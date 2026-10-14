@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de IzalApp</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #171717;
+    --muted: #6b6b6b;
+    --border: #e5e5e5;
+    --primary: #171717;
+    --green: #2f9e57;
+    --red: #d93636;
+    --soft: #f2f2f2;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .layout { display: flex; max-width: 1100px; margin: 0 auto; }
+  nav.toc {
+    position: sticky; top: 0; align-self: flex-start;
+    width: 250px; flex-shrink: 0; height: 100vh; overflow-y: auto;
+    padding: 32px 16px; border-right: 1px solid var(--border);
+  }
+  nav.toc strong { display: block; margin-bottom: 12px; font-size: 18px; }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc li { margin: 4px 0; font-size: 14px; }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover { color: var(--text); }
+  main { flex: 1; min-width: 0; padding: 32px 24px 80px; }
+  header.cover { margin-bottom: 40px; }
+  header.cover .logo {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--primary); color: #fff; font-size: 32px; font-weight: 700;
+  }
+  h1 { font-size: 32px; margin: 16px 0 4px; }
+  h2 { font-size: 24px; margin: 56px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+  h3 { font-size: 18px; margin: 28px 0 8px; }
+  p, li { color: #2b2b2b; }
+  .lead { color: var(--muted); font-size: 18px; margin: 0; }
+  code, .path {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 14px; background: var(--soft); padding: 1px 6px; border-radius: 6px;
+  }
+  pre {
+    background: #1e1e1e; color: #f5f5f5; padding: 14px 16px; border-radius: 10px;
+    overflow-x: auto; font-size: 14px;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px 18px; margin: 16px 0;
+  }
+  .tip, .warn {
+    border-radius: 12px; padding: 12px 16px; margin: 16px 0; font-size: 15px;
+  }
+  .tip { background: #eef7f1; border: 1px solid #cfe9d8; }
+  .warn { background: #fdf3e7; border: 1px solid #f3dcbc; }
+  .tip strong, .warn strong { display: block; margin-bottom: 2px; }
+  .btn {
+    display: inline-block; padding: 1px 10px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    background: var(--primary); color: #fff; white-space: nowrap;
+  }
+  .btn.outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+  .badge {
+    display: inline-block; padding: 0 8px; border-radius: 999px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+  .badge.solid { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .badge.gray { background: var(--soft); }
+  .badge.red { background: var(--red); color: #fff; border-color: var(--red); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--soft); font-weight: 600; }
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps > li {
+    counter-increment: step; position: relative; padding: 0 0 14px 44px;
+  }
+  .steps > li::before {
+    content: counter(step); position: absolute; left: 0; top: 0;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary); color: #fff; font-weight: 600; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+  .flow span.node {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; font-size: 14px;
+  }
+  .flow span.arrow { color: var(--muted); }
+  .example { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .stat small { color: var(--muted); display: block; font-size: 13px; }
+  .stat b { font-size: 18px; }
+  .stat em { color: var(--muted); font-style: normal; font-size: 12px; display: block; }
+  .bar { height: 8px; border-radius: 999px; background: var(--soft); overflow: hidden; margin: 6px 0; }
+  .bar > div { height: 100%; background: var(--primary); }
+  .muted { color: var(--muted); }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  details { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin: 8px 0; }
+  details summary { cursor: pointer; font-weight: 600; }
+  details p { margin: 8px 0 2px; }
+  footer { margin-top: 64px; color: var(--muted); font-size: 14px; }
+  @media (max-width: 860px) {
+    .layout { display: block; }
+    nav.toc { position: static; width: auto; height: auto; border-right: 0; border-bottom: 1px solid var(--border); padding: 20px; }
+    main { padding: 24px 18px 64px; }
+    h1 { font-size: 26px; }
+  }
+  @media print {
+    nav.toc { display: none; }
+    body { background: #fff; }
+    h2 { break-before: page; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <strong>Contenido</strong>
+  <ol>
+    <li><a href="#conceptos">Cómo funciona</a></li>
+    <li><a href="#inicio-rapido">Primeros pasos</a></li>
+    <li><a href="#configuracion">Configurar tu plan</a></li>
+    <li><a href="#quincena">Tu quincena día a día</a></li>
+    <li><a href="#gastos">Registrar gastos</a></li>
+    <li><a href="#transferencias">Transferencias</a></li>
+    <li><a href="#tarjetas">Tarjetas de crédito</a></li>
+    <li><a href="#gasolina">Gasolina</a></li>
+    <li><a href="#cierre">Cerrar la quincena</a></li>
+    <li><a href="#reportes">Reportes</a></li>
+    <li><a href="#faq">Preguntas frecuentes</a></li>
+    <li><a href="#admin">Instalación y respaldos</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="cover">
+  <span class="logo">I</span>
+  <h1>Manual de IzalApp</h1>
+  <p class="lead">Planea tu dinero por quincena: ingresos, gastos fijos, presupuestos, cuentas, tarjetas y gasolina.</p>
+</header>
+
+<!-- 1 -->
+<h2 id="conceptos">1. Cómo funciona</h2>
+<p>IzalApp reemplaza la hoja de Excel con la que planeabas cada quincena. La idea es simple:</p>
+<div class="flow">
+  <span class="node">Configuras tu plan mensual</span><span class="arrow">→</span>
+  <span class="node">Abres la quincena</span><span class="arrow">→</span>
+  <span class="node">Registras gastos y transferencias</span><span class="arrow">→</span>
+  <span class="node">Cierras y mueves el sobrante</span>
+</div>
+
+<table>
+  <tr><th>Concepto</th><th>Qué significa</th></tr>
+  <tr><td><b>Quincena</b></td><td>La 1ª va del día 1 al 15; la 2ª del 16 al último día del mes. Todo se organiza por quincena.</td></tr>
+  <tr><td><b>Cuenta</b></td><td>Una cuenta corriente, una cuenta de ahorro o una tarjeta de crédito.</td></tr>
+  <tr><td><b>Ingreso</b></td><td>Tu salario u otro ingreso fijo, con la cuenta donde se deposita.</td></tr>
+  <tr><td><b>Gasto fijo</b></td><td>Un pago recurrente con monto conocido: préstamo, aporte familiar, servicios, etc.</td></tr>
+  <tr><td><b>Presupuesto</b></td><td>Un tope para gastos variables, como gasolina o citas. Puedes pasarte; la app solo te avisa.</td></tr>
+  <tr><td><b>Sobrante</b></td><td>Lo que queda de tu ingreso después de gastos fijos y presupuestos. Al cerrar la quincena decides a dónde moverlo.</td></tr>
+  <tr><td><b>Transferencia</b></td><td>Dinero que mueves entre tus cuentas (incluido pagar una tarjeta). No cuenta como gasto.</td></tr>
+</table>
+
+<div class="tip"><strong>Nunca te bloquea</strong>Si gastas más de lo planeado, la app lo registra y lo marca como “Excedido”, pero siempre te deja guardar.</div>
+
+<!-- 2 -->
+<h2 id="inicio-rapido">2. Primeros pasos</h2>
+
+<h3>Crear tu cuenta</h3>
+<ol class="steps">
+  <li>Abre la dirección de la app en el navegador.</li>
+  <li>En la pantalla de inicio de sesión toca <b>Regístrate</b> y llena nombre, correo y contraseña.</li>
+  <li>La próxima vez solo usa <b>Entrar</b>. Para cerrar sesión usa <b>Salir</b> (arriba a la derecha).</li>
+</ol>
+
+<h3>Instalarla en el iPhone</h3>
+<ol class="steps">
+  <li>Abre la app en <b>Safari</b>.</li>
+  <li>Toca el botón <b>Compartir</b> (el cuadro con la flecha hacia arriba).</li>
+  <li>Elige <b>Agregar a inicio</b> y confirma.</li>
+</ol>
+<p>Se abrirá a pantalla completa como cualquier otra app. En Android usa el menú de Chrome → <b>Instalar app</b>.</p>
+
+<h3>La navegación</h3>
+<p>En el celular verás una barra abajo con cinco secciones; en computadora aparece arriba.</p>
+<table>
+  <tr><th>Sección</th><th>Para qué sirve</th></tr>
+  <tr><td><b>Inicio</b></td><td>Resumen de la quincena actual, transferencias pendientes, tarjetas, presupuestos, gastos fijos e ingresos.</td></tr>
+  <tr><td><b>Movimientos</b></td><td>Lista de gastos y transferencias de la quincena.</td></tr>
+  <tr><td><b>Gasolina</b></td><td>Cargas de combustible, rendimiento y costo por milla.</td></tr>
+  <tr><td><b>Reportes</b></td><td>Gráficas e historial de varias quincenas.</td></tr>
+  <tr><td><b>Ajustes</b></td><td>Tu plan: cuentas, ingresos, gastos fijos, presupuestos y el plan mensual.</td></tr>
+</table>
+
+<!-- 3 -->
+<h2 id="configuracion">3. Configurar tu plan</h2>
+<p>Todo esto está en <b>Ajustes</b>. Hazlo en este orden la primera vez:</p>
+
+<h3>3.1 Cuentas</h3>
+<p>Registra cada cuenta con <b>Nombre</b>, <b>Banco</b> y <b>Tipo</b>: Corriente, Ahorro o Tarjeta de crédito. Si tu cuenta tiene tarjeta de débito, regístrala con el tipo de la cuenta a la que está ligada (normalmente Ahorro o Corriente).</p>
+<p>Si es <b>tarjeta de crédito</b>, aparecen tres campos más:</p>
+<ul>
+  <li><b>Día de corte</b>: el día del mes en que cierra el estado de cuenta.</li>
+  <li><b>Día de pago</b>: la fecha límite para pagar.</li>
+  <li><b>Se paga desde</b>: la cuenta (corriente o de ahorro) con la que normalmente la pagas.</li>
+</ul>
+<div class="tip"><strong>Consejo</strong>Crea al menos una cuenta de tipo <b>Ahorro</b>: al cerrar cada quincena la app la propone como destino del sobrante.</div>
+
+<h3>3.2 Monto mensual y reparto</h3>
+<p>Ingresos, gastos fijos y presupuestos se capturan con su <b>Monto mensual</b> y un <b>Reparto por quincena</b>:</p>
+<table>
+  <tr><th>Reparto</th><th>Ejemplo con $1,000 al mes</th></tr>
+  <tr><td>Mitad y mitad</td><td>1ª $500 · 2ª $500</td></tr>
+  <tr><td>Todo en la 1ª quincena</td><td>1ª $1,000 · 2ª $0</td></tr>
+  <tr><td>Todo en la 2ª quincena</td><td>1ª $0 · 2ª $1,000</td></tr>
+  <tr><td>Personalizado</td><td>Tú escribes cuánto va en la 1ª (por ejemplo $300) y el resto ($700) va a la 2ª.</td></tr>
+</table>
+
+<h3>3.3 Ingresos</h3>
+<p>Nombre (por ejemplo “Salario”), monto mensual, reparto y la cuenta donde <b>se deposita</b>.</p>
+
+<h3>3.4 Gastos fijos</h3>
+<p>Nombre, monto mensual, reparto, <b>Día de pago</b> (opcional, para recordarte cuándo vence) y la cuenta o tarjeta con la que <b>se paga</b>.</p>
+
+<h3>3.5 Presupuestos</h3>
+<p>Nombre, monto mensual (el tope), reparto y la cuenta o tarjeta desde la que <b>se gasta</b>.</p>
+<p>Marca <b>“Es de gasolina (registra odómetro y galones)”</b> en tu presupuesto de gasolina para que sus gastos se capturen como cargas de combustible (ver <a href="#gasolina">Gasolina</a>).</p>
+
+<h3>3.6 Activo / inactivo</h3>
+<p>Si un ingreso, gasto fijo o presupuesto deja de aplicar, desmarca <b>Activo</b> en lugar de borrarlo. Así no se copia a las próximas quincenas y conservas el historial.</p>
+
+<h3>3.7 Plan mensual</h3>
+<p>Muestra en una tabla cómo queda todo repartido entre la 1ª y la 2ª quincena, con el <b>Sobrante</b> esperado de cada una. Úsalo para revisar que tu plan cuadre; si sale en rojo, estás planeando gastar más de lo que ganas.</p>
+
+<div class="warn"><strong>Importante</strong>Los cambios en Ajustes aplican a partir de la <b>próxima quincena que abras</b>. Para cambiar un monto solo en la quincena actual, hazlo desde Inicio (ver 4.3).</div>
+
+<!-- 4 -->
+<h2 id="quincena">4. Tu quincena día a día</h2>
+
+<h3>4.1 Abrir la quincena</h3>
+<p>Al empezar cada quincena, Inicio te muestra <b>“Quincena sin abrir”</b>. Toca <span class="btn">Abrir quincena</span> y la app copia tus ingresos, gastos fijos y presupuestos activos con el monto que les toca en esa quincena.</p>
+
+<h3>4.2 El resumen</h3>
+<p>Arriba de Inicio verás cuatro tarjetas:</p>
+<div class="example">
+  <div class="stat"><small>Ingreso</small><b>$1,200.00</b></div>
+  <div class="stat"><small>Gastos fijos</small><b>$450.00</b><em>1 de 3 pagados</em></div>
+  <div class="stat"><small>Presupuestos</small><b>$120.00</b><em>de $300.00</em></div>
+  <div class="stat"><small>Sobrante estimado</small><b>$450.00</b><em>Planeado $450.00</em></div>
+</div>
+<ul>
+  <li><b>Gastos fijos</b>: total planeado y cuántos ya marcaste como pagados.</li>
+  <li><b>Presupuestos</b>: lo que llevas gastado contra el total de topes.</li>
+  <li><b>Sobrante estimado</b>: lo que te quedaría al final. Baja si tienes gastos sin presupuesto (“otros gastos”) o si te pasas de algún presupuesto (“excesos”). Se pone en rojo si es negativo.</li>
+</ul>
+
+<h3>4.3 Cambiar un monto solo en esta quincena</h3>
+<p>Toca el nombre de cualquier presupuesto, gasto fijo o ingreso en Inicio (los ingresos están al final de la página). Puedes cambiar el <b>Monto en esta quincena</b> sin tocar tu plan mensual; útil, por ejemplo, si una quincena cobras horas extra.</p>
+
+<h3>4.4 Presupuestos</h3>
+<div class="card">
+  <div style="display:flex;justify-content:space-between"><b>Citas</b><span class="muted">+ Gasto</span></div>
+  <div class="bar"><div style="width:70%"></div></div>
+  <div style="display:flex;justify-content:space-between;font-size:14px"><span class="muted">$52.50 de $75.00</span><span>Quedan $22.50</span></div>
+</div>
+<p>Cada presupuesto muestra una barra de avance, lo gastado contra el tope y lo que te queda. Si te pasas verás <span class="red">Excedido $X</span>. Con <b>+ Gasto</b> registras un gasto directo en ese presupuesto; en el de gasolina el enlace dice <b>+ Carga</b>.</p>
+
+<h3>4.5 Gastos fijos</h3>
+<p>Cada gasto fijo tiene un estado:</p>
+<table>
+  <tr><th>Estado</th><th>Significado</th><th>Botones</th></tr>
+  <tr><td><span class="badge">Pendiente</span></td><td>Todavía no haces nada.</td><td><span class="btn outline">Apartar</span> <span class="btn">Pagar</span></td></tr>
+  <tr><td><span class="badge gray">Apartado</span></td><td>Ya separaste el dinero, pero no lo has pagado.</td><td><span class="btn">Pagar</span> <span class="btn outline">Deshacer</span></td></tr>
+  <tr><td><span class="badge solid">Pagado</span></td><td>Ya está pagado.</td><td><span class="btn outline">Deshacer</span></td></tr>
+</table>
+<p>Marcarlo como pagado no registra un movimiento: solo es tu checklist. Si el monto real fue distinto al planeado, registra el gasto con el botón <b>+</b> eligiendo ese gasto fijo y la app usará el mayor de los dos.</p>
+
+<h3>4.6 Ingresos extra</h3>
+<p>Si en una quincena te llega dinero fuera de tu plan (un bono, un trabajo extra, un reembolso), en la sección <b>Ingresos</b> de Inicio toca <b>+ Ingreso extra</b> y llena:</p>
+<ul>
+  <li><b>Concepto</b>: por ejemplo “Bono”.</li>
+  <li><b>Monto</b>.</li>
+  <li><b>Se depositó en</b>: la cuenta donde cayó el dinero (trae preseleccionada la de tu salario).</li>
+</ul>
+<p>El ingreso extra aparece en la lista marcado como <b>Extra</b>, se suma al Ingreso y al Sobrante de esa quincena, y al cerrarla lo puedes mover a tu ahorro junto con el resto del sobrante. Solo cuenta en esa quincena: no se repite en las siguientes.</p>
+<p>Para corregir el monto o eliminarlo, toca su nombre en la lista.</p>
+<div class="tip"><strong>¿Extra o fijo?</strong>Si el ingreso se va a repetir cada mes, mejor agrégalo en <b>Ajustes → Ingresos</b>. Si solo cambió el monto de tu salario en esta quincena (por ejemplo, horas extra), toca <b>Salario</b> y ajusta su monto.</div>
+
+<!-- 5 -->
+<h2 id="gastos">5. Registrar gastos</h2>
+<p>Toca el botón redondo <span class="btn">+</span> (abajo a la derecha en Inicio o Movimientos) y llena:</p>
+<ul>
+  <li><b>Monto</b>: acepta <code>25</code>, <code>25.50</code>, <code>1,059.65</code> o <code>$1,059.65</code>.</li>
+  <li><b>Presupuesto o gasto fijo</b>: a qué partida pertenece. Déjalo en <b>Sin presupuesto</b> para un gasto imprevisto; se suma como “otros gastos”.</li>
+  <li><b>Cuenta</b>: se llena sola con la cuenta de la partida, pero puedes cambiarla.</li>
+  <li><b>Fecha</b>: por defecto hoy.</li>
+  <li><b>Nota</b>: opcional, por ejemplo “Cena”.</li>
+</ul>
+<p>Para corregir o borrar un gasto, búscalo en <b>Movimientos</b> y tócalo.</p>
+<div class="tip"><strong>¿En qué quincena cae?</strong>Si eliges una partida, el gasto va a la quincena de esa partida. Si es “Sin presupuesto”, va a la quincena que corresponde a la fecha. En ambos casos esa quincena debe estar abierta.</div>
+
+<!-- 6 -->
+<h2 id="transferencias">6. Transferencias</h2>
+
+<h3>6.1 El plan de transferencias</h3>
+<p>Tu sueldo cae en una cuenta, pero tus gastos salen de varias. En Inicio, la sección <b>Transferencias</b> te dice exactamente cuánto mover y a dónde para que cada cuenta tenga lo que necesita:</p>
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>Nómina · Banco A<br><span class="muted">↓</span><br>Gastos · Banco B</div>
+    <div style="text-align:right"><b>$75.00</b><br><span class="btn">Ya lo moví</span></div>
+  </div>
+</div>
+<ul>
+  <li>Cuando hagas la transferencia en tu banco, toca <b>Ya lo moví</b> y se registra automáticamente con fecha de hoy.</li>
+  <li>Si moviste solo una parte (registrada a mano), verás <b>Faltan $X</b>.</li>
+  <li>Al completarse aparece <span class="badge solid">Hecho</span>.</li>
+  <li>Los gastos que se pagan con tarjeta de crédito se cubren desde la cuenta con la que pagas esa tarjeta (“Se paga desde”).</li>
+</ul>
+
+<h3>6.2 Transferencias manuales</h3>
+<p>En <b>Movimientos</b> toca <span class="btn outline">Transferir</span>. Llena monto, <b>Desde</b>, <b>Hacia</b>, fecha y nota. Las cuentas de origen y destino deben ser distintas.</p>
+<p>Las transferencias aparecen en Movimientos junto con tus gastos, pero <b>no cuentan como gasto</b>.</p>
+
+<!-- 7 -->
+<h2 id="tarjetas">7. Tarjetas de crédito</h2>
+<p>Si tienes tarjetas con día de corte y día de pago, Inicio muestra la sección <b>Tarjetas</b>:</p>
+<div class="card">
+  <div style="display:flex;justify-content:space-between;gap:12px">
+    <div>
+      <b>Visa · BAC</b><br>
+      <span class="muted" style="font-size:14px">Corte 5 oct · Límite 25 oct<br>Llevas $40.00 para el próximo corte</span>
+    </div>
+    <div style="text-align:right"><b>$250.00</b><br><span class="badge">Por pagar $150.00</span></div>
+  </div>
+  <div style="text-align:right;margin-top:8px"><span class="btn">Pagar</span></div>
+</div>
+<ul>
+  <li><b>Monto grande</b>: lo que cargaste entre el corte anterior y el último corte; es lo que debes pagar antes de la fecha límite.</li>
+  <li><b>Llevas … para el próximo corte</b>: lo que has cargado después del último corte.</li>
+  <li>Estados: <span class="badge">Por pagar $X</span> <span class="badge solid">Pagada</span> <span class="badge red">Vencida $X</span> <span class="badge">Sin saldo</span></li>
+</ul>
+<h3>Pagar la tarjeta</h3>
+<ol class="steps">
+  <li>Toca <span class="btn">Pagar</span>.</li>
+  <li>Se abre una transferencia ya llena: el monto pendiente, la cuenta “Se paga desde” y la tarjeta como destino. Ajusta lo que necesites.</li>
+  <li>Toca <b>Guardar</b>. El pendiente baja; si pagaste todo, la tarjeta queda como <b>Pagada</b>.</li>
+</ol>
+<p>También puedes pagarla desde <b>Movimientos → Transferir</b> eligiendo la tarjeta en <b>Hacia</b>. Puedes hacer varios abonos.</p>
+<div class="warn"><strong>Ten en cuenta</strong>Solo cuenta los cargos registrados en la app. Si usaste la tarjeta antes de empezar con IzalApp, esos cargos no aparecen.</div>
+
+<!-- 8 -->
+<h2 id="gasolina">8. Gasolina</h2>
+<p>Para registrar una carga usa <span class="btn">Nueva carga</span> en la sección Gasolina, o <b>+ Carga</b> en tu presupuesto de gasolina en Inicio.</p>
+<table>
+  <tr><th>Campo</th><th>Detalle</th></tr>
+  <tr><td>Fecha</td><td>Hoy por defecto; cámbiala si registras una carga de otro día.</td></tr>
+  <tr><td>Odómetro (millas)</td><td>Lo que marca el carro. Debe ser mayor que la carga anterior y menor que la siguiente; el campo te muestra tu último registro.</td></tr>
+  <tr><td>Galones y Precio por galón</td><td>Hasta 3 decimales, como en la bomba.</td></tr>
+  <tr><td>Total pagado</td><td>Opcional. Si lo dejas vacío se calcula galones × precio (la app te muestra el resultado).</td></tr>
+  <tr><td>Gasolinera</td><td>Opcional.</td></tr>
+  <tr><td>Llené el tanque</td><td>Márcalo solo si llenaste por completo. Es necesario para calcular el rendimiento.</td></tr>
+  <tr><td>Presupuesto y Cuenta</td><td>Se eligen solos si tienes un presupuesto marcado como gasolina.</td></tr>
+</table>
+<p>La página de Gasolina muestra:</p>
+<ul>
+  <li><b>Rendimiento</b> (millas por galón) — necesita al menos 2 tanques llenos.</li>
+  <li><b>Costo por milla</b>, <b>Odómetro</b> actual y <b>Precio promedio</b> por galón.</li>
+  <li>La lista de cargas, con el rendimiento de cada tanque lleno. Las cargas parciales se marcan como “parcial”.</li>
+</ul>
+<p>Cada carga también es un gasto normal: aparece en Movimientos y descuenta de tu presupuesto de gasolina.</p>
+
+<!-- 9 -->
+<h2 id="cierre">9. Cerrar la quincena</h2>
+<p>Al final de la quincena, en Inicio toca <span class="btn outline">Cerrar quincena</span>. Verás:</p>
+<ul>
+  <li>Un resumen: Ingreso, Gastos fijos, Gastado en presupuestos, Otros gastos y el <b>Sobrante real</b>.</li>
+  <li>Un aviso si tienes gastos fijos sin marcar como pagados (se cuentan como gastados).</li>
+  <li><b>¿Cuánto vas a mover?</b> — ya trae el sobrante real. Déjalo vacío si no vas a mover nada.</li>
+  <li><b>Desde</b> (la cuenta donde cae tu ingreso) y <b>Hacia</b> (tu cuenta de ahorro).</li>
+</ul>
+<p>Al confirmar, la app registra la transferencia del sobrante y la quincena queda <b>cerrada</b>: ya no se puede modificar nada en ella.</p>
+<h3>Reabrir</h3>
+<p>Si te equivocaste, en Inicio aparece <b>Quincena cerrada</b> con el botón <span class="btn outline">Reabrir</span>. Al reabrirla se quita la transferencia del sobrante y puedes volver a editar y cerrar.</p>
+<h3>Si olvidaste cerrar</h3>
+<p>Si empieza una quincena nueva y la anterior sigue abierta, Inicio te muestra un aviso con el botón <b>Cerrar</b>. Mientras siga abierta todavía puedes registrar gastos con fechas de esa quincena.</p>
+
+<!-- 10 -->
+<h2 id="reportes">10. Reportes</h2>
+<p>Elige ver las últimas <b>6</b>, <b>12</b> o <b>24</b> quincenas.</p>
+<ul>
+  <li><b>Totales</b>: Ingreso, Gastado, Sobrante (y cuánto de verdad ahorraste al cerrar) y Excesos.</li>
+  <li><b>Por quincena</b>: una gráfica de barras con gastos fijos, presupuestos, otros gastos y sobrante de cada quincena.</li>
+  <li><b>Presupuestos</b>: cuánto gastaste contra el tope en cada presupuesto, y en cuántas quincenas te pasaste (por ejemplo “2 de 6”).</li>
+  <li><b>Rendimiento de gasolina</b>: cómo ha cambiado tu rendimiento por tanque lleno.</li>
+</ul>
+
+<!-- 11 -->
+<h2 id="faq">11. Preguntas frecuentes</h2>
+<details>
+  <summary>Me pasé de un presupuesto, ¿qué pasa?</summary>
+  <p>Nada se bloquea. El presupuesto muestra “Excedido” y tu sobrante estimado baja. En Reportes verás cuántas veces te pasaste.</p>
+</details>
+<details>
+  <summary>Cambié mi salario en Ajustes y la quincena actual no cambió.</summary>
+  <p>Es a propósito: Ajustes aplica desde la próxima quincena que abras. Para la actual, toca tu ingreso en la sección <b>Ingresos</b> de Inicio y cambia el monto de esta quincena.</p>
+</details>
+<details>
+  <summary>Me llegó un dinero extra, ¿dónde lo registro?</summary>
+  <p>En Inicio, sección Ingresos, toca “+ Ingreso extra”. Se suma al sobrante de esa quincena (ver 4.6).</p>
+</details>
+<details>
+  <summary>¿Cómo registro un gasto que no estaba planeado?</summary>
+  <p>Con el botón +, dejando “Sin presupuesto”. Se suma a “otros gastos” y reduce tu sobrante.</p>
+</details>
+<details>
+  <summary>Me dice “La quincena de esta fecha ya está cerrada”.</summary>
+  <p>Estás registrando algo en una quincena cerrada. Reábrela desde Inicio (si es la actual) o cambia la fecha.</p>
+</details>
+<details>
+  <summary>Me dice “No hay una quincena abierta para esta fecha”.</summary>
+  <p>Todavía no abres esa quincena. Ve a Inicio y toca “Abrir quincena”.</p>
+</details>
+<details>
+  <summary>¿Pagar la tarjeta cuenta como gasto?</summary>
+  <p>No. Los gastos se cuentan cuando haces cada compra con la tarjeta. Pagarla es solo mover dinero de tu cuenta a la tarjeta.</p>
+</details>
+<details>
+  <summary>El odómetro no me deja guardar.</summary>
+  <p>El valor debe ser mayor que el de la carga anterior y menor que el de la siguiente (por fecha). Revisa que la fecha y las millas estén bien.</p>
+</details>
+<details>
+  <summary>No me sale el rendimiento de gasolina.</summary>
+  <p>Necesitas al menos dos cargas con “Llené el tanque” marcado.</p>
+</details>
+<details>
+  <summary>¿Puedo borrar una cuenta?</summary>
+  <p>Solo si no tiene movimientos ni está usada en ingresos, gastos fijos o presupuestos. Para conservar el historial es mejor dejarla y dejar de usarla.</p>
+</details>
+
+<!-- 12 -->
+<h2 id="admin">12. Instalación y respaldos</h2>
+<p class="muted">Esta sección es para quien administra el servidor.</p>
+
+<h3>Publicar con Docker</h3>
+<ol class="steps">
+  <li>Copia <span class="path">.env.example</span> como <span class="path">.env</span> y llena <code>POSTGRES_PASSWORD</code> (solo letras y números), <code>BETTER_AUTH_SECRET</code> y <code>BETTER_AUTH_URL</code> (la dirección con la que abrirás la app).</li>
+  <li>Levanta todo:
+<pre><code>docker compose -f docker-compose.prod.yml up -d --build</code></pre>
+  Las migraciones de la base de datos se aplican solas antes de arrancar.</li>
+  <li>Crea tu cuenta en la app. Después pon <code>DISABLE_SIGNUP=true</code> en <span class="path">.env</span> y vuelve a ejecutar el comando para que nadie más pueda registrarse.</li>
+</ol>
+
+<h3>Actualizar a una nueva versión</h3>
+<pre><code>git pull
+docker compose -f docker-compose.prod.yml up -d --build</code></pre>
+
+<h3>Respaldos</h3>
+<p>El servicio <code>backup</code> guarda un respaldo diario en la carpeta <span class="path">backups</span> (configurable con <code>BACKUP_DIR</code>) y borra los que tengan más de 30 días (<code>BACKUP_KEEP_DAYS</code>). Conviene copiar esa carpeta a otro disco o a la nube de vez en cuando.</p>
+
+<h3>Restaurar un respaldo</h3>
+<pre><code>docker compose -f docker-compose.prod.yml exec -T db \
+  pg_restore -U izalapp -d izalapp --clean --if-exists &lt; backups/izalapp-AAAA-MM-DD_HHMM.dump</code></pre>
+<div class="warn"><strong>Cuidado</strong>Restaurar reemplaza todos los datos actuales por los del respaldo.</div>
+
+<footer>IzalApp · Manual de uso</footer>
+
+</main>
+</div>
+</body>
+</html>

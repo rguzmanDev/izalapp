@@ -1,0 +1,59 @@
+import type { PeriodItem } from "@/db/schema";
+
+type ItemWithSpent = { item: PeriodItem; spentCents: number };
+
+export type PeriodSummary = {
+  incomeCents: number;
+  fixedPlannedCents: number;
+  /** Planned fixed expenses, or what was actually paid when it was more. */
+  fixedCommittedCents: number;
+  fixedPaidCount: number;
+  fixedCount: number;
+  budgetPlannedCents: number;
+  budgetSpentCents: number;
+  unbudgetedCents: number;
+  /** Spending above the planned amount of budgets and fixed expenses. */
+  overspentCents: number;
+  /** Income minus everything planned. */
+  plannedSurplusCents: number;
+  /** Planned surplus minus overspending and unbudgeted expenses. */
+  projectedSurplusCents: number;
+  /** What is left when unspent budgets are released; fixed expenses always count in full. */
+  actualSurplusCents: number;
+};
+
+const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
+
+export function overspentOf({ item, spentCents }: ItemWithSpent): number {
+  return Math.max(0, spentCents - item.plannedCents);
+}
+
+export function summarizePeriod(rows: ItemWithSpent[], unbudgetedCents: number): PeriodSummary {
+  const ofKind = (kind: PeriodItem["kind"]) => rows.filter((row) => row.item.kind === kind);
+  const incomes = ofKind("income");
+  const fixed = ofKind("fixed_expense");
+  const budgets = ofKind("budget");
+
+  const incomeCents = sum(incomes.map((row) => row.item.plannedCents));
+  const fixedPlannedCents = sum(fixed.map((row) => row.item.plannedCents));
+  const budgetPlannedCents = sum(budgets.map((row) => row.item.plannedCents));
+  const overspentCents = sum([...fixed, ...budgets].map(overspentOf));
+  const plannedSurplusCents = incomeCents - fixedPlannedCents - budgetPlannedCents;
+  const budgetSpentCents = sum(budgets.map((row) => row.spentCents));
+  const fixedCommittedCents = sum(fixed.map((row) => Math.max(row.item.plannedCents, row.spentCents)));
+
+  return {
+    incomeCents,
+    fixedPlannedCents,
+    fixedCommittedCents,
+    fixedPaidCount: fixed.filter((row) => row.item.paymentStatus === "paid").length,
+    fixedCount: fixed.length,
+    budgetPlannedCents,
+    budgetSpentCents,
+    unbudgetedCents,
+    overspentCents,
+    plannedSurplusCents,
+    projectedSurplusCents: plannedSurplusCents - overspentCents - unbudgetedCents,
+    actualSurplusCents: incomeCents - fixedCommittedCents - budgetSpentCents - unbudgetedCents,
+  };
+}

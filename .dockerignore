@@ -1,0 +1,21 @@
+.git
+.next
+node_modules
+backups
+.env*
+!.env.example
+Dockerfile
+docker-compose*.yml
+README.md
+
+# AI agents and editor assistants
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.cursor
+.claude
+.agents
+.windsurf
+.codex
+.aider*
+.next-docs

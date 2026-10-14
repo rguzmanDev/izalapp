@@ -1,0 +1,70 @@
+import { ArrowDownIcon } from "lucide-react";
+import { PendingButton } from "@/components/form/pending-button";
+import { Badge } from "@/components/ui/badge";
+import type { FinancialAccount } from "@/db/schema";
+import { accountLabel } from "@/features/accounts/format";
+import { formatMoney } from "@/lib/money";
+import { completeTransferStep } from "../actions";
+import type { TransferStep } from "../plan";
+
+type TransferPlanListProps = {
+  periodId: string;
+  steps: TransferStep[];
+  accounts: FinancialAccount[];
+  readOnly?: boolean;
+};
+
+export function TransferPlanList({ periodId, steps, accounts, readOnly }: TransferPlanListProps) {
+  const labelOf = (accountId: string) => {
+    const account = accounts.find((candidate) => candidate.id === accountId);
+    return account ? accountLabel(account) : "Cuenta eliminada";
+  };
+
+  return (
+    <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+      {steps.map((step) => {
+        const pendingCents = step.amountCents - step.doneCents;
+        return (
+          <li
+            key={`${step.fromAccountId}-${step.toAccountId}`}
+            className="flex items-center justify-between gap-3 px-4 py-3"
+          >
+            <div className="flex min-w-0 flex-col text-sm select-text">
+              <span className="truncate">{labelOf(step.fromAccountId)}</span>
+              <ArrowDownIcon className="size-3.5 text-muted-foreground" />
+              <span className="truncate">{labelOf(step.toAccountId)}</span>
+            </div>
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              <span className="font-medium tabular-nums select-text">
+                {formatMoney(step.amountCents)}
+              </span>
+              {pendingCents <= 0 ? (
+                <Badge>Hecho</Badge>
+              ) : (
+                <>
+                  {step.doneCents > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      Faltan {formatMoney(pendingCents)}
+                    </span>
+                  )}
+                  {!readOnly && (
+                    <form
+                      action={completeTransferStep.bind(
+                        null,
+                        periodId,
+                        step.fromAccountId,
+                        step.toAccountId,
+                      )}
+                    >
+                      <PendingButton size="sm">Ya lo moví</PendingButton>
+                    </form>
+                  )}
+                </>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}

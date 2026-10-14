@@ -1,0 +1,1 @@
+ALTER TABLE "transfers" ADD COLUMN "is_surplus" boolean DEFAULT false NOT NULL;
