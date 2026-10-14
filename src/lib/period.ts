@@ -56,9 +56,59 @@ export function shortPeriodLabel({ month, half }: PeriodKey): string {
   return `${half}ª ${monthName.replace(".", "")}`;
 }
 
-export function formatShortDate(isoDate: string): string {
+const toUtcDate = (isoDate: string) => {
   const [year, month, day] = isoDate.split("-").map(Number);
-  return shortDateFormatter.format(new Date(Date.UTC(year, month - 1, day)));
+  return new Date(Date.UTC(year, month - 1, day));
+};
+
+const fromUtcDate = (date: Date) =>
+  toIsoDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+
+export function addDays(isoDate: string, days: number): string {
+  const date = toUtcDate(isoDate);
+  date.setUTCDate(date.getUTCDate() + days);
+  return fromUtcDate(date);
+}
+
+/** Calendar days from `from` to `to`; negative when `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((toUtcDate(to).getTime() - toUtcDate(from).getTime()) / 86_400_000);
+}
+
+/** Saturdays and Sundays move to the following Monday, as payment due dates do. */
+export function nextBusinessDay(isoDate: string): string {
+  const weekday = toUtcDate(isoDate).getUTCDay();
+  if (weekday === 6) return addDays(isoDate, 2);
+  if (weekday === 0) return addDays(isoDate, 1);
+  return isoDate;
+}
+
+/** That day of the month, clamped to the month's last day (the 31st falls on April 30). */
+export function dayOfMonthIn(year: number, month: number, day: number): string {
+  return toIsoDate(year, month, Math.min(day, new Date(year, month, 0).getDate()));
+}
+
+/** The next date, today included, that falls on that day of the month. */
+export function nextDayOfMonth(day: number, today: string): string {
+  const [year, month] = today.split("-").map(Number);
+  const thisMonth = dayOfMonthIn(year, month, day);
+  if (thisMonth >= today) return thisMonth;
+  return month === 12 ? dayOfMonthIn(year + 1, 1, day) : dayOfMonthIn(year, month + 1, day);
+}
+
+export function formatShortDate(isoDate: string): string {
+  return shortDateFormatter.format(toUtcDate(isoDate));
+}
+
+const longDateFormatter = new Intl.DateTimeFormat("es-MX", {
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+});
+
+/** "18 de octubre". */
+export function formatLongDate(isoDate: string): string {
+  return longDateFormatter.format(toUtcDate(isoDate));
 }
 
 export function periodRangeLabel(key: PeriodKey): string {

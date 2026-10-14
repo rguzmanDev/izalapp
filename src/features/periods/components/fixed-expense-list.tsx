@@ -3,7 +3,10 @@ import { PendingButton } from "@/components/form/pending-button";
 import { Badge } from "@/components/ui/badge";
 import { accountLabel } from "@/features/accounts/format";
 import { describeDueDay } from "@/features/fixed-expenses/constants";
+import { describeDueIn, isDueSoon } from "@/lib/due";
 import { formatMoney } from "@/lib/money";
+import { daysBetween, nextDayOfMonth } from "@/lib/period";
+import { cn } from "@/lib/utils";
 import { setPaymentStatus } from "../actions";
 import { PAYMENT_STATUS_LABELS, type PaymentStatus } from "../constants";
 import type { PeriodItemRow } from "../data";
@@ -26,10 +29,14 @@ const BADGE_VARIANTS: Record<PaymentStatus, "outline" | "secondary" | "default">
   paid: "default",
 };
 
-type FixedExpenseRowProps = PeriodItemRow & { readOnly?: boolean };
+type FixedExpenseRowProps = PeriodItemRow & { today: string; readOnly?: boolean };
 
-function FixedExpenseRow({ item, account, readOnly }: FixedExpenseRowProps) {
+function FixedExpenseRow({ item, account, today, readOnly }: FixedExpenseRowProps) {
   const details = [describeDueDay(item.dueDay), accountLabel(account)];
+  const daysLeft =
+    item.dueDay !== null && item.paymentStatus !== "paid" && !readOnly
+      ? daysBetween(today, nextDayOfMonth(item.dueDay, today))
+      : null;
 
   return (
     <li className="flex flex-col gap-2 px-4 py-3">
@@ -43,6 +50,16 @@ function FixedExpenseRow({ item, account, readOnly }: FixedExpenseRowProps) {
             </Link>
           )}
           <span className="truncate text-sm text-muted-foreground">{details.join(" · ")}</span>
+          {daysLeft !== null && isDueSoon(daysLeft) && (
+            <span
+              className={cn(
+                "text-sm font-medium",
+                daysLeft <= 1 ? "text-destructive" : "text-foreground",
+              )}
+            >
+              {describeDueIn(daysLeft)}
+            </span>
+          )}
         </div>
         <div className="flex flex-col items-end gap-1">
           <span className="text-sm tabular-nums select-text">{formatMoney(item.plannedCents)}</span>
@@ -66,11 +83,13 @@ function FixedExpenseRow({ item, account, readOnly }: FixedExpenseRowProps) {
   );
 }
 
-export function FixedExpenseList({ rows, readOnly }: { rows: PeriodItemRow[]; readOnly?: boolean }) {
+type FixedExpenseListProps = { rows: PeriodItemRow[]; today: string; readOnly?: boolean };
+
+export function FixedExpenseList({ rows, today, readOnly }: FixedExpenseListProps) {
   return (
     <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
       {rows.map((row) => (
-        <FixedExpenseRow key={row.item.id} {...row} readOnly={readOnly} />
+        <FixedExpenseRow key={row.item.id} {...row} today={today} readOnly={readOnly} />
       ))}
     </ul>
   );

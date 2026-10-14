@@ -1,5 +1,5 @@
 import type { FinancialAccount } from "@/db/schema";
-import { toIsoDate } from "@/lib/period";
+import { addDays, dayOfMonthIn, nextBusinessDay } from "@/lib/period";
 
 /** The latest closed statement of a credit card. Dates are YYYY-MM-DD. */
 export type CardCycle = {
@@ -29,16 +29,12 @@ const shiftMonth = ({ year, month }: YearMonth, delta: number): YearMonth => {
   return { year: Math.floor(index / 12), month: (index % 12) + 1 };
 };
 
-/** That day of the month, clamped to the month's last day (a cutoff on the 31st falls on April 30). */
-const dayIn = ({ year, month }: YearMonth, day: number) =>
-  toIsoDate(year, month, Math.min(day, new Date(year, month, 0).getDate()));
+const dayIn = ({ year, month }: YearMonth, day: number) => dayOfMonthIn(year, month, day);
 
-const addDays = (isoDate: string, days: number) => {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day + days));
-  return toIsoDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
-};
-
+/**
+ * Days after the cutoff are counted from the day after it (cutoff on the 10th + 20 days = the 30th).
+ * By law (Ley del Sistema de Tarjetas de Crédito, art. 20) a due date on a weekend moves to Monday.
+ */
 export function lastCardCycle(statementDay: number, due: PaymentDue, today: string): CardCycle {
   const [year, month] = today.split("-").map(Number);
   const thisMonth = { year, month };
@@ -48,16 +44,11 @@ export function lastCardCycle(statementDay: number, due: PaymentDue, today: stri
   const previousCutoff = dayIn(shiftMonth(cutoffMonth, -1), statementDay);
 
   if ("daysAfterCutoff" in due) {
-    return { previousCutoff, cutoff, dueDate: addDays(cutoff, due.daysAfterCutoff) };
+    return { previousCutoff, cutoff, dueDate: nextBusinessDay(addDays(cutoff, due.daysAfterCutoff)) };
   }
 
   const dueInCutoffMonth = dayIn(cutoffMonth, due.dayOfMonth);
-  return {
-    previousCutoff,
-    cutoff,
-    dueDate:
-      dueInCutoffMonth > cutoff
-        ? dueInCutoffMonth
-        : dayIn(shiftMonth(cutoffMonth, 1), due.dayOfMonth),
-  };
+  const dueDate =
+    dueInCutoffMonth > cutoff ? dueInCutoffMonth : dayIn(shiftMonth(cutoffMonth, 1), due.dayOfMonth);
+  return { previousCutoff, cutoff, dueDate: nextBusinessDay(dueDate) };
 }

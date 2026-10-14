@@ -21,6 +21,7 @@ import { summarizePeriod } from "@/features/periods/summary";
 import { getActiveTemplates } from "@/features/plan/data";
 import { TransferPlanList } from "@/features/transfers/components/transfer-plan-list";
 import { getTransferPlan } from "@/features/transfers/data";
+import { UpcomingPayments } from "@/features/upcoming/components/upcoming-payments";
 import { periodKeyOf, periodLabel, periodRangeLabel, todayIsoDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 
@@ -64,6 +65,11 @@ export default async function HomePage() {
     <>
       {header}
       {isClosed && <ClosedPeriodNotice periodId={period.id} />}
+      <UpcomingPayments
+        cardStatements={cardStatements}
+        fixedExpenses={isClosed ? [] : fixedExpenses}
+        today={today}
+      />
       <PeriodSummary summary={summarizePeriod(rows, unbudgetedCents)} closed={isClosed} />
       {transferPlan.steps.length > 0 && (
         <Section title="Transferencias">
@@ -87,7 +93,7 @@ export default async function HomePage() {
       )}
       {fixedExpenses.length > 0 && (
         <Section title="Gastos fijos">
-          <FixedExpenseList rows={fixedExpenses} readOnly={isClosed} />
+          <FixedExpenseList rows={fixedExpenses} today={today} readOnly={isClosed} />
         </Section>
       )}
       <Section
