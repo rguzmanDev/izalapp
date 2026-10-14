@@ -3,7 +3,7 @@ import { and, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { transactions, transfers, type FinancialAccount } from "@/db/schema";
 import { listAccounts } from "@/features/accounts/data";
-import { lastCardCycle, type CardCycle } from "./cycle";
+import { lastCardCycle, paymentDueOf, type CardCycle } from "./cycle";
 
 export type CardStatement = {
   card: FinancialAccount;
@@ -18,10 +18,9 @@ export type CardStatement = {
 
 async function getCardStatement(
   userId: string,
-  card: FinancialAccount & { statementDay: number; paymentDueDay: number },
-  today: string,
+  card: FinancialAccount,
+  cycle: CardCycle,
 ): Promise<CardStatement> {
-  const cycle = lastCardCycle(card.statementDay, card.paymentDueDay, today);
   const charged = (condition: ReturnType<typeof sql>) =>
     sql<number>`coalesce(sum(${transactions.amountCents}) filter (where ${condition}), 0)::int`;
 
@@ -55,9 +54,10 @@ async function getCardStatement(
 }
 
 export async function listCardStatements(userId: string, today: string) {
-  const cards = (await listAccounts(userId)).filter(
-    (account): account is FinancialAccount & { statementDay: number; paymentDueDay: number } =>
-      account.type === "credit" && account.statementDay !== null && account.paymentDueDay !== null,
-  );
-  return Promise.all(cards.map((card) => getCardStatement(userId, card, today)));
+  const statements = (await listAccounts(userId)).flatMap((card) => {
+    const due = paymentDueOf(card);
+    if (card.type !== "credit" || card.statementDay === null || due === null) return [];
+    return [getCardStatement(userId, card, lastCardCycle(card.statementDay, due, today))];
+  });
+  return Promise.all(statements);
 }

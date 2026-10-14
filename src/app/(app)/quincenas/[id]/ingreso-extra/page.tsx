@@ -7,6 +7,7 @@ import { listAccounts } from "@/features/accounts/data";
 import { toAccountOptions } from "@/features/accounts/format";
 import { saveExtraIncome } from "@/features/periods/actions";
 import { getPeriod, listPeriodItems } from "@/features/periods/data";
+import { NAME_MAX_LENGTH } from "@/lib/limits";
 import { periodLabel, toPeriodKey } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 
@@ -31,11 +32,18 @@ export default async function ExtraIncomePage({ params }: PageProps<"/quincenas/
         backHref="/"
       />
       <ActionForm action={saveExtraIncome.bind(null, period.id)}>
-        <TextField name="name" label="Concepto" placeholder="Bono" />
-        <MoneyField name="plannedCents" label="Monto" />
+        <TextField
+          name="name"
+          label="Concepto"
+          required
+          placeholder="Bono"
+          maxLength={NAME_MAX_LENGTH}
+        />
+        <MoneyField name="plannedCents" label="Monto" required />
         <SelectField
           name="accountId"
           label="Se depositó en"
+          required
           placeholder="Selecciona una cuenta"
           options={toAccountOptions(accounts)}
           defaultValue={incomeAccountId ?? ""}

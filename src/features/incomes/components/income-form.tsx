@@ -4,6 +4,7 @@ import { CheckboxField, SelectField, TextField, type SelectOption } from "@/comp
 import { SubmitButton } from "@/components/form/submit-button";
 import type { Income } from "@/db/schema";
 import type { FormState } from "@/lib/form";
+import { NAME_MAX_LENGTH } from "@/lib/limits";
 
 type IncomeFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
@@ -14,11 +15,19 @@ type IncomeFormProps = {
 export function IncomeForm({ action, income, accountOptions }: IncomeFormProps) {
   return (
     <ActionForm action={action}>
-      <TextField name="name" label="Nombre" placeholder="Salario" defaultValue={income?.name} />
+      <TextField
+        name="name"
+        label="Nombre"
+        required
+        placeholder="Salario"
+        maxLength={NAME_MAX_LENGTH}
+        defaultValue={income?.name}
+      />
       <AllocationFields defaultValue={income} />
       <SelectField
         name="depositAccountId"
         label="Se deposita en"
+        required
         placeholder="Selecciona una cuenta"
         options={accountOptions}
         defaultValue={income?.depositAccountId ?? ""}

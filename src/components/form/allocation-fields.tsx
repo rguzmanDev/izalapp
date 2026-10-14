@@ -14,11 +14,13 @@ export function AllocationFields({ defaultValue }: { defaultValue?: Allocation }
       <MoneyField
         name="monthlyAmountCents"
         label="Monto mensual"
+        required
         defaultCents={defaultValue?.monthlyAmountCents}
       />
       <SelectField
         name="split"
         label="Reparto por quincena"
+        required
         options={splitOptions}
         value={split}
         onChange={(event) => setSplit(event.target.value as Split)}
@@ -28,6 +30,7 @@ export function AllocationFields({ defaultValue }: { defaultValue?: Allocation }
           name="customFirstHalfCents"
           label="Monto en la 1ª quincena"
           hint="El resto se asigna a la 2ª quincena"
+          required
           defaultCents={defaultValue?.customFirstHalfCents}
         />
       )}

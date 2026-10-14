@@ -4,6 +4,7 @@ import { CheckboxField, SelectField, TextField, type SelectOption } from "@/comp
 import { SubmitButton } from "@/components/form/submit-button";
 import type { Budget } from "@/db/schema";
 import type { FormState } from "@/lib/form";
+import { NAME_MAX_LENGTH } from "@/lib/limits";
 
 type BudgetFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
@@ -14,11 +15,19 @@ type BudgetFormProps = {
 export function BudgetForm({ action, budget, accountOptions }: BudgetFormProps) {
   return (
     <ActionForm action={action}>
-      <TextField name="name" label="Nombre" placeholder="Gasolina" defaultValue={budget?.name} />
+      <TextField
+        name="name"
+        label="Nombre"
+        required
+        placeholder="Gasolina"
+        maxLength={NAME_MAX_LENGTH}
+        defaultValue={budget?.name}
+      />
       <AllocationFields defaultValue={budget} />
       <SelectField
         name="spendingAccountId"
         label="Se gasta desde"
+        required
         placeholder="Selecciona una cuenta o tarjeta"
         options={accountOptions}
         defaultValue={budget?.spendingAccountId ?? ""}

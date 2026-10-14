@@ -38,6 +38,7 @@ export default async function EditPeriodItemPage({ params }: PageProps<"/partida
         <MoneyField
           name="plannedCents"
           label="Monto en esta quincena"
+          required
           defaultCents={item.plannedCents}
         />
         <SubmitButton>Guardar</SubmitButton>

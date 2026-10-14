@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PendingButton } from "@/components/form/pending-button";
 import { Badge } from "@/components/ui/badge";
 import { accountLabel } from "@/features/accounts/format";
+import { describeDueDay } from "@/features/fixed-expenses/constants";
 import { formatMoney } from "@/lib/money";
 import { setPaymentStatus } from "../actions";
 import { PAYMENT_STATUS_LABELS, type PaymentStatus } from "../constants";
@@ -28,7 +29,7 @@ const BADGE_VARIANTS: Record<PaymentStatus, "outline" | "secondary" | "default">
 type FixedExpenseRowProps = PeriodItemRow & { readOnly?: boolean };
 
 function FixedExpenseRow({ item, account, readOnly }: FixedExpenseRowProps) {
-  const details = [item.dueDay && `día ${item.dueDay}`, accountLabel(account)].filter(Boolean);
+  const details = [describeDueDay(item.dueDay), accountLabel(account)];
 
   return (
     <li className="flex flex-col gap-2 px-4 py-3">

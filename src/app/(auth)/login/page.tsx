@@ -4,6 +4,7 @@ import { TextField } from "@/components/form/fields";
 import { SubmitButton } from "@/components/form/submit-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { signIn } from "@/features/auth/actions";
+import { EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH } from "@/lib/limits";
 
 export default function LoginPage() {
   return (
@@ -13,12 +14,21 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <ActionForm action={signIn}>
-          <TextField name="email" label="Correo" type="email" autoComplete="email" />
+          <TextField
+            name="email"
+            label="Correo"
+            required
+            type="email"
+            autoComplete="email"
+            maxLength={EMAIL_MAX_LENGTH}
+          />
           <TextField
             name="password"
             label="Contraseña"
+            required
             type="password"
             autoComplete="current-password"
+            maxLength={PASSWORD_MAX_LENGTH}
           />
           <SubmitButton>Entrar</SubmitButton>
         </ActionForm>

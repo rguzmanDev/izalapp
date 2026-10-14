@@ -31,9 +31,13 @@ export const financialAccounts = pgTable(
     userId: owner(),
     name: text().notNull(),
     bank: text(),
+    /** Last 4 digits of the card or account number, to tell similar accounts apart. */
+    lastFour: text(),
     type: accountType().notNull(),
     statementDay: smallint(),
+    /** Credit cards set one of these: a fixed day of the month or a number of days after the cutoff. */
     paymentDueDay: smallint(),
+    paymentDueDaysAfterCutoff: smallint(),
     paymentAccountId: uuid().references((): AnyPgColumn => financialAccounts.id, {
       onDelete: "set null",
     }),

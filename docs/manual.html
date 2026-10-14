@@ -206,17 +206,20 @@
 
 <!-- 3 -->
 <h2 id="configuracion">3. Configurar tu plan</h2>
-<p>Todo esto está en <b>Ajustes</b>. Hazlo en este orden la primera vez:</p>
+<p>Todo esto está en <b>Ajustes</b>. Hazlo en este orden la primera vez. En todos los formularios, los campos marcados con <b>*</b> son obligatorios.</p>
 
 <h3>3.1 Cuentas</h3>
-<p>Registra cada cuenta con <b>Nombre</b>, <b>Banco</b> y <b>Tipo</b>: Corriente, Ahorro o Tarjeta de crédito. Si tu cuenta tiene tarjeta de débito, regístrala con el tipo de la cuenta a la que está ligada (normalmente Ahorro o Corriente).</p>
-<p>Si es <b>tarjeta de crédito</b>, aparecen tres campos más:</p>
+<p>Registra cada cuenta con su <b>Tipo</b> (Corriente, Ahorro o Tarjeta de crédito), un <b>Nombre</b>, el <b>Banco</b> y, si quieres, los <b>Últimos 4 dígitos</b>. Si tu cuenta tiene tarjeta de débito, regístrala con el tipo de la cuenta a la que está ligada (normalmente Ahorro o Corriente).</p>
+<p>El nombre es solo un apodo: el tipo ya aparece escrito dentro del campo y no se puede borrar. Una tarjeta llamada "NICO" del BAC terminada en 1234 se muestra como <b>Tarjeta de crédito NICO ••1234 · BAC</b>. Los últimos 4 dígitos son opcionales y sirven para distinguir dos tarjetas o cuentas parecidas.</p>
+<p>Si es <b>tarjeta de crédito</b>, aparecen más campos:</p>
 <ul>
   <li><b>Día de corte</b>: el día del mes en que cierra el estado de cuenta.</li>
-  <li><b>Día de pago</b>: la fecha límite para pagar.</li>
+  <li><b>Fecha límite de pago</b>: elige <b>Un día fijo del mes</b> (por ejemplo, el 5) o <b>Días después del corte</b> (por ejemplo, 20 días), según lo que diga tu estado de cuenta.</li>
   <li><b>Se paga desde</b>: la cuenta (corriente o de ahorro) con la que normalmente la pagas.</li>
 </ul>
+<p>El <b>Banco</b> se elige de la lista de bancos de El Salvador. Si el tuyo no aparece, elige <b>Otro…</b> y escribe su nombre.</p>
 <div class="tip"><strong>Consejo</strong>Crea al menos una cuenta de tipo <b>Ahorro</b>: al cerrar cada quincena la app la propone como destino del sobrante.</div>
+<div class="tip"><strong>Cómo se escriben los montos</strong>Escribe solo los dígitos, sin punto: se llenan de derecha a izquierda como en una caja registradora. Para $13.00 teclea 1, 3, 0, 0; para $1,059.65 teclea 1, 0, 5, 9, 6, 5. Las letras y los símbolos se ignoran.</div>
 
 <h3>3.2 Monto mensual y reparto</h3>
 <p>Ingresos, gastos fijos y presupuestos se capturan con su <b>Monto mensual</b> y un <b>Reparto por quincena</b>:</p>
@@ -232,7 +235,11 @@
 <p>Nombre (por ejemplo “Salario”), monto mensual, reparto y la cuenta donde <b>se deposita</b>.</p>
 
 <h3>3.4 Gastos fijos</h3>
-<p>Nombre, monto mensual, reparto, <b>Día de pago</b> (opcional, para recordarte cuándo vence) y la cuenta o tarjeta con la que <b>se paga</b>.</p>
+<p>Nombre, monto mensual, reparto, <b>¿Cuándo se paga?</b> y la cuenta o tarjeta con la que <b>se paga</b>.</p>
+<ul>
+  <li><b>El día que recibo mi pago</b>: compromisos sin fecha, como un apoyo familiar de $75 cada quincena.</li>
+  <li><b>Tiene fecha de vencimiento</b>: servicios o préstamos con fecha límite, como el teléfono; indica el día en que vence.</li>
+</ul>
 
 <h3>3.5 Presupuestos</h3>
 <p>Nombre, monto mensual (el tope), reparto y la cuenta o tarjeta desde la que <b>se gasta</b>.</p>
@@ -318,7 +325,7 @@
 <p>Tu sueldo cae en una cuenta, pero tus gastos salen de varias. En Inicio, la sección <b>Transferencias</b> te dice exactamente cuánto mover y a dónde para que cada cuenta tenga lo que necesita:</p>
 <div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <div>Nómina · Banco A<br><span class="muted">↓</span><br>Gastos · Banco B</div>
+    <div>Cuenta corriente Nómina · Banco Agrícola<br><span class="muted">↓</span><br>Cuenta de ahorro Gastos · BAC</div>
     <div style="text-align:right"><b>$75.00</b><br><span class="btn">Ya lo moví</span></div>
   </div>
 </div>
@@ -367,7 +374,7 @@
   <tr><th>Campo</th><th>Detalle</th></tr>
   <tr><td>Fecha</td><td>Hoy por defecto; cámbiala si registras una carga de otro día.</td></tr>
   <tr><td>Odómetro (millas)</td><td>Lo que marca el carro. Debe ser mayor que la carga anterior y menor que la siguiente; el campo te muestra tu último registro.</td></tr>
-  <tr><td>Galones y Precio por galón</td><td>Hasta 3 decimales, como en la bomba.</td></tr>
+  <tr><td>Galones y Precio por galón</td><td>Con 3 decimales, como en la bomba. Igual que los montos, se teclean solo dígitos: 10500 queda como 10.500.</td></tr>
   <tr><td>Total pagado</td><td>Opcional. Si lo dejas vacío se calcula galones × precio (la app te muestra el resultado).</td></tr>
   <tr><td>Gasolinera</td><td>Opcional.</td></tr>
   <tr><td>Llené el tanque</td><td>Márcalo solo si llenaste por completo. Es necesario para calcular el rendimiento.</td></tr>

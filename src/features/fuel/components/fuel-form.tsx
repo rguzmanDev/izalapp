@@ -5,6 +5,7 @@ import { ActionForm } from "@/components/form/action-form";
 import {
   CheckboxField,
   MoneyField,
+  NumberField,
   SelectField,
   TextField,
   type SelectOption,
@@ -12,6 +13,12 @@ import {
 import { SubmitButton } from "@/components/form/submit-button";
 import type { ItemOption } from "@/features/transactions/components/transaction-form";
 import type { FormState } from "@/lib/form";
+import {
+  GALLONS_MAX_DIGITS,
+  NOTE_MAX_LENGTH,
+  ODOMETER_MAX_DIGITS,
+  PRICE_PER_GALLON_MAX_DIGITS,
+} from "@/lib/limits";
 import { formatMoney } from "@/lib/money";
 import type { FuelLogRow } from "../data";
 import { formatMiles } from "../format";
@@ -26,11 +33,17 @@ type FuelFormProps = {
   accountOptions: SelectOption[];
 };
 
+/** Gallons and price per gallon are edited as thousandths. */
+const THOUSANDTHS = 1000;
+
 /** Estimated total for the hint; the server computes the real one when the field is left empty. */
-function estimateCents(gallons: string, price: string): number | null {
-  const total = Number(gallons) * Number(price);
-  return Number.isFinite(total) && total > 0 ? Math.round(total * 100) : null;
+function estimateCents(gallonsUnits: number, priceUnits: number): number | null {
+  const total = Math.round((gallonsUnits * priceUnits * 100) / THOUSANDTHS ** 2);
+  return total > 0 ? total : null;
 }
+
+const toThousandths = (value: number | undefined) =>
+  value === undefined ? undefined : Math.round(value * THOUSANDTHS);
 
 export function FuelForm({
   action,
@@ -49,8 +62,10 @@ export function FuelForm({
   const [accountId, setAccountId] = useState(
     row?.transaction.accountId ?? accountOfItem(initialItemId) ?? "",
   );
-  const [gallons, setGallons] = useState(row ? String(row.log.gallons) : "");
-  const [price, setPrice] = useState(row ? String(row.log.pricePerGallon) : "");
+  const initialGallons = toThousandths(row?.log.gallons);
+  const initialPrice = toThousandths(row?.log.pricePerGallon);
+  const [gallons, setGallons] = useState(initialGallons ?? 0);
+  const [price, setPrice] = useState(initialPrice ?? 0);
   const estimate = estimateCents(gallons, price);
 
   function handleItemChange(nextItemId: string) {
@@ -65,41 +80,45 @@ export function FuelForm({
         name="occurredOn"
         label="Fecha"
         type="date"
+        required
         hint="Cámbiala si registras una carga de otro día."
         defaultValue={row?.transaction.occurredOn ?? defaultDate}
       />
-      <TextField
+      <NumberField
         name="odometer"
         label="Odómetro (millas)"
-        inputMode="numeric"
-        autoComplete="off"
-        placeholder={lastOdometer ? `Último: ${formatMiles(lastOdometer)}` : undefined}
-        defaultValue={row?.log.odometer}
+        required
+        decimals={0}
+        maxDigits={ODOMETER_MAX_DIGITS}
+        placeholder={lastOdometer ? `Último: ${formatMiles(lastOdometer)}` : "0"}
+        defaultUnits={row?.log.odometer}
         autoFocus={!row}
       />
       <div className="grid grid-cols-2 gap-3">
-        <TextField
+        <NumberField
           name="gallons"
           label="Galones"
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0.000"
-          value={gallons}
-          onChange={(event) => setGallons(event.target.value)}
+          required
+          decimals={3}
+          maxDigits={GALLONS_MAX_DIGITS}
+          defaultUnits={initialGallons}
+          onUnitsChange={setGallons}
         />
-        <TextField
+        <NumberField
           name="pricePerGallon"
           label="Precio por galón"
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0.000"
-          value={price}
-          onChange={(event) => setPrice(event.target.value)}
+          required
+          decimals={3}
+          maxDigits={PRICE_PER_GALLON_MAX_DIGITS}
+          prefix="$"
+          defaultUnits={initialPrice}
+          onUnitsChange={setPrice}
         />
       </div>
       <MoneyField
         name="amountCents"
         label="Total pagado"
+        optional
         hint={
           estimate
             ? `Si lo dejas vacío se guarda ${formatMoney(estimate)} (galones × precio).`
@@ -110,7 +129,7 @@ export function FuelForm({
       <TextField
         name="station"
         label="Gasolinera"
-        placeholder="Opcional"
+        maxLength={NOTE_MAX_LENGTH}
         defaultValue={row?.log.station ?? ""}
       />
       <CheckboxField
@@ -129,6 +148,7 @@ export function FuelForm({
       <SelectField
         name="accountId"
         label="Cuenta"
+        required
         placeholder="Selecciona una cuenta"
         options={accountOptions}
         value={accountId}

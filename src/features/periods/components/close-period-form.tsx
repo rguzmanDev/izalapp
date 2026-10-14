@@ -23,6 +23,7 @@ export function ClosePeriodForm({
       <MoneyField
         name="surplusCents"
         label="¿Cuánto vas a mover?"
+        optional
         hint="Déjalo vacío para cerrar sin mover dinero."
         defaultCents={surplusCents > 0 ? surplusCents : null}
       />

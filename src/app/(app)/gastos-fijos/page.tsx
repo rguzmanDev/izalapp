@@ -3,6 +3,7 @@ import { ItemLink, ItemList } from "@/components/item-list";
 import { LinkButton } from "@/components/link-button";
 import { PageHeader } from "@/components/page-header";
 import { accountLabel } from "@/features/accounts/format";
+import { describeDueDay } from "@/features/fixed-expenses/constants";
 import { listFixedExpenses } from "@/features/fixed-expenses/data";
 import { describeHalves } from "@/lib/allocation";
 import { formatMoney } from "@/lib/money";
@@ -31,8 +32,8 @@ export default async function FixedExpensesPage() {
             <ItemLink
               key={expense.id}
               href={`/gastos-fijos/${expense.id}`}
-              title={expense.dueDay ? `${expense.name} · día ${expense.dueDay}` : expense.name}
-              subtitle={`${accountLabel(account)} · ${describeHalves(expense)}`}
+              title={expense.name}
+              subtitle={`${describeDueDay(expense.dueDay)} · ${accountLabel(account)} · ${describeHalves(expense)}`}
               trailing={formatMoney(expense.monthlyAmountCents)}
               muted={!expense.isActive}
             />

@@ -3,6 +3,7 @@ import { MoneyField, SelectField, TextField, type SelectOption } from "@/compone
 import { SubmitButton } from "@/components/form/submit-button";
 import type { Transfer } from "@/db/schema";
 import type { FormState } from "@/lib/form";
+import { NOTE_MAX_LENGTH } from "@/lib/limits";
 
 export type TransferDefaults = Partial<
   Pick<Transfer, "amountCents" | "fromAccountId" | "toAccountId" | "note">
@@ -21,12 +22,14 @@ export function TransferForm({ action, defaults, accountOptions }: TransferFormP
       <MoneyField
         name="amountCents"
         label="Monto"
+        required
         defaultCents={defaults.amountCents}
         autoFocus={defaults.amountCents === undefined}
       />
       <SelectField
         name="fromAccountId"
         label="Desde"
+        required
         placeholder="Selecciona una cuenta"
         options={accountOptions}
         defaultValue={defaults.fromAccountId ?? ""}
@@ -34,13 +37,25 @@ export function TransferForm({ action, defaults, accountOptions }: TransferFormP
       <SelectField
         name="toAccountId"
         label="Hacia"
+        required
         hint="Para pagar una tarjeta, elígela como destino."
         placeholder="Selecciona una cuenta"
         options={accountOptions}
         defaultValue={defaults.toAccountId ?? ""}
       />
-      <TextField name="occurredOn" label="Fecha" type="date" defaultValue={defaults.occurredOn} />
-      <TextField name="note" label="Nota" placeholder="Opcional" defaultValue={defaults.note ?? ""} />
+      <TextField
+        name="occurredOn"
+        label="Fecha"
+        type="date"
+        required
+        defaultValue={defaults.occurredOn}
+      />
+      <TextField
+        name="note"
+        label="Nota"
+        maxLength={NOTE_MAX_LENGTH}
+        defaultValue={defaults.note ?? ""}
+      />
       <SubmitButton>Guardar</SubmitButton>
     </ActionForm>
   );

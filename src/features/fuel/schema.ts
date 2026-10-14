@@ -1,11 +1,15 @@
 import { z } from "zod";
 import {
+  GALLONS_MAX_DIGITS,
+  ODOMETER_MAX_DIGITS,
+  PRICE_PER_GALLON_MAX_DIGITS,
+} from "@/lib/limits";
+import {
   checkbox,
   optionalId,
   optionalMoney,
   optionalText,
-  positiveDecimal,
-  positiveInteger,
+  positiveNumber,
   requiredId,
 } from "@/lib/validation";
 
@@ -13,9 +17,9 @@ import {
 export const fuelLogSchema = z
   .object({
     occurredOn: z.iso.date("Fecha inválida"),
-    odometer: positiveInteger,
-    gallons: positiveDecimal(3),
-    pricePerGallon: positiveDecimal(3),
+    odometer: positiveNumber(0, ODOMETER_MAX_DIGITS),
+    gallons: positiveNumber(3, GALLONS_MAX_DIGITS),
+    pricePerGallon: positiveNumber(3, PRICE_PER_GALLON_MAX_DIGITS),
     amountCents: optionalMoney,
     station: optionalText,
     isFullTank: checkbox,

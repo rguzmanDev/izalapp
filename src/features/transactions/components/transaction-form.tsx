@@ -6,6 +6,7 @@ import { MoneyField, SelectField, TextField, type SelectOption } from "@/compone
 import { SubmitButton } from "@/components/form/submit-button";
 import type { Transaction } from "@/db/schema";
 import type { FormState } from "@/lib/form";
+import { NOTE_MAX_LENGTH } from "@/lib/limits";
 
 export type ItemOption = SelectOption & { accountId: string };
 
@@ -46,6 +47,7 @@ export function TransactionForm({
       <MoneyField
         name="amountCents"
         label="Monto"
+        required
         defaultCents={transaction?.amountCents}
         autoFocus={!transaction}
       />
@@ -60,6 +62,7 @@ export function TransactionForm({
       <SelectField
         name="accountId"
         label="Cuenta"
+        required
         placeholder="Selecciona una cuenta"
         options={accountOptions}
         value={accountId}
@@ -69,9 +72,15 @@ export function TransactionForm({
         name="occurredOn"
         label="Fecha"
         type="date"
+        required
         defaultValue={transaction?.occurredOn ?? defaultDate}
       />
-      <TextField name="note" label="Nota" placeholder="Opcional" defaultValue={transaction?.note ?? ""} />
+      <TextField
+        name="note"
+        label="Nota"
+        maxLength={NOTE_MAX_LENGTH}
+        defaultValue={transaction?.note ?? ""}
+      />
       <SubmitButton>Guardar</SubmitButton>
     </ActionForm>
   );

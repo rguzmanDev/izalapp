@@ -36,6 +36,13 @@
       "when": 1792007763521,
       "tag": "0004_fuel_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792016337251,
+      "tag": "0005_account_last_four_and_due_rule",
+      "breakpoints": true
     }
   ]
 }

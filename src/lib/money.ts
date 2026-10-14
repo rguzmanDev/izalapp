@@ -13,7 +13,3 @@ export function parseMoney(input: string): number | null {
   if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return null;
   return Math.round(Number(normalized) * 100);
 }
-
-export function centsToInput(cents: number | null | undefined): string {
-  return cents == null ? "" : (cents / 100).toFixed(2);
-}
