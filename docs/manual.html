@@ -197,7 +197,7 @@
 <p>En el celular verás una barra abajo con cinco secciones; en computadora aparece arriba.</p>
 <table>
   <tr><th>Sección</th><th>Para qué sirve</th></tr>
-  <tr><td><b>Inicio</b></td><td>Resumen de la quincena actual, transferencias pendientes, tarjetas, presupuestos, gastos fijos e ingresos.</td></tr>
+  <tr><td><b>Inicio</b></td><td>Resumen de la quincena actual, próximos pagos, transferencias pendientes, tarjetas, presupuestos, gastos fijos e ingresos.</td></tr>
   <tr><td><b>Movimientos</b></td><td>Lista de gastos y transferencias de la quincena.</td></tr>
   <tr><td><b>Gasolina</b></td><td>Cargas de combustible, rendimiento y costo por milla.</td></tr>
   <tr><td><b>Reportes</b></td><td>Gráficas e historial de varias quincenas.</td></tr>
@@ -214,10 +214,11 @@
 <p>Si es <b>tarjeta de crédito</b>, aparecen más campos:</p>
 <ul>
   <li><b>Día de corte</b>: el día del mes en que cierra el estado de cuenta.</li>
-  <li><b>Fecha límite de pago</b>: elige <b>Un día fijo del mes</b> (por ejemplo, el 5) o <b>Días después del corte</b> (por ejemplo, 20 días), según lo que diga tu estado de cuenta.</li>
+  <li><b>Fecha límite de pago</b>: elige <b>Un día fijo del mes</b> (por ejemplo, el 5) o <b>Días después del corte</b> (por ejemplo, 20 días), según lo que diga tu estado de cuenta. Los días se cuentan desde el día siguiente al corte: con corte el 23 de septiembre y 25 días, el pago es el 18 de octubre. Si la fecha cae en sábado o domingo, se pasa al lunes.</li>
   <li><b>Se paga desde</b>: la cuenta (corriente o de ahorro) con la que normalmente la pagas.</li>
 </ul>
 <p>El <b>Banco</b> se elige de la lista de bancos de El Salvador. Si el tuyo no aparece, elige <b>Otro…</b> y escribe su nombre.</p>
+<p>La lista de cuentas se divide en <b>Cuentas bancarias</b> y <b>Tarjetas de crédito</b>, cada una ordenada alfabéticamente por banco.</p>
 <div class="tip"><strong>Consejo</strong>Crea al menos una cuenta de tipo <b>Ahorro</b>: al cerrar cada quincena la app la propone como destino del sobrante.</div>
 <div class="tip"><strong>Cómo se escriben los montos</strong>Escribe solo los dígitos, sin punto: se llenan de derecha a izquierda como en una caja registradora. Para $13.00 teclea 1, 3, 0, 0; para $1,059.65 teclea 1, 0, 5, 9, 6, 5. Las letras y los símbolos se ignoran.</div>
 
@@ -238,7 +239,7 @@
 <p>Nombre, monto mensual, reparto, <b>¿Cuándo se paga?</b> y la cuenta o tarjeta con la que <b>se paga</b>.</p>
 <ul>
   <li><b>El día que recibo mi pago</b>: compromisos sin fecha, como un apoyo familiar de $75 cada quincena.</li>
-  <li><b>Tiene fecha de vencimiento</b>: servicios o préstamos con fecha límite, como el teléfono; indica el día en que vence.</li>
+  <li><b>Tiene fecha de vencimiento</b>: servicios o préstamos con fecha límite, como el teléfono; indica el día en que vence. Una semana antes empezará a aparecer en <b>Próximos pagos</b> (ver 4.2).</li>
 </ul>
 
 <h3>3.5 Presupuestos</h3>
@@ -260,7 +261,14 @@
 <p>Al empezar cada quincena, Inicio te muestra <b>“Quincena sin abrir”</b>. Toca <span class="btn">Abrir quincena</span> y la app copia tus ingresos, gastos fijos y presupuestos activos con el monto que les toca en esa quincena.</p>
 
 <h3>4.2 El resumen</h3>
-<p>Arriba de Inicio verás cuatro tarjetas:</p>
+<p>Si algún pago vence en los próximos 7 días, lo primero que verás en Inicio es <b>Próximos pagos</b>: tarjetas con saldo pendiente y gastos fijos con fecha de vencimiento que aún no marcas como pagados. Cada uno dice cuánto falta (“vence en 5 días”, “vence mañana”, “vence hoy”) y la fecha; al tocarlo vas directo a pagarlo. Las tarjetas vencidas siguen apareciendo hasta que las pagues.</p>
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>Tarjeta de crédito NICO ••1234 · BAC<br><span class="muted" style="font-size:14px">18 de octubre</span></div>
+    <div style="text-align:right"><b>$150.00</b><br><span class="badge">vence en 4 días</span></div>
+  </div>
+</div>
+<p>Debajo verás cuatro tarjetas:</p>
 <div class="example">
   <div class="stat"><small>Ingreso</small><b>$1,200.00</b></div>
   <div class="stat"><small>Gastos fijos</small><b>$450.00</b><em>1 de 3 pagados</em></div>
@@ -309,7 +317,7 @@
 <h2 id="gastos">5. Registrar gastos</h2>
 <p>Toca el botón redondo <span class="btn">+</span> (abajo a la derecha en Inicio o Movimientos) y llena:</p>
 <ul>
-  <li><b>Monto</b>: acepta <code>25</code>, <code>25.50</code>, <code>1,059.65</code> o <code>$1,059.65</code>.</li>
+  <li><b>Monto</b>: escribe solo los dígitos; para $25.50 teclea 2, 5, 5, 0 (ver el consejo en 3.1).</li>
   <li><b>Presupuesto o gasto fijo</b>: a qué partida pertenece. Déjalo en <b>Sin presupuesto</b> para un gasto imprevisto; se suma como “otros gastos”.</li>
   <li><b>Cuenta</b>: se llena sola con la cuenta de la partida, pero puedes cambiarla.</li>
   <li><b>Fecha</b>: por defecto hoy.</li>
@@ -346,8 +354,10 @@
 <div class="card">
   <div style="display:flex;justify-content:space-between;gap:12px">
     <div>
-      <b>Visa · BAC</b><br>
-      <span class="muted" style="font-size:14px">Corte 5 oct · Límite 25 oct<br>Llevas $40.00 para el próximo corte</span>
+      <b>Tarjeta de crédito NICO ••1234 · BAC</b><br>
+      <span class="muted" style="font-size:14px">Corte 23 de septiembre · Pago 18 de octubre</span><br>
+      <span style="font-size:14px">El pago vence en 4 días</span><br>
+      <span class="muted" style="font-size:14px">Llevas $40.00 para el próximo corte</span>
     </div>
     <div style="text-align:right"><b>$250.00</b><br><span class="badge">Por pagar $150.00</span></div>
   </div>
@@ -355,6 +365,7 @@
 </div>
 <ul>
   <li><b>Monto grande</b>: lo que cargaste entre el corte anterior y el último corte; es lo que debes pagar antes de la fecha límite.</li>
+  <li><b>El pago vence en …</b>: aparece la última semana antes de la fecha de pago si aún debes algo; en rojo cuando vence mañana u hoy.</li>
   <li><b>Llevas … para el próximo corte</b>: lo que has cargado después del último corte.</li>
   <li>Estados: <span class="badge">Por pagar $X</span> <span class="badge solid">Pagada</span> <span class="badge red">Vencida $X</span> <span class="badge">Sin saldo</span></li>
 </ul>
