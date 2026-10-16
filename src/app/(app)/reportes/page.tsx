@@ -7,9 +7,12 @@ import { refillStats } from "@/features/fuel/stats";
 import { buildBudgetReport } from "@/features/reports/budget-report";
 import { BudgetReportTable } from "@/features/reports/components/budget-report-table";
 import { FuelChart } from "@/features/reports/components/fuel-chart";
+import { MovementFilter } from "@/features/reports/components/movement-filter";
+import { MovementReportList } from "@/features/reports/components/movement-report-list";
 import { PeriodChart } from "@/features/reports/components/period-chart";
 import { RangeSelector, REPORT_RANGES } from "@/features/reports/components/range-selector";
-import { getPeriodReports } from "@/features/reports/data";
+import { getPeriodReports, listMovementsForPeriods } from "@/features/reports/data";
+import { buildMovementReport, parseMovementFilter } from "@/features/reports/movement-report";
 import { formatMoney } from "@/lib/money";
 import { formatShortDate, shortPeriodLabel, toPeriodKey } from "@/lib/period";
 import { requireUser } from "@/lib/session";
@@ -23,7 +26,9 @@ function parseRange(value: string | string[] | undefined): number {
 }
 
 export default async function ReportsPage({ searchParams }: PageProps<"/reportes">) {
-  const range = parseRange((await searchParams).quincenas);
+  const params = await searchParams;
+  const range = parseRange(params.quincenas);
+  const tipo = parseMovementFilter(params.tipo);
   const user = await requireUser();
   const [reports, refills] = await Promise.all([
     getPeriodReports(user.id, range),
@@ -44,6 +49,22 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
       </>
     );
   }
+
+  const periodIds = reports.map((report) => report.period.id);
+  const movements = await listMovementsForPeriods(user.id, periodIds);
+  const movementEntries = buildMovementReport(
+    movements.expenses,
+    movements.transfers,
+    movements.incomes,
+    tipo,
+  );
+  const totalOf = (kind: "income" | "expense" | "transfer") =>
+    movementEntries
+      .filter((entry) => entry.kind === kind)
+      .reduce((total, entry) => total + entry.amountCents, 0);
+  const incomeTotal = totalOf("income");
+  const expenseTotal = totalOf("expense");
+  const transferTotal = totalOf("transfer");
 
   const summaries = reports.map((report) => report.summary);
   const spentCents = (summary: (typeof summaries)[number]) =>
@@ -72,7 +93,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
   return (
     <>
       {header}
-      <RangeSelector current={range} />
+      <RangeSelector current={range} tipo={tipo} />
       <div className="grid grid-cols-2 gap-3">
         <StatCard
           label="Ingreso"
@@ -92,6 +113,23 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
           negative={summaries.some((summary) => summary.overspentCents > 0)}
         />
       </div>
+      <Section
+        title="Movimientos"
+        description={
+          tipo === "ingresos"
+            ? `${movementEntries.length} ingresos · ${formatMoney(incomeTotal)}`
+            : tipo === "gastos"
+              ? `${movementEntries.length} gastos · ${formatMoney(expenseTotal)}`
+              : tipo === "transferencias"
+                ? `${movementEntries.length} transferencias · ${formatMoney(transferTotal)}`
+                : `${movementEntries.length} · ingresos ${formatMoney(incomeTotal)} · gastos ${formatMoney(expenseTotal)} · transferencias ${formatMoney(transferTotal)}`
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <MovementFilter current={tipo} range={range} />
+          <MovementReportList entries={movementEntries} />
+        </div>
+      </Section>
       <Section title="Por quincena">
         <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
           <PeriodChart data={periodData} />

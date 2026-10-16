@@ -1,8 +1,19 @@
 import "server-only";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db";
-import { periodItems, periods, transactions, transfers } from "@/db/schema";
+import {
+  financialAccounts,
+  fuelLogs,
+  periodItems,
+  periods,
+  transactions,
+  transfers,
+} from "@/db/schema";
 import { summarizePeriod } from "@/features/periods/summary";
+
+const fromAccount = alias(financialAccounts, "from_account");
+const toAccount = alias(financialAccounts, "to_account");
 
 const total = (column: typeof transactions.amountCents | typeof transfers.amountCents) =>
   sql<number>`coalesce(sum(${column}), 0)::int`;
@@ -64,3 +75,59 @@ export async function getPeriodReports(userId: string, count: number) {
 }
 
 export type PeriodReport = Awaited<ReturnType<typeof getPeriodReports>>[number];
+
+/** Incomes, expenses and transfers across the given periods (for the movements report). */
+export async function listMovementsForPeriods(userId: string, periodIds: string[]) {
+  if (periodIds.length === 0) return { expenses: [], transfers: [], incomes: [] };
+
+  const [expenses, transferRows, incomes] = await Promise.all([
+    db
+      .select({
+        transaction: transactions,
+        account: financialAccounts,
+        itemName: periodItems.name,
+        fuelLogId: fuelLogs.id,
+        station: fuelLogs.station,
+        period: periods,
+      })
+      .from(transactions)
+      .innerJoin(financialAccounts, eq(transactions.accountId, financialAccounts.id))
+      .innerJoin(periods, eq(transactions.periodId, periods.id))
+      .leftJoin(periodItems, eq(transactions.itemId, periodItems.id))
+      .leftJoin(fuelLogs, eq(fuelLogs.transactionId, transactions.id))
+      .where(and(eq(transactions.userId, userId), inArray(transactions.periodId, periodIds)))
+      .orderBy(desc(transactions.occurredOn), desc(transactions.createdAt)),
+    db
+      .select({
+        transfer: transfers,
+        from: fromAccount,
+        to: toAccount,
+        period: periods,
+      })
+      .from(transfers)
+      .innerJoin(fromAccount, eq(transfers.fromAccountId, fromAccount.id))
+      .innerJoin(toAccount, eq(transfers.toAccountId, toAccount.id))
+      .innerJoin(periods, eq(transfers.periodId, periods.id))
+      .where(and(eq(transfers.userId, userId), inArray(transfers.periodId, periodIds)))
+      .orderBy(desc(transfers.occurredOn), desc(transfers.createdAt)),
+    db
+      .select({
+        item: periodItems,
+        account: financialAccounts,
+        period: periods,
+      })
+      .from(periodItems)
+      .innerJoin(financialAccounts, eq(periodItems.accountId, financialAccounts.id))
+      .innerJoin(periods, eq(periodItems.periodId, periods.id))
+      .where(
+        and(
+          eq(periodItems.userId, userId),
+          inArray(periodItems.periodId, periodIds),
+          eq(periodItems.kind, "income"),
+        ),
+      )
+      .orderBy(desc(periodItems.createdAt)),
+  ]);
+
+  return { expenses, transfers: transferRows, incomes };
+}
