@@ -1,8 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { isOwnedAccount } from "@/features/accounts/data";
-import { isPeriodOpen } from "@/features/periods/data";
+import { getPeriodItem, isPeriodOpen } from "@/features/periods/data";
 import { CLOSED_EXPENSE_ERROR, resolveExpensePeriod } from "@/features/transactions/period";
 import { parseFormData, type FormState } from "@/lib/form";
 import { requireUser } from "@/lib/session";
@@ -14,7 +13,7 @@ import {
   updateFuelLog,
 } from "./data";
 import { formatMiles } from "./format";
-import { fuelLogSchema } from "./schema";
+import { fuelLogSchema, type FuelLogInput } from "./schema";
 
 export async function saveFuelLog(
   id: string | null,
@@ -24,16 +23,28 @@ export async function saveFuelLog(
   const user = await requireUser();
   const parsed = parseFormData(fuelLogSchema, formData);
   if (!parsed.success) return parsed.state;
-  const input = parsed.data;
 
-  if (!(await isOwnedAccount(user.id, input.accountId))) {
-    return { fieldErrors: { accountId: ["Cuenta inválida"] } };
+  const item = await getPeriodItem(user.id, parsed.data.itemId);
+  if (!item || item.kind !== "budget" || !item.isFuel) {
+    return { fieldErrors: { itemId: ["Elige un presupuesto de gasolina"] } };
   }
+
+  const input: FuelLogInput = { ...parsed.data, accountId: item.accountId };
 
   const current = id ? await getFuelLog(user.id, id) : null;
   if (id && !current) return { error: "La carga ya no existe" };
   if (current && !(await isPeriodOpen(user.id, current.transaction.periodId))) {
     return { error: CLOSED_EXPENSE_ERROR };
+  }
+
+  if (!id && item.paymentStatus === "pending") {
+    return {
+      fieldErrors: {
+        itemId: [
+          "Aparta o fondea este presupuesto antes de registrar cargas (si pagaste de otra cuenta, repones después)",
+        ],
+      },
+    };
   }
 
   const resolved = await resolveExpensePeriod(user.id, input);

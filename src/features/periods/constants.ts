@@ -13,7 +13,11 @@ export function isExtraIncome(item: Pick<PeriodItem, "kind" | "sourceId">): bool
   return item.kind === "income" && item.sourceId === null;
 }
 
-/** Only meaningful for fixed expenses. */
+/**
+ * Funding checklist on period items.
+ * Fixed expenses use pending → set_aside → paid.
+ * Budgets use pending ↔ set_aside (spending is tracked with transactions).
+ */
 export const PAYMENT_STATUSES = ["pending", "set_aside", "paid"] as const;
 
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];

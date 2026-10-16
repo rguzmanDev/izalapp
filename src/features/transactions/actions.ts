@@ -6,7 +6,7 @@ import { isPeriodOpen } from "@/features/periods/data";
 import { parseFormData, type FormState } from "@/lib/form";
 import { requireUser } from "@/lib/session";
 import { createTransaction, deleteTransaction, getTransaction, updateTransaction } from "./data";
-import { CLOSED_EXPENSE_ERROR, resolveExpensePeriod } from "./period";
+import { CLOSED_EXPENSE_ERROR, fundingRequiredError, resolveExpensePeriod } from "./period";
 import { transactionSchema } from "./schema";
 
 export async function saveTransaction(
@@ -30,6 +30,11 @@ export async function saveTransaction(
 
   const resolved = await resolveExpensePeriod(user.id, parsed.data);
   if ("fieldErrors" in resolved) return { fieldErrors: resolved.fieldErrors };
+
+  if (!id && resolved.item) {
+    const fundingError = fundingRequiredError(resolved.item);
+    if (fundingError) return { fieldErrors: fundingError };
+  }
 
   const values = { ...parsed.data, periodId: resolved.periodId };
   if (id) {

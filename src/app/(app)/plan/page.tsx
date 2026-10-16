@@ -13,7 +13,7 @@ export default async function PlanPage() {
     <>
       <PageHeader
         title="Plan mensual"
-        description="Ingresos, gastos fijos y presupuestos activos repartidos por quincena"
+        description="Ingresos, gastos fijos y presupuestos activos repartidos entre el pago del 15 y el del 30"
         backHref="/ajustes"
       />
       {plan.incomes.lines.length > 0 ? (

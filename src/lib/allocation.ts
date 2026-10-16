@@ -6,8 +6,8 @@ export type Split = (typeof SPLITS)[number];
 
 export const SPLIT_LABELS: Record<Split, string> = {
   even: "Mitad y mitad",
-  first: "Todo en la 1ª quincena",
-  second: "Todo en la 2ª quincena",
+  first: "Todo en el pago del 15",
+  second: "Todo en el pago del 30",
   custom: "Personalizado",
 };
 
@@ -60,5 +60,5 @@ export function totalOf(halves: Halves): number {
 
 export function describeHalves(allocation: Allocation): string {
   const { first, second } = splitAmount(allocation);
-  return `1ª ${formatMoney(first)} · 2ª ${formatMoney(second)}`;
+  return `15 ${formatMoney(first)} · 30 ${formatMoney(second)}`;
 }

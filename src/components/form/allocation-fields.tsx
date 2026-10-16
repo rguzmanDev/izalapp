@@ -19,7 +19,7 @@ export function AllocationFields({ defaultValue }: { defaultValue?: Allocation }
       />
       <SelectField
         name="split"
-        label="Reparto por quincena"
+        label="Reparto por pago"
         required
         options={splitOptions}
         value={split}
@@ -28,8 +28,8 @@ export function AllocationFields({ defaultValue }: { defaultValue?: Allocation }
       {split === "custom" && (
         <MoneyField
           name="customFirstHalfCents"
-          label="Monto en la 1ª quincena"
-          hint="El resto se asigna a la 2ª quincena"
+          label="Monto en el pago del 15"
+          hint="El resto se asigna al pago del 30"
           required
           defaultCents={defaultValue?.customFirstHalfCents}
         />

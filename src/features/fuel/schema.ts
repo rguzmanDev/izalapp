@@ -6,7 +6,6 @@ import {
 } from "@/lib/limits";
 import {
   checkbox,
-  optionalId,
   optionalMoney,
   optionalText,
   positiveNumber,
@@ -19,16 +18,15 @@ export const fuelLogSchema = z
     occurredOn: z.iso.date("Fecha inválida"),
     odometer: positiveNumber(0, ODOMETER_MAX_DIGITS),
     gallons: positiveNumber(3, GALLONS_MAX_DIGITS),
-    pricePerGallon: positiveNumber(3, PRICE_PER_GALLON_MAX_DIGITS),
+    pricePerGallon: positiveNumber(2, PRICE_PER_GALLON_MAX_DIGITS),
     amountCents: optionalMoney,
     station: optionalText,
     isFullTank: checkbox,
-    itemId: optionalId,
-    accountId: requiredId,
+    itemId: requiredId,
   })
   .transform((value) => ({
     ...value,
     amountCents: value.amountCents ?? Math.round(value.gallons * value.pricePerGallon * 100),
   }));
 
-export type FuelLogInput = z.output<typeof fuelLogSchema>;
+export type FuelLogInput = z.output<typeof fuelLogSchema> & { accountId: string };

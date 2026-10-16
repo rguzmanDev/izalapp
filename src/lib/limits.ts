@@ -12,4 +12,4 @@ export const DAY_OF_MONTH_MAX = 31;
 export const MONEY_MAX_DIGITS = 9; // $9,999,999.99
 export const ODOMETER_MAX_DIGITS = 7; // 9,999,999 mi
 export const GALLONS_MAX_DIGITS = 7; // 9,999.999 gal
-export const PRICE_PER_GALLON_MAX_DIGITS = 6; // $999.999
+export const PRICE_PER_GALLON_MAX_DIGITS = 6; // $9,999.99

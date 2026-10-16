@@ -11,4 +11,4 @@ export const formatGallons = (gallons: number) => `${threeDecimals.format(gallon
 
 export const formatMpg = (milesPerGallon: number) => `${oneDecimal.format(milesPerGallon)} mi/gal`;
 
-export const formatPricePerGallon = (price: number) => `$${price.toFixed(3)}/gal`;
+export const formatPricePerGallon = (price: number) => `$${price.toFixed(2)}/gal`;

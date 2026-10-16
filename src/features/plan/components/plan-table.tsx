@@ -52,10 +52,10 @@ export function PlanTable({ plan }: { plan: MonthlyPlan }) {
           <TableRow>
             <TableHead>Concepto</TableHead>
             <TableHead className="text-right">
-              1ª<span className="hidden md:inline"> quincena</span>
+              Pago<span className="hidden md:inline"> del</span> 15
             </TableHead>
             <TableHead className="text-right">
-              2ª<span className="hidden md:inline"> quincena</span>
+              Pago<span className="hidden md:inline"> del</span> 30
             </TableHead>
             <TableHead className="text-right">Mes</TableHead>
           </TableRow>

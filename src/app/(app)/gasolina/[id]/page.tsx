@@ -1,13 +1,11 @@
 import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/form/delete-button";
 import { PageHeader } from "@/components/page-header";
-import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
 import { removeFuelLog, saveFuelLog } from "@/features/fuel/actions";
 import { FuelForm } from "@/features/fuel/components/fuel-form";
 import { getFuelLog } from "@/features/fuel/data";
 import { listPeriodItems } from "@/features/periods/data";
-import { toItemOptions } from "@/features/transactions/format";
+import { toFuelItemOptions } from "@/features/transactions/format";
 import { formatShortDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 
@@ -17,10 +15,11 @@ export default async function EditFuelLogPage({ params }: PageProps<"/gasolina/[
   const row = await getFuelLog(user.id, id);
   if (!row) notFound();
 
-  const [items, accounts] = await Promise.all([
-    listPeriodItems(user.id, row.transaction.periodId),
-    listAccounts(user.id),
-  ]);
+  const items = await listPeriodItems(user.id, row.transaction.periodId);
+  const itemOptions = toFuelItemOptions(
+    items.map((item) => item.item),
+    { includeId: row.transaction.itemId },
+  );
 
   return (
     <>
@@ -33,8 +32,7 @@ export default async function EditFuelLogPage({ params }: PageProps<"/gasolina/[
         row={row}
         defaultDate={row.transaction.occurredOn}
         lastOdometer={null}
-        itemOptions={toItemOptions(items.map((item) => item.item))}
-        accountOptions={toAccountOptions(accounts)}
+        itemOptions={itemOptions}
       />
       <DeleteButton
         action={removeFuelLog.bind(null, row.log.id)}

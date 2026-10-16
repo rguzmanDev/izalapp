@@ -72,7 +72,10 @@ export default async function HomePage() {
       />
       <PeriodSummary summary={summarizePeriod(rows, unbudgetedCents)} closed={isClosed} />
       {transferPlan.steps.length > 0 && (
-        <Section title="Transferencias">
+        <Section
+          title="Fondear cuentas"
+          description="Solo lo pendiente de fondear. Si apartas o pagas una partida, baja de aquí; al completar el paso, lo restante queda apartado."
+        >
           <TransferPlanList
             periodId={period.id}
             steps={transferPlan.steps}

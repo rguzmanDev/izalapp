@@ -12,6 +12,7 @@ import {
   deleteTransfer,
   getTransfer,
   getTransferPlan,
+  setAsideIfAccountFullyFunded,
   updateTransfer,
 } from "./data";
 import { transferSchema } from "./schema";
@@ -49,6 +50,7 @@ export async function saveTransfer(
   } else {
     await createTransfer(user.id, values);
   }
+  await setAsideIfAccountFullyFunded(user.id, resolved.periodId, toAccountId);
   redirect("/movimientos");
 }
 
@@ -87,5 +89,6 @@ export async function completeTransferStep(
     occurredOn: todayIsoDate(),
     note: null,
   });
+  await setAsideIfAccountFullyFunded(user.id, periodId, toAccountId);
   revalidatePath("/");
 }

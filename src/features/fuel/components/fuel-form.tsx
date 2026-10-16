@@ -8,7 +8,6 @@ import {
   NumberField,
   SelectField,
   TextField,
-  type SelectOption,
 } from "@/components/form/fields";
 import { SubmitButton } from "@/components/form/submit-button";
 import type { ItemOption } from "@/features/transactions/components/transaction-form";
@@ -30,20 +29,20 @@ type FuelFormProps = {
   defaultDate: string;
   lastOdometer: number | null;
   itemOptions: ItemOption[];
-  accountOptions: SelectOption[];
 };
 
-/** Gallons and price per gallon are edited as thousandths. */
-const THOUSANDTHS = 1000;
+/** Gallons use thousandths; price per gallon uses hundredths (like cents). */
+const GALLON_SCALE = 1000;
+const PRICE_SCALE = 100;
 
 /** Estimated total for the hint; the server computes the real one when the field is left empty. */
 function estimateCents(gallonsUnits: number, priceUnits: number): number | null {
-  const total = Math.round((gallonsUnits * priceUnits * 100) / THOUSANDTHS ** 2);
+  const total = Math.round((gallonsUnits * priceUnits) / GALLON_SCALE);
   return total > 0 ? total : null;
 }
 
-const toThousandths = (value: number | undefined) =>
-  value === undefined ? undefined : Math.round(value * THOUSANDTHS);
+const toUnits = (value: number | undefined, scale: number) =>
+  value === undefined ? undefined : Math.round(value * scale);
 
 export function FuelForm({
   action,
@@ -52,27 +51,17 @@ export function FuelForm({
   defaultDate,
   lastOdometer,
   itemOptions,
-  accountOptions,
 }: FuelFormProps) {
-  const accountOfItem = (itemId: string) =>
-    itemOptions.find((option) => option.value === itemId)?.accountId;
-
-  const initialItemId = row?.transaction.itemId ?? defaultItemId ?? "";
+  const initialItemId =
+    row?.transaction.itemId ??
+    defaultItemId ??
+    (itemOptions.length === 1 ? itemOptions[0].value : "");
   const [itemId, setItemId] = useState(initialItemId);
-  const [accountId, setAccountId] = useState(
-    row?.transaction.accountId ?? accountOfItem(initialItemId) ?? "",
-  );
-  const initialGallons = toThousandths(row?.log.gallons);
-  const initialPrice = toThousandths(row?.log.pricePerGallon);
+  const initialGallons = toUnits(row?.log.gallons, GALLON_SCALE);
+  const initialPrice = toUnits(row?.log.pricePerGallon, PRICE_SCALE);
   const [gallons, setGallons] = useState(initialGallons ?? 0);
   const [price, setPrice] = useState(initialPrice ?? 0);
   const estimate = estimateCents(gallons, price);
-
-  function handleItemChange(nextItemId: string) {
-    setItemId(nextItemId);
-    const itemAccountId = accountOfItem(nextItemId);
-    if (itemAccountId) setAccountId(itemAccountId);
-  }
 
   return (
     <ActionForm action={action}>
@@ -108,7 +97,7 @@ export function FuelForm({
           name="pricePerGallon"
           label="Precio por galón"
           required
-          decimals={3}
+          decimals={2}
           maxDigits={PRICE_PER_GALLON_MAX_DIGITS}
           prefix="$"
           defaultUnits={initialPrice}
@@ -140,19 +129,11 @@ export function FuelForm({
       <SelectField
         name="itemId"
         label="Presupuesto"
-        placeholder="Sin presupuesto"
+        required
+        placeholder={itemId ? undefined : "Selecciona un presupuesto"}
         options={itemOptions}
         value={itemId}
-        onChange={(event) => handleItemChange(event.target.value)}
-      />
-      <SelectField
-        name="accountId"
-        label="Cuenta"
-        required
-        placeholder="Selecciona una cuenta"
-        options={accountOptions}
-        value={accountId}
-        onChange={(event) => setAccountId(event.target.value)}
+        onChange={(event) => setItemId(event.target.value)}
       />
       <SubmitButton>Guardar</SubmitButton>
     </ActionForm>

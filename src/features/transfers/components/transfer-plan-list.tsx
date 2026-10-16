@@ -5,7 +5,7 @@ import type { FinancialAccount } from "@/db/schema";
 import { accountLabel } from "@/features/accounts/format";
 import { formatMoney } from "@/lib/money";
 import { completeTransferStep } from "../actions";
-import type { TransferStep } from "../plan";
+import type { TransferStep, TransferStepCover } from "../plan";
 
 type TransferPlanListProps = {
   periodId: string;
@@ -13,6 +13,11 @@ type TransferPlanListProps = {
   accounts: FinancialAccount[];
   readOnly?: boolean;
 };
+
+function coversLabel(covers: TransferStepCover[]) {
+  if (covers.length === 0) return null;
+  return covers.map((cover) => `${cover.name} ${formatMoney(cover.amountCents)}`).join(" · ");
+}
 
 export function TransferPlanList({ periodId, steps, accounts, readOnly }: TransferPlanListProps) {
   const labelOf = (accountId: string) => {
@@ -24,6 +29,7 @@ export function TransferPlanList({ periodId, steps, accounts, readOnly }: Transf
     <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
       {steps.map((step) => {
         const pendingCents = step.amountCents - step.doneCents;
+        const covers = coversLabel(step.covers);
         return (
           <li
             key={`${step.fromAccountId}-${step.toAccountId}`}
@@ -33,6 +39,9 @@ export function TransferPlanList({ periodId, steps, accounts, readOnly }: Transf
               <span className="truncate">{labelOf(step.fromAccountId)}</span>
               <ArrowDownIcon className="size-3.5 text-muted-foreground" />
               <span className="truncate">{labelOf(step.toAccountId)}</span>
+              {covers && (
+                <span className="mt-1 text-xs text-muted-foreground line-clamp-2">{covers}</span>
+              )}
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1">
               <span className="font-medium tabular-nums select-text">

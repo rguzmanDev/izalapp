@@ -43,6 +43,13 @@
       "when": 1792016337251,
       "tag": "0005_account_last_four_and_due_rule",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792163460795,
+      "tag": "0006_fuel_price_two_decimals",
+      "breakpoints": true
     }
   ]
 }

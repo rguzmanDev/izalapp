@@ -33,7 +33,10 @@ export default async function EditTransactionPage({ params }: PageProps<"/movimi
         action={saveTransaction.bind(null, transaction.id)}
         transaction={transaction}
         defaultDate={transaction.occurredOn}
-        itemOptions={toItemOptions(rows.map((row) => row.item))}
+        itemOptions={toItemOptions(
+          rows.map((row) => row.item),
+          { includeId: transaction.itemId },
+        )}
         accountOptions={toAccountOptions(accounts)}
       />
       <DeleteButton

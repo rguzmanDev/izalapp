@@ -14,7 +14,7 @@ export const fuelLogs = pgTable(
       .references(() => transactions.id, { onDelete: "cascade" }),
     odometer: integer().notNull(),
     gallons: numeric({ precision: 7, scale: 3, mode: "number" }).notNull(),
-    pricePerGallon: numeric({ precision: 6, scale: 3, mode: "number" }).notNull(),
+    pricePerGallon: numeric({ precision: 6, scale: 2, mode: "number" }).notNull(),
     station: text(),
     isFullTank: boolean().notNull().default(true),
     ...timestamps,

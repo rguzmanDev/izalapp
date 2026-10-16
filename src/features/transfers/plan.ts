@@ -1,11 +1,19 @@
 import type { FinancialAccount, PeriodItem, Transfer } from "@/db/schema";
 
+export type TransferStepCover = {
+  name: string;
+  amountCents: number;
+  kind: "fixed_expense" | "budget";
+};
+
 export type TransferStep = {
   fromAccountId: string;
   toAccountId: string;
   amountCents: number;
   /** Already moved between these two accounts during the period. */
   doneCents: number;
+  /** Planned expenses and budgets this transfer is meant to fund. */
+  covers: TransferStepCover[];
 };
 
 type TransferPlanInput = {
@@ -17,16 +25,41 @@ type TransferPlanInput = {
 type Balance = { accountId: string; cents: number };
 
 /** Card expenses are covered by the account the card is paid from. */
-function fundingAccountId(account: FinancialAccount | undefined, fallbackId: string) {
+export function fundingAccountId(account: FinancialAccount | undefined, fallbackId: string) {
   return account?.type === "credit" && account.paymentAccountId
     ? account.paymentAccountId
     : fallbackId;
 }
 
+/** Still waiting to be funded; apartados and pagados are left out of the plan. */
+export function stillNeedsFunding(item: PeriodItem): boolean {
+  return (
+    (item.kind === "fixed_expense" || item.kind === "budget") && item.paymentStatus === "pending"
+  );
+}
+
+function coversForAccount(
+  items: PeriodItem[],
+  accountsById: Map<string, FinancialAccount>,
+  accountId: string,
+): TransferStepCover[] {
+  return items
+    .filter(stillNeedsFunding)
+    .filter(
+      (item) => fundingAccountId(accountsById.get(item.accountId), item.accountId) === accountId,
+    )
+    .map((item) => ({
+      name: item.name,
+      amountCents: item.plannedCents,
+      kind: item.kind as "fixed_expense" | "budget",
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "es"));
+}
+
 /**
- * Moves that leave each account with what its expenses need: income lands in the deposit
- * accounts and is sent to the accounts that pay fixed expenses and budgets.
- * Whatever is not needed stays where the income landed (the surplus).
+ * Moves that leave each account with what its pending expenses need: income lands in the
+ * deposit accounts and is sent to the accounts that pay fixed expenses and budgets still
+ * awaiting funding. Apartados and pagados are skipped. Surplus stays where income landed.
  */
 export function buildTransferPlan({ items, accounts, transfers }: TransferPlanInput): TransferStep[] {
   const accountsById = new Map(accounts.map((account) => [account.id, account]));
@@ -37,7 +70,7 @@ export function buildTransferPlan({ items, accounts, transfers }: TransferPlanIn
   for (const item of items) {
     if (item.kind === "income") {
       add(item.accountId, item.plannedCents);
-    } else {
+    } else if (stillNeedsFunding(item)) {
       add(fundingAccountId(accountsById.get(item.accountId), item.accountId), -item.plannedCents);
     }
   }
@@ -50,7 +83,7 @@ export function buildTransferPlan({ items, accounts, transfers }: TransferPlanIn
     .map((entry) => ({ ...entry, cents: -entry.cents }))
     .sort(largestFirst);
 
-  const steps: Omit<TransferStep, "doneCents">[] = [];
+  const steps: Omit<TransferStep, "doneCents" | "covers">[] = [];
   for (const need of needs) {
     for (const source of sources) {
       if (need.cents === 0) break;
@@ -69,6 +102,10 @@ export function buildTransferPlan({ items, accounts, transfers }: TransferPlanIn
           transfer.fromAccountId === step.fromAccountId && transfer.toAccountId === step.toAccountId,
       )
       .reduce((total, transfer) => total + transfer.amountCents, 0);
-    return { ...step, doneCents: Math.min(moved, step.amountCents) };
+    return {
+      ...step,
+      doneCents: Math.min(moved, step.amountCents),
+      covers: coversForAccount(items, accountsById, step.toAccountId),
+    };
   });
 }

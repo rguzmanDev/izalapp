@@ -17,7 +17,7 @@ export default async function FixedExpensesPage() {
     <>
       <PageHeader
         title="Gastos fijos"
-        description="Pagos recurrentes y cómo se reparten por quincena"
+        description="Pagos recurrentes y cómo se reparten entre el 15 y el 30"
         backHref="/ajustes"
         action={<LinkButton href="/gastos-fijos/nuevo">Nuevo</LinkButton>}
       />

@@ -197,7 +197,7 @@
 <p>En el celular verás una barra abajo con cinco secciones; en computadora aparece arriba.</p>
 <table>
   <tr><th>Sección</th><th>Para qué sirve</th></tr>
-  <tr><td><b>Inicio</b></td><td>Resumen de la quincena actual, próximos pagos, transferencias pendientes, tarjetas, presupuestos, gastos fijos e ingresos.</td></tr>
+  <tr><td><b>Inicio</b></td><td>Resumen de la quincena actual, próximos pagos, fondeo de cuentas, tarjetas, presupuestos, gastos fijos e ingresos.</td></tr>
   <tr><td><b>Movimientos</b></td><td>Lista de gastos y transferencias de la quincena.</td></tr>
   <tr><td><b>Gasolina</b></td><td>Cargas de combustible, rendimiento y costo por milla.</td></tr>
   <tr><td><b>Reportes</b></td><td>Gráficas e historial de varias quincenas.</td></tr>
@@ -223,13 +223,13 @@
 <div class="tip"><strong>Cómo se escriben los montos</strong>Escribe solo los dígitos, sin punto: se llenan de derecha a izquierda como en una caja registradora. Para $13.00 teclea 1, 3, 0, 0; para $1,059.65 teclea 1, 0, 5, 9, 6, 5. Las letras y los símbolos se ignoran.</div>
 
 <h3>3.2 Monto mensual y reparto</h3>
-<p>Ingresos, gastos fijos y presupuestos se capturan con su <b>Monto mensual</b> y un <b>Reparto por quincena</b>:</p>
+<p>Ingresos, gastos fijos y presupuestos se capturan con su <b>Monto mensual</b> y un <b>Reparto por pago</b>:</p>
 <table>
   <tr><th>Reparto</th><th>Ejemplo con $1,000 al mes</th></tr>
-  <tr><td>Mitad y mitad</td><td>1ª $500 · 2ª $500</td></tr>
-  <tr><td>Todo en la 1ª quincena</td><td>1ª $1,000 · 2ª $0</td></tr>
-  <tr><td>Todo en la 2ª quincena</td><td>1ª $0 · 2ª $1,000</td></tr>
-  <tr><td>Personalizado</td><td>Tú escribes cuánto va en la 1ª (por ejemplo $300) y el resto ($700) va a la 2ª.</td></tr>
+  <tr><td>Mitad y mitad</td><td>15 $500 · 30 $500</td></tr>
+  <tr><td>Todo en el pago del 15</td><td>15 $1,000 · 30 $0</td></tr>
+  <tr><td>Todo en el pago del 30</td><td>15 $0 · 30 $1,000</td></tr>
+  <tr><td>Personalizado</td><td>Tú escribes cuánto va en el pago del 15 (por ejemplo $300) y el resto ($700) va al pago del 30.</td></tr>
 </table>
 
 <h3>3.3 Ingresos</h3>
@@ -250,7 +250,7 @@
 <p>Si un ingreso, gasto fijo o presupuesto deja de aplicar, desmarca <b>Activo</b> en lugar de borrarlo. Así no se copia a las próximas quincenas y conservas el historial.</p>
 
 <h3>3.7 Plan mensual</h3>
-<p>Muestra en una tabla cómo queda todo repartido entre la 1ª y la 2ª quincena, con el <b>Sobrante</b> esperado de cada una. Úsalo para revisar que tu plan cuadre; si sale en rojo, estás planeando gastar más de lo que ganas.</p>
+<p>Muestra en una tabla cómo queda todo repartido entre el pago del 15 y el pago del 30, con el <b>Sobrante</b> esperado de cada uno. Úsalo para revisar que tu plan cuadre; si sale en rojo, estás planeando gastar más de lo que ganas.</p>
 
 <div class="warn"><strong>Importante</strong>Los cambios en Ajustes aplican a partir de la <b>próxima quincena que abras</b>. Para cambiar un monto solo en la quincena actual, hazlo desde Inicio (ver 4.3).</div>
 
@@ -286,21 +286,22 @@
 
 <h3>4.4 Presupuestos</h3>
 <div class="card">
-  <div style="display:flex;justify-content:space-between"><b>Citas</b><span class="muted">+ Gasto</span></div>
-  <div class="bar"><div style="width:70%"></div></div>
-  <div style="display:flex;justify-content:space-between;font-size:14px"><span class="muted">$52.50 de $75.00</span><span>Quedan $22.50</span></div>
+  <div style="display:flex;justify-content:space-between"><b>Citas</b><span class="muted">Aparta primero</span></div>
+  <div class="bar"><div style="width:0%"></div></div>
+  <div style="display:flex;justify-content:space-between;font-size:14px"><span class="muted">$0 de $75.00</span><span class="btn outline">Apartar</span></div>
 </div>
-<p>Cada presupuesto muestra una barra de avance, lo gastado contra el tope y lo que te queda. Si te pasas verás <span class="red">Excedido $X</span>. Con <b>+ Gasto</b> registras un gasto directo en ese presupuesto; en el de gasolina el enlace dice <b>+ Carga</b>.</p>
+<p>Cada presupuesto muestra una barra de avance, lo gastado contra el tope y lo que te queda. Empieza en <b>Pendiente</b>: debes <b>Apartar</b> (o completar el fondeo de su cuenta) antes de poder registrar gastos. Mientras esté pendiente verás “Aparta primero” en lugar de <b>+ Gasto</b> / <b>+ Carga</b>.</p>
+<p>Al apartarlo queda <span class="badge gray">Apartado</span> y baja del plan de fondeo. Si te pasas del tope verás <span class="red">Excedido $X</span>.</p>
 
 <h3>4.5 Gastos fijos</h3>
 <p>Cada gasto fijo tiene un estado:</p>
 <table>
   <tr><th>Estado</th><th>Significado</th><th>Botones</th></tr>
-  <tr><td><span class="badge">Pendiente</span></td><td>Todavía no haces nada.</td><td><span class="btn outline">Apartar</span> <span class="btn">Pagar</span></td></tr>
-  <tr><td><span class="badge gray">Apartado</span></td><td>Ya separaste el dinero, pero no lo has pagado.</td><td><span class="btn">Pagar</span> <span class="btn outline">Deshacer</span></td></tr>
-  <tr><td><span class="badge solid">Pagado</span></td><td>Ya está pagado.</td><td><span class="btn outline">Deshacer</span></td></tr>
+  <tr><td><span class="badge">Pendiente</span></td><td>Aún no está fondeado. Cuenta en “Fondear cuentas”. No puedes cargarle gastos sueltos todavía.</td><td><span class="btn outline">Apartar</span> <span class="btn">Pagar</span></td></tr>
+  <tr><td><span class="badge gray">Apartado</span></td><td>Ya separaste el dinero. Sale del fondeo. También pasa solo al completar el fondeo de esa cuenta.</td><td><span class="btn">Pagar</span> <span class="btn outline">Deshacer</span></td></tr>
+  <tr><td><span class="badge solid">Pagado</span></td><td>Ya está pagado; también sale del fondeo.</td><td><span class="btn outline">Deshacer</span></td></tr>
 </table>
-<p>Marcarlo como pagado no registra un movimiento: solo es tu checklist. Si el monto real fue distinto al planeado, registra el gasto con el botón <b>+</b> eligiendo ese gasto fijo y la app usará el mayor de los dos.</p>
+<p>Si el monto real fue distinto al planeado, registra el gasto con el botón <b>+</b> eligiendo ese gasto fijo (debe estar apartado o pagado) y la app usará el mayor de los dos.</p>
 
 <h3>4.6 Ingresos extra</h3>
 <p>Si en una quincena te llega dinero fuera de tu plan (un bono, un trabajo extra, un reembolso), en la sección <b>Ingresos</b> de Inicio toca <b>+ Ingreso extra</b> y llena:</p>
@@ -318,7 +319,7 @@
 <p>Toca el botón redondo <span class="btn">+</span> (abajo a la derecha en Inicio o Movimientos) y llena:</p>
 <ul>
   <li><b>Monto</b>: escribe solo los dígitos; para $25.50 teclea 2, 5, 5, 0 (ver el consejo en 3.1).</li>
-  <li><b>Presupuesto o gasto fijo</b>: a qué partida pertenece. Déjalo en <b>Sin presupuesto</b> para un gasto imprevisto; se suma como “otros gastos”.</li>
+  <li><b>Presupuesto o gasto fijo</b>: solo aparecen partidas ya apartadas o pagadas. Déjalo en <b>Sin presupuesto</b> para un gasto imprevisto; se suma como “otros gastos”.</li>
   <li><b>Cuenta</b>: se llena sola con la cuenta de la partida, pero puedes cambiarla.</li>
   <li><b>Fecha</b>: por defecto hoy.</li>
   <li><b>Nota</b>: opcional, por ejemplo “Cena”.</li>
@@ -329,18 +330,19 @@
 <!-- 6 -->
 <h2 id="transferencias">6. Transferencias</h2>
 
-<h3>6.1 El plan de transferencias</h3>
-<p>Tu sueldo cae en una cuenta, pero tus gastos salen de varias. En Inicio, la sección <b>Transferencias</b> te dice exactamente cuánto mover y a dónde para que cada cuenta tenga lo que necesita:</p>
+<h3>6.1 Fondear cuentas</h3>
+<p>Tu sueldo cae en una cuenta, pero tus gastos salen de varias. En Inicio, la sección <b>Fondear cuentas</b> suma solo lo <b>pendiente</b> (gastos fijos y presupuestos aún no apartados ni pagados) y te dice cuánto mover. Si apartas o pagas una partida a mano, el monto baja. Debajo del destino verás el desglose:</p>
 <div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <div>Cuenta corriente Nómina · Banco Agrícola<br><span class="muted">↓</span><br>Cuenta de ahorro Gastos · BAC</div>
+    <div>Cuenta corriente Nómina · Banco Agrícola<br><span class="muted">↓</span><br>Cuenta de ahorro Gastos · BAC<br><span class="muted" style="font-size:12px">Luz $40.00 · Internet $35.00</span></div>
     <div style="text-align:right"><b>$75.00</b><br><span class="btn">Ya lo moví</span></div>
   </div>
 </div>
 <ul>
   <li>Cuando hagas la transferencia en tu banco, toca <b>Ya lo moví</b> y se registra automáticamente con fecha de hoy.</li>
   <li>Si moviste solo una parte (registrada a mano), verás <b>Faltan $X</b>.</li>
-  <li>Al completarse aparece <span class="badge solid">Hecho</span>.</li>
+  <li>Al completarse aparece <span class="badge solid">Hecho</span> y lo pendiente de esa cuenta (gastos fijos y presupuestos) pasa a <b>Apartado</b>.</li>
+  <li>Sin apartar / fondear no puedes registrar gastos ni cargas contra esa partida (si pagaste de otra cuenta, repones después).</li>
   <li>Los gastos que se pagan con tarjeta de crédito se cubren desde la cuenta con la que pagas esa tarjeta (“Se paga desde”).</li>
 </ul>
 
@@ -385,11 +387,12 @@
   <tr><th>Campo</th><th>Detalle</th></tr>
   <tr><td>Fecha</td><td>Hoy por defecto; cámbiala si registras una carga de otro día.</td></tr>
   <tr><td>Odómetro (millas)</td><td>Lo que marca el carro. Debe ser mayor que la carga anterior y menor que la siguiente; el campo te muestra tu último registro.</td></tr>
-  <tr><td>Galones y Precio por galón</td><td>Con 3 decimales, como en la bomba. Igual que los montos, se teclean solo dígitos: 10500 queda como 10.500.</td></tr>
+  <tr><td>Galones</td><td>Con 3 decimales. Igual que los montos, se teclean solo dígitos: 10500 queda como 10.500.</td></tr>
+  <tr><td>Precio por galón</td><td>Con 2 decimales, como el resto del dinero. Teclea solo dígitos: 375 queda como $3.75.</td></tr>
   <tr><td>Total pagado</td><td>Opcional. Si lo dejas vacío se calcula galones × precio (la app te muestra el resultado).</td></tr>
   <tr><td>Gasolinera</td><td>Opcional.</td></tr>
   <tr><td>Llené el tanque</td><td>Márcalo solo si llenaste por completo. Es necesario para calcular el rendimiento.</td></tr>
-  <tr><td>Presupuesto y Cuenta</td><td>Se eligen solos si tienes un presupuesto marcado como gasolina.</td></tr>
+  <tr><td>Presupuesto</td><td>Solo aparecen los presupuestos marcados como gasolina. La cuenta de cobro es la de ese presupuesto.</td></tr>
 </table>
 <p>La página de Gasolina muestra:</p>
 <ul>

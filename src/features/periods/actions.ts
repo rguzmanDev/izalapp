@@ -77,10 +77,17 @@ export async function removeExtraIncome(id: string): Promise<FormState> {
 export async function setPaymentStatus(id: string, status: PaymentStatus) {
   const user = await requireUser();
   const item = await getPeriodItem(user.id, id);
-  if (!item || item.kind !== "fixed_expense" || !PAYMENT_STATUSES.includes(status)) return;
+  if (!item || !PAYMENT_STATUSES.includes(status)) return;
   if (!(await isPeriodOpen(user.id, item.periodId))) return;
 
-  await changePaymentStatus(item, status, todayIsoDate());
+  if (item.kind === "fixed_expense") {
+    await changePaymentStatus(item, status, todayIsoDate());
+  } else if (item.kind === "budget" && status !== "paid") {
+    await changePaymentStatus(item, status, todayIsoDate());
+  } else {
+    return;
+  }
+
   revalidatePath("/");
 }
 

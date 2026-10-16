@@ -112,7 +112,7 @@ export function withAllocationRules<T extends z.ZodType<Allocation>>(schema: T) 
         ctx.addIssue({
           code: "custom",
           path: ["customFirstHalfCents"],
-          message: "Indica cuánto va en la 1ª quincena",
+          message: "Indica cuánto va en el pago del 15",
         });
       } else if (value.customFirstHalfCents > value.monthlyAmountCents) {
         ctx.addIssue({

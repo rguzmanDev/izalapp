@@ -1,0 +1,1 @@
+ALTER TABLE "fuel_logs" ALTER COLUMN "price_per_gallon" SET DATA TYPE numeric(6, 2);
