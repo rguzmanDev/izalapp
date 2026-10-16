@@ -73,7 +73,7 @@ export function FuelForm({
         label="Fecha"
         type="date"
         required
-        hint="Cámbiala si registras una carga de otro día."
+        hint="La fecha es cuándo cargaste. La carga va al corte que tengas abierto."
         defaultValue={row?.transaction.occurredOn ?? defaultDate}
       />
       <NumberField

@@ -7,6 +7,8 @@ export type PeriodSummary = {
   fixedPlannedCents: number;
   /** Planned fixed expenses, or what was actually paid when it was more. */
   fixedCommittedCents: number;
+  /** Amount actually recorded against fixed expenses (not unpaid planned). */
+  fixedSpentCents: number;
   fixedPaidCount: number;
   fixedCount: number;
   budgetPlannedCents: number;
@@ -21,6 +23,11 @@ export type PeriodSummary = {
   /** What is left when unspent budgets are released; fixed expenses always count in full. */
   actualSurplusCents: number;
 };
+
+/** Gastos ya registrados (fijos + presupuestos + sin presupuesto). */
+export function spentCentsOf(summary: Pick<PeriodSummary, "fixedSpentCents" | "budgetSpentCents" | "unbudgetedCents">) {
+  return summary.fixedSpentCents + summary.budgetSpentCents + summary.unbudgetedCents;
+}
 
 const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
 
@@ -40,12 +47,14 @@ export function summarizePeriod(rows: ItemWithSpent[], unbudgetedCents: number):
   const overspentCents = sum([...fixed, ...budgets].map(overspentOf));
   const plannedSurplusCents = incomeCents - fixedPlannedCents - budgetPlannedCents;
   const budgetSpentCents = sum(budgets.map((row) => row.spentCents));
+  const fixedSpentCents = sum(fixed.map((row) => row.spentCents));
   const fixedCommittedCents = sum(fixed.map((row) => Math.max(row.item.plannedCents, row.spentCents)));
 
   return {
     incomeCents,
     fixedPlannedCents,
     fixedCommittedCents,
+    fixedSpentCents,
     fixedPaidCount: fixed.filter((row) => row.item.paymentStatus === "paid").length,
     fixedCount: fixed.length,
     budgetPlannedCents,

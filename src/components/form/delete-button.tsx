@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { startTransition, useActionState, useRef, useState } from "react";
 import { ConfirmDialog } from "@/components/form/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import type { FormState } from "@/lib/form";
@@ -18,8 +18,10 @@ export function DeleteButton({ action, confirmMessage }: DeleteButtonProps) {
   function runAction() {
     if (startedRef.current || pending) return;
     startedRef.current = true;
-    formAction();
-    startedRef.current = false;
+    startTransition(() => {
+      formAction();
+      startedRef.current = false;
+    });
   }
 
   return (

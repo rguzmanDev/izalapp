@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, like, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import {
@@ -10,13 +10,29 @@ import {
   transactions,
   transfers,
 } from "@/db/schema";
+import { listAccounts } from "@/features/accounts/data";
+import { listAccountBalances } from "@/features/accounts/balance";
+import { listCardStatements } from "@/features/cards/data";
 import { summarizePeriod } from "@/features/periods/summary";
+import { todayIsoDate } from "@/lib/period";
+import {
+  buildAccountAlerts,
+  buildAccountBalanceRows,
+  buildAccountFlowRows,
+  buildCardReportRows,
+  buildFundingUseRows,
+  buildTransferMapRows,
+} from "./account-report";
 
 const fromAccount = alias(financialAccounts, "from_account");
 const toAccount = alias(financialAccounts, "to_account");
 
 const total = (column: typeof transactions.amountCents | typeof transfers.amountCents) =>
   sql<number>`coalesce(sum(${column}), 0)::int`;
+
+function toCentsMap(rows: { accountId: string; cents: number }[]) {
+  return new Map(rows.map((row) => [row.accountId, row.cents]));
+}
 
 /** The latest `count` periods, oldest first, each with its summary and the surplus that was saved. */
 export async function getPeriodReports(userId: string, count: number) {
@@ -130,4 +146,138 @@ export async function listMovementsForPeriods(userId: string, periodIds: string[
   ]);
 
   return { expenses, transfers: transferRows, incomes };
+}
+
+/** Account report sections for the selected period range. */
+export async function getAccountReports(userId: string, periodIds: string[]) {
+  const [accounts, balances, statements] = await Promise.all([
+    listAccounts(userId),
+    listAccountBalances(userId),
+    listCardStatements(userId, todayIsoDate()),
+  ]);
+  const accountsById = new Map(accounts.map((account) => [account.id, account]));
+
+  if (periodIds.length === 0) {
+    const balanceRows = buildAccountBalanceRows(accounts, balances);
+    const cardRows = buildCardReportRows(statements, new Map(), new Map(), balances, accountsById);
+    return {
+      balanceRows,
+      flowRows: [],
+      fundingRows: [],
+      cardRows,
+      transferMapRows: [],
+      alerts: buildAccountAlerts({
+        accounts,
+        balances,
+        flowRows: [],
+        cardRows,
+      }),
+    };
+  }
+
+  const creditIds = accounts.filter((account) => account.type === "credit").map((account) => account.id);
+
+  const [
+    incomeRows,
+    expenseRows,
+    transferInRows,
+    transferOutRows,
+    apartadoInRows,
+    cardPaymentRows,
+    transferPairs,
+  ] = await Promise.all([
+    db
+      .select({
+        accountId: periodItems.accountId,
+        cents: sql<number>`coalesce(sum(${periodItems.plannedCents}), 0)::int`,
+      })
+      .from(periodItems)
+      .where(
+        and(
+          eq(periodItems.userId, userId),
+          inArray(periodItems.periodId, periodIds),
+          eq(periodItems.kind, "income"),
+        ),
+      )
+      .groupBy(periodItems.accountId),
+    db
+      .select({ accountId: transactions.accountId, cents: total(transactions.amountCents) })
+      .from(transactions)
+      .where(and(eq(transactions.userId, userId), inArray(transactions.periodId, periodIds)))
+      .groupBy(transactions.accountId),
+    db
+      .select({ accountId: transfers.toAccountId, cents: total(transfers.amountCents) })
+      .from(transfers)
+      .where(and(eq(transfers.userId, userId), inArray(transfers.periodId, periodIds)))
+      .groupBy(transfers.toAccountId),
+    db
+      .select({ accountId: transfers.fromAccountId, cents: total(transfers.amountCents) })
+      .from(transfers)
+      .where(and(eq(transfers.userId, userId), inArray(transfers.periodId, periodIds)))
+      .groupBy(transfers.fromAccountId),
+    db
+      .select({ accountId: transfers.toAccountId, cents: total(transfers.amountCents) })
+      .from(transfers)
+      .where(
+        and(
+          eq(transfers.userId, userId),
+          inArray(transfers.periodId, periodIds),
+          like(transfers.note, "Apartado:%"),
+        ),
+      )
+      .groupBy(transfers.toAccountId),
+    creditIds.length === 0
+      ? Promise.resolve([] as { accountId: string; cents: number }[])
+      : db
+          .select({ accountId: transfers.toAccountId, cents: total(transfers.amountCents) })
+          .from(transfers)
+          .where(
+            and(
+              eq(transfers.userId, userId),
+              inArray(transfers.periodId, periodIds),
+              inArray(transfers.toAccountId, creditIds),
+            ),
+          )
+          .groupBy(transfers.toAccountId),
+    db
+      .select({
+        fromAccountId: transfers.fromAccountId,
+        toAccountId: transfers.toAccountId,
+        amountCents: transfers.amountCents,
+      })
+      .from(transfers)
+      .where(and(eq(transfers.userId, userId), inArray(transfers.periodId, periodIds))),
+  ]);
+
+  const incomesByAccount = toCentsMap(incomeRows);
+  const expensesByAccount = toCentsMap(expenseRows);
+  const transferInByAccount = toCentsMap(transferInRows);
+  const transferOutByAccount = toCentsMap(transferOutRows);
+  const apartadoInByAccount = toCentsMap(apartadoInRows);
+  const paymentsByAccount = toCentsMap(cardPaymentRows);
+
+  const balanceRows = buildAccountBalanceRows(accounts, balances);
+  const flowRows = buildAccountFlowRows({
+    accounts,
+    incomesByAccount,
+    expensesByAccount,
+    transferInByAccount,
+    transferOutByAccount,
+  });
+  const fundingRows = buildFundingUseRows({
+    accounts,
+    apartadoInByAccount,
+    expensesByAccount,
+  });
+  const cardRows = buildCardReportRows(
+    statements,
+    expensesByAccount,
+    paymentsByAccount,
+    balances,
+    accountsById,
+  );
+  const transferMapRows = buildTransferMapRows(transferPairs, accountsById);
+  const alerts = buildAccountAlerts({ accounts, balances, flowRows, cardRows });
+
+  return { balanceRows, flowRows, fundingRows, cardRows, transferMapRows, alerts };
 }

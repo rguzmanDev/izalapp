@@ -4,11 +4,11 @@ import { LinkButton } from "@/components/link-button";
 import { PageHeader } from "@/components/page-header";
 import { QuickAddButton } from "@/components/quick-add-button";
 import { accountLabel } from "@/features/accounts/format";
-import { findPeriod } from "@/features/periods/data";
+import { getWorkingPeriod } from "@/features/periods/data";
 import { listTransactions } from "@/features/transactions/data";
 import { listTransfers } from "@/features/transfers/data";
 import { formatMoney } from "@/lib/money";
-import { formatShortDate, periodKeyOf, periodLabel, todayIsoDate } from "@/lib/period";
+import { formatShortDate, periodLabel, todayIsoDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 
 type Entry = {
@@ -48,8 +48,7 @@ async function listEntries(userId: string, periodId: string): Promise<Entry[]> {
 
 export default async function TransactionsPage() {
   const user = await requireUser();
-  const key = periodKeyOf(todayIsoDate());
-  const period = await findPeriod(user.id, key);
+  const { period, key } = await getWorkingPeriod(user.id, todayIsoDate());
   const entries = period ? await listEntries(user.id, period.id) : [];
   const isOpen = period?.status === "open";
 

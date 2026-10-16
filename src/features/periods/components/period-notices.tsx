@@ -23,8 +23,8 @@ function Notice({ title, description, action }: NoticeProps) {
 export function StalePeriodNotice({ period }: { period: Period }) {
   return (
     <Notice
-      title={`La ${periodLabel(toPeriodKey(period))} sigue abierta`}
-      description="Ciérrala para decidir qué hacer con su sobrante."
+      title={`Sigue el corte de la ${periodLabel(toPeriodKey(period))}`}
+      description="Hasta que la cierres, todos los movimientos van aquí. Luego abres la siguiente."
       action={
         <LinkButton href={`/quincenas/${period.id}/cerrar`} size="sm">
           Cerrar

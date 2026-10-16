@@ -331,7 +331,7 @@
 </ul>
 <p>Si el gasto supera el saldo planificado de una cuenta bancaria, verás un aviso y podrás confirmar para continuar.</p>
 <p>Para corregir o borrar un gasto, búscalo en <b>Movimientos</b> y tócalo.</p>
-<div class="tip"><strong>¿En qué quincena cae?</strong>Si eliges una partida, el gasto va a la quincena de esa partida. Si es “Sin presupuesto”, va a la quincena que corresponde a la fecha. En ambos casos esa quincena debe estar abierta.</div>
+<div class="tip"><strong>¿En qué quincena cae?</strong>Al corte que tengas <b>abierto</b>, no al día del calendario. Si te pagan el 15 a las 5&nbsp;pm, cierras el corte anterior y abres el nuevo: desde ese momento todo va al nuevo. Si te pagan tarde el 17 y aún no cerraste la primera quincena, los movimientos siguen en esa hasta que la cierres. La fecha del gasto solo registra cuándo moviste el dinero.</div>
 
 <!-- 6 -->
 <h2 id="transferencias">6. Transferencias</h2>
@@ -421,18 +421,23 @@
 <p>Al confirmar, la app registra la transferencia del sobrante y la quincena queda <b>cerrada</b>: ya no se puede modificar nada en ella.</p>
 <h3>Reabrir</h3>
 <p>Si te equivocaste, en Inicio aparece <b>Quincena cerrada</b> con el botón <span class="btn outline">Reabrir</span>. Al reabrirla se quita la transferencia del sobrante y puedes volver a editar y cerrar.</p>
-<h3>Si olvidaste cerrar</h3>
-<p>Si empieza una quincena nueva y la anterior sigue abierta, Inicio te muestra un aviso con el botón <b>Cerrar</b>. Mientras siga abierta todavía puedes registrar gastos con fechas de esa quincena.</p>
+<h3>Si aún no cerraste</h3>
+<p>Mientras un corte siga abierto, Inicio y Movimientos siguen en ese corte (aunque el calendario ya diga “siguiente quincena”). Todos los gastos y transferencias nuevas van ahí hasta que lo cierres; después abres el siguiente. El aviso en Inicio te recuerda cerrarlo cuando hagas el cambio.</p>
 
 <!-- 10 -->
 <h2 id="reportes">10. Reportes</h2>
-<p>Elige ver las últimas <b>6</b>, <b>12</b> o <b>24</b> quincenas.</p>
+<p>Elige ver las últimas <b>6</b>, <b>12</b> o <b>24</b> quincenas. Con <b>Exportar CSV</b> descargas un archivo con todas las secciones del reporte (totales, movimientos, cuentas, tarjetas, transferencias, gasolina, etc.) del rango elegido.</p>
 <ul>
-  <li><b>Totales</b>: Ingreso, Gastado, Sobrante (y cuánto de verdad ahorraste al cerrar) y Excesos.</li>
-  <li><b>Movimientos</b>: lista de ingresos (verde), gastos (rojo) y transferencias (amarillo) del rango. Filtra por tipo. Cada fila indica la quincena, la fecha y la cuenta (o el origen→destino).</li>
-  <li><b>Por quincena</b>: una gráfica de barras con gastos fijos, presupuestos, otros gastos y sobrante de cada quincena.</li>
-  <li><b>Presupuestos</b>: cuánto gastaste contra el tope en cada presupuesto, y en cuántas quincenas te pasaste (por ejemplo “2 de 6”).</li>
-  <li><b>Rendimiento de gasolina</b>: cómo ha cambiado tu rendimiento por tanque lleno.</li>
+  <li><b>Totales</b>: Ingreso, Gastado (solo registrados), Sobrante (reserva fijos pendientes y ahorrado al cerrar) y Excesos. Si pediste 6 quincenas y solo tienes 1, verás «1 de 6».</li>
+  <li><b>Movimientos</b>: lista de ingresos (verde), gastos (rojo) y transferencias (amarillo) del rango. Filtra por tipo. Cada fila indica la quincena (el corte) y la fecha real del movimiento. El corte lo defines tú al cerrar/abrir; la fecha no cambia de periodo sola.</li>
+  <li><b>Alertas</b>: saldo negativo, cuentas sin movimiento en el rango, tarjetas sin «Se paga desde» o sin cobertura para lo por pagar.</li>
+  <li><b>Saldo por cuenta</b>: saldo planificado acumulado (opening + todas las quincenas), no solo el rango.</li>
+  <li><b>Flujo por cuenta</b>: qué entró y qué salió <b>en este rango</b> (ingresos, gastos y transferencias).</li>
+  <li><b>Fondeo vs uso</b>: lo apartado hacia una cuenta vs compras con tarjetas que se pagan desde ella (no cuenta gastos directos de la cuenta).</li>
+  <li><b>Tarjetas</b>: compras y pagos del rango, por pagar del ciclo, y saldo de la cuenta «Se paga desde».</li>
+  <li><b>Mapa de transferencias</b>: totales origen → destino en el rango.</li>
+  <li><b>Por quincena</b>: una gráfica de barras con gastos fijos registrados, presupuestos, otros gastos y sobrante de cada quincena.</li>
+  <li><b>Rendimiento de gasolina</b>: cómo ha cambiado tu rendimiento por tanque lleno (aparece cuando hay al menos dos cargas).</li>
 </ul>
 
 <!-- 11 -->

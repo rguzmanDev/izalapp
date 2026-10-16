@@ -17,6 +17,7 @@ import {
   changePaymentStatus,
   closePeriod,
   deleteExtraIncome,
+  findStaleOpenPeriod,
   getPeriod,
   getPeriodItem,
   isPeriodOpen,
@@ -31,7 +32,10 @@ const setAsideSchema = z.object({ fromAccountId: requiredId });
 
 export async function openCurrentPeriod() {
   const user = await requireUser();
-  await openPeriod(user.id, periodKeyOf(todayIsoDate()));
+  const key = periodKeyOf(todayIsoDate());
+  const stale = await findStaleOpenPeriod(user.id, key);
+  if (stale) redirect(`/quincenas/${stale.id}/cerrar`);
+  await openPeriod(user.id, key);
   revalidatePath("/");
 }
 

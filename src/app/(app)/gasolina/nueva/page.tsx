@@ -6,16 +6,16 @@ import { FuelForm } from "@/features/fuel/components/fuel-form";
 import { listFuelLogs } from "@/features/fuel/data";
 import { OpenPeriodPrompt } from "@/features/periods/components/open-period-prompt";
 import { ClosedPeriodNotice } from "@/features/periods/components/period-notices";
-import { findPeriod, listPeriodItems } from "@/features/periods/data";
+import { getWorkingPeriod, listPeriodItems } from "@/features/periods/data";
 import { toFuelItemOptions } from "@/features/transactions/format";
-import { periodKeyOf, todayIsoDate } from "@/lib/period";
+import { todayIsoDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 
 export default async function NewFuelLogPage({ searchParams }: PageProps<"/gasolina/nueva">) {
   const { partida } = await searchParams;
   const user = await requireUser();
   const today = todayIsoDate();
-  const period = await findPeriod(user.id, periodKeyOf(today));
+  const { period } = await getWorkingPeriod(user.id, today);
   const header = <PageHeader title="Nueva carga" backHref="/gasolina" />;
 
   if (!period || period.status === "closed") {

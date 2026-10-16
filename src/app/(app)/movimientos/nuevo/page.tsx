@@ -3,11 +3,11 @@ import { listAccounts } from "@/features/accounts/data";
 import { toAccountOptions } from "@/features/accounts/format";
 import { OpenPeriodPrompt } from "@/features/periods/components/open-period-prompt";
 import { ClosedPeriodNotice } from "@/features/periods/components/period-notices";
-import { findPeriod, listPeriodItems } from "@/features/periods/data";
+import { getWorkingPeriod, listPeriodItems } from "@/features/periods/data";
 import { saveTransaction } from "@/features/transactions/actions";
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import { toItemOptions } from "@/features/transactions/format";
-import { periodKeyOf, todayIsoDate } from "@/lib/period";
+import { todayIsoDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 
 export default async function NewTransactionPage({
@@ -16,7 +16,7 @@ export default async function NewTransactionPage({
   const { partida } = await searchParams;
   const user = await requireUser();
   const today = todayIsoDate();
-  const period = await findPeriod(user.id, periodKeyOf(today));
+  const { period } = await getWorkingPeriod(user.id, today);
 
   if (!period || period.status === "closed") {
     return (

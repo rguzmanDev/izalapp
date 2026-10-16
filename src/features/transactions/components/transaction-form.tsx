@@ -93,6 +93,7 @@ export function TransactionForm({
         label="Fecha"
         type="date"
         required
+        hint="La fecha es cuándo moviste el dinero. El gasto va al corte que tengas abierto, no al día del calendario."
         defaultValue={transaction?.occurredOn ?? defaultDate}
       />
       <TextField

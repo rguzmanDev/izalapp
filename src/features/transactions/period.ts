@@ -14,7 +14,11 @@ export function fundingRequiredError(item: PeriodItem): FieldErrors | null {
   return { itemId: [NOT_FUNDED_ERROR] };
 }
 
-/** An expense belongs to its item's period, or to the period that contains its date. Both must be open. */
+/**
+ * An expense belongs to its item's period, or to the currently open corte.
+ * The calendar date is only when the money moved (p. ej. pago atrasado el 17);
+ * the open period is whichever corte the user has not closed yet.
+ */
 export async function resolveExpensePeriod(
   userId: string,
   input: { itemId: string | null; occurredOn: string },

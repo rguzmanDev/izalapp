@@ -12,9 +12,8 @@ import { OpenPeriodPrompt } from "@/features/periods/components/open-period-prom
 import { ClosedPeriodNotice, StalePeriodNotice } from "@/features/periods/components/period-notices";
 import { PeriodSummary } from "@/features/periods/components/period-summary";
 import {
-  findPeriod,
-  findStaleOpenPeriod,
   getUnbudgetedSpent,
+  getWorkingPeriod,
   listPeriodItems,
 } from "@/features/periods/data";
 import { summarizePeriod } from "@/features/periods/summary";
@@ -22,21 +21,17 @@ import { getActiveTemplates } from "@/features/plan/data";
 import { TransferPlanList } from "@/features/transfers/components/transfer-plan-list";
 import { getTransferPlan } from "@/features/transfers/data";
 import { UpcomingPayments } from "@/features/upcoming/components/upcoming-payments";
-import { periodKeyOf, periodLabel, periodRangeLabel, todayIsoDate } from "@/lib/period";
+import { periodLabel, periodRangeLabel, todayIsoDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 
 export default async function HomePage() {
   const user = await requireUser();
   const today = todayIsoDate();
-  const key = periodKeyOf(today);
-  const [period, stalePeriod] = await Promise.all([
-    findPeriod(user.id, key),
-    findStaleOpenPeriod(user.id, key),
-  ]);
+  const { period, key, isStale } = await getWorkingPeriod(user.id, today);
   const header = (
     <>
       <PageHeader title={periodLabel(key)} description={periodRangeLabel(key)} />
-      {stalePeriod && <StalePeriodNotice period={stalePeriod} />}
+      {isStale && period && <StalePeriodNotice period={period} />}
     </>
   );
 

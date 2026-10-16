@@ -12,7 +12,13 @@ import {
 import { getActiveTemplates } from "@/features/plan/data";
 import { fundingAccountId, setAsideTransferNote } from "@/features/transfers/plan";
 import { splitAmount } from "@/lib/allocation";
-import { amountForHalf, periodKeyOf, type PeriodKey } from "@/lib/period";
+import {
+  amountForHalf,
+  periodKeyOf,
+  todayIsoDate,
+  toPeriodKey,
+  type PeriodKey,
+} from "@/lib/period";
 import { isUuid } from "@/lib/validation";
 import type { PaymentStatus } from "./constants";
 import type { ExtraIncomeInput } from "./schema";
@@ -62,14 +68,44 @@ export async function findStaleOpenPeriod(userId: string, { year, month, half }:
   return period ?? null;
 }
 
-/** The open period that a movement dated `isoDate` belongs to. */
+/**
+ * The corte the user is working in: an unfinished older open period first,
+ * otherwise the calendar period for `today` (open, closed, or missing).
+ * Period membership follows the open corte, not the calendar day of each movement.
+ */
+export async function getWorkingPeriod(userId: string, today = todayIsoDate()) {
+  const calendarKey = periodKeyOf(today);
+  const stale = await findStaleOpenPeriod(userId, calendarKey);
+  if (stale) {
+    return {
+      period: stale,
+      key: toPeriodKey(stale),
+      calendarKey,
+      isStale: true as const,
+    };
+  }
+  const period = await findPeriod(userId, calendarKey);
+  return {
+    period,
+    key: calendarKey,
+    calendarKey,
+    isStale: false as const,
+  };
+}
+
+/**
+ * The open corte that new movements belong to.
+ * The movement date is only a label (payday/corte can land on any day); it does not pick the period.
+ */
 export async function resolveOpenPeriod(
   userId: string,
-  isoDate: string,
+  _occurredOn?: string,
 ): Promise<{ periodId: string } | { error: string }> {
-  const period = await findPeriod(userId, periodKeyOf(isoDate));
-  if (!period) return { error: "No hay una quincena abierta para esta fecha" };
-  if (period.status === "closed") return { error: "La quincena de esta fecha ya está cerrada" };
+  const { period } = await getWorkingPeriod(userId);
+  if (!period) return { error: "No hay una quincena abierta. Ábrela desde Inicio." };
+  if (period.status === "closed") {
+    return { error: "La quincena actual ya está cerrada. Reabre o abre la siguiente." };
+  }
   return { periodId: period.id };
 }
 

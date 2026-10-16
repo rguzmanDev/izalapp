@@ -1,0 +1,78 @@
+﻿# Totales
+concepto,monto
+Rango solicitado (quincenas),6
+Quincenas incluidas,1
+Ingreso,549.82
+Gastado (registrado),194.00
+Sobrante (reserva fijos pendientes),235.12
+Ahorrado al cerrar,0.00
+Excesos,0.00
+
+# Por quincena
+quincena,ingreso,gastos_fijos_registrados,presupuestos,otros_gastos,excesos,sobrante,ahorrado_al_cerrar,estado
+2ª quincena de octubre 2026,549.82,110.00,51.00,33.00,0.00,235.12,0.00,open
+
+# Movimientos
+tipo,titulo,detalle,monto,fecha
+Gasto,Sin presupuesto · snack almuerzo,2ª oct · 16 oct · Cuenta de ahorro EFECTIVO,2.20,2026-10-16
+Transferencia,Transferencia · cena amoicito descuento del presupuesto,2ª oct · 16 oct · Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán → Cuenta de ahorro Planillera ••5005 · Banco Agrícola,10.80,2026-10-16
+Ingreso,PRESTAMO MAMA PUPUSAS,2ª oct · 16 oct · Cuenta de ahorro EFECTIVO,20.00,2026-10-16
+Gasto,gimnasio Rodrigo,2ª oct · 16 oct · Tarjeta de crédito TIGO ••2189 · Banco Cuscatlán,25.00,2026-10-16
+Gasto,Plan Cursor,2ª oct · 16 oct · Tarjeta de crédito TIGO ••2189 · Banco Cuscatlán,10.00,2026-10-16
+Gasto,Sin presupuesto · Pago prestamo mama,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola,20.00,2026-10-16
+Transferencia,Transferencia · Reintegracion de dinero por compra de gasolina,2ª oct · 16 oct · Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán → Cuenta de ahorro Planillera ••5005 · Banco Agrícola,51.00,2026-10-16
+Transferencia,Transferencia · Apartado: gimnasio Rodrigo,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola → Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,25.00,2026-10-16
+Transferencia,Transferencia · Apartado: Cuota Iphone,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola → Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,10.77,2026-10-16
+Transferencia,Transferencia · Apartado: Medicinas,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola → Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,30.00,2026-10-16
+Transferencia,Transferencia · Apartado: Plan Cursor,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola → Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,10.00,2026-10-16
+Transferencia,Transferencia · Apartado: Prestamo,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola → Cuenta de ahorro Prestamo ••6328 · Banco Agrícola,79.93,2026-10-16
+Transferencia,Transferencia · Apartado: Gasolina,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola → Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,75.00,2026-10-16
+Transferencia,Transferencia · Apartado: Amoicito,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola → Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,75.00,2026-10-16
+Gasto,Aporte Familiar,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola,75.00,2026-10-16
+Ingreso,Salario,2ª oct · 16 oct · Cuenta de ahorro Planillera ••5005 · Banco Agrícola,529.82,2026-10-16
+Gasto,Sin presupuesto · Cena pupusas amoicito,2ª oct · 15 oct · Cuenta de ahorro EFECTIVO,10.80,2026-10-15
+Gasto,Gasolina · Texaco - Juan Pablo II,2ª oct · 15 oct · Tarjeta de crédito NIU ••0356 · Banco Cuscatlán,51.00,2026-10-15
+
+# Alertas
+severidad,mensaje
+warning,Cuenta de ahorro Emergencias ••7670 · Banco Promerica no tuvo movimientos en este rango.
+warning,Cuenta corriente Gastos ••6121 · BAC no tuvo movimientos en este rango.
+warning,Tarjeta de crédito Gold · Banco Agrícola no tuvo movimientos en este rango.
+
+# Saldo por cuenta
+cuenta,saldo_planificado_acumulado,es_tarjeta
+Cuenta corriente Gastos ••6121 · BAC,42.77,no
+Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,163.97,no
+Cuenta de ahorro EFECTIVO,7.00,no
+Cuenta de ahorro Emergencias ••7670 · Banco Promerica,684.00,no
+Cuenta de ahorro Planillera ••5005 · Banco Agrícola,190.92,no
+Cuenta de ahorro Prestamo ••6328 · Banco Agrícola,159.87,no
+Tarjeta de crédito Gold · Banco Agrícola,0.00,si
+Tarjeta de crédito NIU ••0356 · Banco Cuscatlán,-167.42,si
+Tarjeta de crédito TIGO ••2189 · Banco Cuscatlán,-35.00,si
+
+# Flujo por cuenta (solo este rango)
+cuenta,ingresos,transferencias_in,gastos,transferencias_out,entro,salio,neto_rango
+Cuenta de ahorro Planillera ••5005 · Banco Agrícola,529.82,61.80,95.00,305.70,591.62,400.70,190.92
+Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,0.00,225.77,0.00,61.80,225.77,61.80,163.97
+Cuenta de ahorro Prestamo ••6328 · Banco Agrícola,0.00,79.93,0.00,0.00,79.93,0.00,79.93
+Tarjeta de crédito NIU ••0356 · Banco Cuscatlán,0.00,0.00,51.00,0.00,0.00,51.00,-51.00
+Tarjeta de crédito TIGO ••2189 · Banco Cuscatlán,0.00,0.00,35.00,0.00,0.00,35.00,-35.00
+Cuenta de ahorro EFECTIVO,20.00,0.00,13.00,0.00,20.00,13.00,7.00
+
+# Fondeo vs uso
+cuenta,apartado,usado_en_tarjetas
+Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,225.77,86.00
+Cuenta de ahorro Prestamo ••6328 · Banco Agrícola,79.93,0.00
+
+# Tarjetas
+tarjeta,compras_rango,pagos_rango,por_pagar,ciclo_actual,se_paga_desde,saldo_fondeo
+Tarjeta de crédito Gold · Banco Agrícola,0.00,0.00,0.00,0.00,Cuenta de ahorro Planillera ••5005 · Banco Agrícola,190.92
+Tarjeta de crédito NIU ••0356 · Banco Cuscatlán,51.00,0.00,0.00,51.00,Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,163.97
+Tarjeta de crédito TIGO ••2189 · Banco Cuscatlán,35.00,0.00,0.00,35.00,Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,163.97
+
+# Mapa de transferencias
+desde,hacia,monto,movimientos
+Cuenta de ahorro Planillera ••5005 · Banco Agrícola,Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,225.77,6
+Cuenta de ahorro Planillera ••5005 · Banco Agrícola,Cuenta de ahorro Prestamo ••6328 · Banco Agrícola,79.93,1
+Cuenta de ahorro Cusca Tarjetas ••1138 · Banco Cuscatlán,Cuenta de ahorro Planillera ••5005 · Banco Agrícola,61.80,2
