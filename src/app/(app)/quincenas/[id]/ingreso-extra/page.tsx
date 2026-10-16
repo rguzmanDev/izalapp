@@ -4,7 +4,7 @@ import { MoneyField, SelectField, TextField } from "@/components/form/fields";
 import { SubmitButton } from "@/components/form/submit-button";
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
+import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { saveExtraIncome } from "@/features/periods/actions";
 import { getPeriod, listPeriodItems } from "@/features/periods/data";
 import { NAME_MAX_LENGTH } from "@/lib/limits";
@@ -22,7 +22,12 @@ export default async function ExtraIncomePage({ params }: PageProps<"/quincenas/
     listPeriodItems(user.id, period.id),
     listAccounts(user.id),
   ]);
+  const moneyOptions = toMoneyAccountOptions(accounts);
   const incomeAccountId = rows.find(({ item }) => item.kind === "income")?.item.accountId;
+  const defaultAccountId =
+    incomeAccountId && moneyOptions.some((option) => option.value === incomeAccountId)
+      ? incomeAccountId
+      : "";
 
   return (
     <>
@@ -48,8 +53,8 @@ export default async function ExtraIncomePage({ params }: PageProps<"/quincenas/
           label="Se depositó en"
           required
           placeholder="Selecciona una cuenta"
-          options={toAccountOptions(accounts)}
-          defaultValue={incomeAccountId ?? ""}
+          options={moneyOptions}
+          defaultValue={defaultAccountId}
         />
         <SubmitButton>Guardar</SubmitButton>
       </ActionForm>

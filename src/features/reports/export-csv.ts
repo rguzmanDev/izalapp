@@ -112,10 +112,18 @@ export async function buildReportsCsv(userId: string, range: number): Promise<st
     },
     {
       title: "Saldo por cuenta",
-      headers: ["cuenta", "saldo_planificado_acumulado", "es_tarjeta"],
+      headers: [
+        "cuenta",
+        "en_banco",
+        "tras_pagar_tarjetas",
+        "reservado_tarjetas",
+        "es_tarjeta",
+      ],
       rows: accountReport.balanceRows.map((row) => [
         row.label,
+        csvMoney(row.bankEstimateCents),
         csvMoney(row.plannedBalanceCents),
+        csvMoney(row.cardReservedCents),
         row.isCredit ? "si" : "no",
       ]),
     },

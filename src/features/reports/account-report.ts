@@ -2,13 +2,19 @@ import type { FinancialAccount } from "@/db/schema";
 import type { AccountBalance } from "@/features/accounts/balance";
 import { accountLabel } from "@/features/accounts/format";
 import type { CardStatement } from "@/features/cards/data";
+import { pendingCents } from "@/features/cards/payment";
 import { fundingAccountId } from "@/features/transfers/plan";
 import { formatMoney } from "@/lib/money";
 
 export type AccountBalanceRow = {
   accountId: string;
   label: string;
+  /** Physical bank estimate (card charges not paid out yet). */
+  bankEstimateCents: number;
+  /** What remains after reserving unpaid card charges. */
   plannedBalanceCents: number;
+  /** Unpaid card statement + current cycle tagged to this funding account. */
+  cardReservedCents: number;
   isCredit: boolean;
 };
 
@@ -80,16 +86,39 @@ function cents(map: Map<string, number>, id: string) {
 export function buildAccountBalanceRows(
   accounts: FinancialAccount[],
   balances: Map<string, AccountBalance>,
+  cardReservedByFunding: Map<string, number> = new Map(),
 ): AccountBalanceRow[] {
   return accounts
     .filter((account) => account.type !== "credit")
-    .map((account) => ({
-      accountId: account.id,
-      label: accountLabel(account),
-      plannedBalanceCents: balances.get(account.id)?.plannedBalanceCents ?? 0,
-      isCredit: false,
-    }))
+    .map((account) => {
+      const plannedBalanceCents = balances.get(account.id)?.plannedBalanceCents ?? 0;
+      const cardReservedCents = cardReservedByFunding.get(account.id) ?? 0;
+      return {
+        accountId: account.id,
+        label: accountLabel(account),
+        plannedBalanceCents,
+        cardReservedCents,
+        bankEstimateCents: plannedBalanceCents + cardReservedCents,
+        isCredit: false,
+      };
+    })
     .sort((a, b) => a.label.localeCompare(b.label, "es"));
+}
+
+/** Sum statement due + current cycle per funding (payment) account. */
+export function cardReservedByFundingAccount(
+  statements: CardStatement[],
+): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const statement of statements) {
+    const fundingId = statement.card.paymentAccountId;
+    if (!fundingId) continue;
+    map.set(
+      fundingId,
+      (map.get(fundingId) ?? 0) + pendingCents(statement) + statement.currentCents,
+    );
+  }
+  return map;
 }
 
 export function buildAccountFlowRows({

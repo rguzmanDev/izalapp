@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/form/delete-button";
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
+import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeIncome, saveIncome } from "@/features/incomes/actions";
 import { IncomeForm } from "@/features/incomes/components/income-form";
 import { getIncome } from "@/features/incomes/data";
@@ -14,15 +14,13 @@ export default async function EditIncomePage({ params }: PageProps<"/ingresos/[i
   const [income, accounts] = await Promise.all([getIncome(user.id, id), listAccounts(user.id)]);
   if (!income) notFound();
 
-  const depositAccounts = accounts.filter((account) => account.type !== "credit");
-
   return (
     <>
       <PageHeader title={income.name} backHref="/ingresos" />
       <IncomeForm
         action={saveIncome.bind(null, income.id)}
         income={income}
-        accountOptions={toAccountOptions(depositAccounts)}
+        accountOptions={toMoneyAccountOptions(accounts)}
       />
       <DeleteButton
         action={removeIncome.bind(null, income.id)}

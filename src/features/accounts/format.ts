@@ -25,13 +25,16 @@ export function describeAccount(account: FinancialAccount): string | undefined {
   return `Corte día ${account.statementDay}${payment}`;
 }
 
+/** Select options for bank/cash accounts only (credit cards never appear). */
 export function toAccountOptions(accounts: FinancialAccount[]): SelectOption[] {
-  return accounts.map((account) => ({ value: account.id, label: accountLabel(account) }));
+  return accounts
+    .filter((account) => account.type !== "credit")
+    .map((account) => ({ value: account.id, label: accountLabel(account) }));
 }
 
-/** Bank/checking/savings/efectivo — never credit cards. */
+/** Alias: bank/checking/savings/efectivo — never credit cards. */
 export function toMoneyAccountOptions(accounts: FinancialAccount[]): SelectOption[] {
-  return toAccountOptions(accounts.filter((account) => account.type !== "credit"));
+  return toAccountOptions(accounts);
 }
 
 /** Credit cards whose «Se paga desde» is `fundingAccountId`. */
@@ -39,11 +42,11 @@ export function toCardOptionsForAccount(
   cards: FinancialAccount[],
   fundingAccountId: string,
 ): SelectOption[] {
-  return toAccountOptions(
-    cards.filter(
+  return cards
+    .filter(
       (account) => account.type === "credit" && account.paymentAccountId === fundingAccountId,
-    ),
-  );
+    )
+    .map((account) => ({ value: account.id, label: accountLabel(account) }));
 }
 
 /** Map fundingAccountId → card select options. */

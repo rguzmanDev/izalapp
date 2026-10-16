@@ -4,9 +4,9 @@ import { LinkButton } from "@/components/link-button";
 import { PageHeader } from "@/components/page-header";
 import { Section } from "@/components/section";
 import type { FinancialAccount } from "@/db/schema";
-import { listAccountBalances } from "@/features/accounts/balance";
 import { listAccounts } from "@/features/accounts/data";
 import { accountLabel, describeAccount } from "@/features/accounts/format";
+import { listAccountMoneyViews, type AccountMoneyView } from "@/features/accounts/money-view";
 import { formatMoney } from "@/lib/money";
 import { requireUser } from "@/lib/session";
 
@@ -18,34 +18,53 @@ const byBankThenName = (a: FinancialAccount, b: FinancialAccount) => {
   );
 };
 
+function bankSubtitle(view: AccountMoneyView | undefined): string {
+  if (!view) return "";
+  if (view.cardReservedCents <= 0) return `Tras pagar tarjetas ${formatMoney(view.plannedBalanceCents)}`;
+  const parts = [
+    `En banco ${formatMoney(view.bankEstimateCents)}`,
+    `tras pagar ${formatMoney(view.plannedBalanceCents)}`,
+  ];
+  if (view.cardDueCents > 0) parts.push(`por pagar ${formatMoney(view.cardDueCents)}`);
+  if (view.cardCurrentCents > 0) parts.push(`próximo corte ${formatMoney(view.cardCurrentCents)}`);
+  return parts.join(" · ");
+}
+
 function AccountSection({
   title,
   accounts,
-  balances,
+  views,
 }: {
   title: string;
   accounts: FinancialAccount[];
-  balances: Map<string, { plannedBalanceCents: number }>;
+  views: Map<string, AccountMoneyView>;
 }) {
   if (accounts.length === 0) return null;
   return (
     <Section title={title}>
       <ItemList>
         {accounts.toSorted(byBankThenName).map((account) => {
-          const planned = balances.get(account.id)?.plannedBalanceCents ?? 0;
-          const subtitle =
-            account.type === "credit"
-              ? [describeAccount(account), "Seguimiento informativo (compras / por pagar)"]
+          if (account.type === "credit") {
+            return (
+              <ItemLink
+                key={account.id}
+                href={`/cuentas/${account.id}`}
+                title={accountLabel(account)}
+                subtitle={[describeAccount(account), "Seguimiento informativo (compras / por pagar)"]
                   .filter(Boolean)
-                  .join(" · ")
-              : describeAccount(account);
+                  .join(" · ")}
+              />
+            );
+          }
+          const view = views.get(account.id);
+          const trailing = view?.bankEstimateCents ?? view?.plannedBalanceCents ?? 0;
           return (
             <ItemLink
               key={account.id}
               href={`/cuentas/${account.id}`}
               title={accountLabel(account)}
-              subtitle={subtitle}
-              trailing={account.type === "credit" ? undefined : formatMoney(planned)}
+              subtitle={bankSubtitle(view)}
+              trailing={formatMoney(trailing)}
             />
           );
         })}
@@ -56,16 +75,16 @@ function AccountSection({
 
 export default async function AccountsPage() {
   const user = await requireUser();
-  const [accounts, balances] = await Promise.all([
+  const [accounts, views] = await Promise.all([
     listAccounts(user.id),
-    listAccountBalances(user.id),
+    listAccountMoneyViews(user.id),
   ]);
 
   return (
     <>
       <PageHeader
         title="Cuentas"
-        description="Saldo planificado: inicial + ingresos − gastos ± transferencias (no es el saldo del banco)."
+        description="En banco ≈ lo físico (aún no pagaste tarjetas). Tras pagar = lo que queda cuando liquides esas compras."
         backHref="/ajustes"
         action={<LinkButton href="/cuentas/nueva">Nueva</LinkButton>}
       />
@@ -79,12 +98,12 @@ export default async function AccountsPage() {
           <AccountSection
             title="Cuentas bancarias"
             accounts={accounts.filter((account) => account.type !== "credit")}
-            balances={balances}
+            views={views}
           />
           <AccountSection
             title="Tarjetas de crédito"
             accounts={accounts.filter((account) => account.type === "credit")}
-            balances={balances}
+            views={views}
           />
         </>
       )}

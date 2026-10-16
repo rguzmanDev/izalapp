@@ -23,6 +23,7 @@ import {
   buildCardReportRows,
   buildFundingUseRows,
   buildTransferMapRows,
+  cardReservedByFundingAccount,
 } from "./account-report";
 
 const fromAccount = alias(financialAccounts, "from_account");
@@ -162,8 +163,10 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
   ]);
   const accountsById = new Map(accounts.map((account) => [account.id, account]));
 
+  const reservedByFunding = cardReservedByFundingAccount(statements);
+
   if (periodIds.length === 0) {
-    const balanceRows = buildAccountBalanceRows(accounts, balances);
+    const balanceRows = buildAccountBalanceRows(accounts, balances, reservedByFunding);
     const cardRows = buildCardReportRows(statements, new Map(), new Map(), balances, accountsById);
     return {
       balanceRows,
@@ -285,7 +288,7 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
   );
   const paymentsByAccount = toCentsMap(cardPaymentRows);
 
-  const balanceRows = buildAccountBalanceRows(accounts, balances);
+  const balanceRows = buildAccountBalanceRows(accounts, balances, reservedByFunding);
   const flowRows = buildAccountFlowRows({
     accounts: accounts.filter((account) => account.type !== "credit"),
     incomesByAccount,

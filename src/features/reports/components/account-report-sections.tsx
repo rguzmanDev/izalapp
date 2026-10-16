@@ -68,29 +68,34 @@ export function AccountReportSections({
 
       <Section
         title="Saldo por cuenta"
-        description="Saldo planificado acumulado (opening + todas las quincenas); no es solo el flujo de este rango"
+        description="En banco ≈ físico (aún no pagaste tarjetas). Tras pagar = lo que queda cuando liquides esas compras."
       >
         {balanceRows.length === 0 ? (
           <EmptyNote>No hay cuentas.</EmptyNote>
         ) : (
           <ReportList>
             {balanceRows.map((row) => (
-              <li key={row.accountId} className="flex items-center justify-between gap-3 px-4 py-3">
+              <li key={row.accountId} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <span className="min-w-0 truncate text-sm font-medium select-text">{row.label}</span>
-                <span
-                  className={cn(
-                    "shrink-0 text-sm font-medium tabular-nums select-text",
-                    row.isCredit
-                      ? row.plannedBalanceCents < 0
-                        ? "text-red-700 dark:text-red-400"
-                        : "text-muted-foreground"
-                      : row.plannedBalanceCents < 0
+                <div className="shrink-0 text-right text-sm tabular-nums select-text">
+                  <div
+                    className={cn(
+                      "font-medium",
+                      row.bankEstimateCents < 0
                         ? "text-red-700 dark:text-red-400"
                         : "text-emerald-700 dark:text-emerald-400",
-                  )}
-                >
-                  {formatMoney(row.plannedBalanceCents)}
-                </span>
+                    )}
+                  >
+                    En banco {formatMoney(row.bankEstimateCents)}
+                  </div>
+                  {row.cardReservedCents > 0 ? (
+                    <div className="text-xs text-muted-foreground">
+                      tras pagar {formatMoney(row.plannedBalanceCents)}
+                      {" · "}
+                      reservado {formatMoney(row.cardReservedCents)}
+                    </div>
+                  ) : null}
+                </div>
               </li>
             ))}
           </ReportList>
