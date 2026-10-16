@@ -18,6 +18,7 @@ import {
 } from "@/features/periods/data";
 import { summarizePeriod } from "@/features/periods/summary";
 import { getActiveTemplates } from "@/features/plan/data";
+import { FundingHelp } from "@/features/transfers/components/funding-help";
 import { TransferPlanList } from "@/features/transfers/components/transfer-plan-list";
 import { getTransferPlan } from "@/features/transfers/data";
 import { UpcomingPayments } from "@/features/upcoming/components/upcoming-payments";
@@ -55,22 +56,16 @@ export default async function HomePage() {
   const budgets = rows.filter((row) => row.item.kind === "budget");
   const fixedExpenses = rows.filter((row) => row.item.kind === "fixed_expense");
   const isClosed = period.status === "closed";
+  const hasFuelBudget = budgets.some((row) => row.item.isFuel);
 
   return (
     <>
       {header}
       {isClosed && <ClosedPeriodNotice periodId={period.id} />}
-      <UpcomingPayments
-        cardStatements={cardStatements}
-        fixedExpenses={isClosed ? [] : fixedExpenses}
-        today={today}
-      />
       <PeriodSummary summary={summarizePeriod(rows, unbudgetedCents)} closed={isClosed} />
+      <UpcomingPayments fixedExpenses={isClosed ? [] : fixedExpenses} today={today} />
       {transferPlan.steps.length > 0 && (
-        <Section
-          title="Fondear cuentas"
-          description="Solo lo pendiente de apartar. «Ya lo moví» elige el origen; el avance ignora otras transferencias a la misma cuenta."
-        >
+        <Section title="Fondear cuentas" description={<FundingHelp />}>
           <TransferPlanList
             periodId={period.id}
             steps={transferPlan.steps}
@@ -80,7 +75,10 @@ export default async function HomePage() {
         </Section>
       )}
       {cardStatements.length > 0 && (
-        <Section title="Tarjetas">
+        <Section
+          title="Tarjetas"
+          description="Compra → baja la cuenta fondeadora y sube el «por pagar». Registrar pago → solo marca liquidación."
+        >
           <CardStatementList statements={cardStatements} today={today} />
         </Section>
       )}
@@ -94,27 +92,33 @@ export default async function HomePage() {
           <FixedExpenseList rows={fixedExpenses} today={today} readOnly={isClosed} />
         </Section>
       )}
-      <Section
-        title="Ingresos"
-        action={
-          !isClosed && (
-            <Link
-              href={`/quincenas/${period.id}/ingreso-extra`}
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              + Ingreso extra
-            </Link>
-          )
-        }
-      >
-        {incomes.length > 0 && <IncomeList rows={incomes} readOnly={isClosed} />}
-      </Section>
+      {(incomes.length > 0 || !isClosed) && (
+        <Section
+          title="Ingresos"
+          action={
+            !isClosed && (
+              <Link
+                href={`/quincenas/${period.id}/ingreso-extra`}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                + Ingreso extra
+              </Link>
+            )
+          }
+        >
+          {incomes.length > 0 ? (
+            <IncomeList rows={incomes} readOnly={isClosed} />
+          ) : (
+            <p className="text-sm text-muted-foreground">Aún no hay ingresos en esta quincena.</p>
+          )}
+        </Section>
+      )}
       {!isClosed && (
         <>
           <LinkButton href={`/quincenas/${period.id}/cerrar`} variant="outline">
             Cerrar quincena
           </LinkButton>
-          <QuickAddButton />
+          <QuickAddButton fuelHref={hasFuelBudget ? "/gasolina/nueva" : undefined} />
         </>
       )}
     </>

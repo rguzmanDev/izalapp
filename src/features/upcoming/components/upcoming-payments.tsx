@@ -1,9 +1,6 @@
 import { ItemLink, ItemList } from "@/components/item-list";
 import { Section } from "@/components/section";
 import { Badge } from "@/components/ui/badge";
-import { accountLabel } from "@/features/accounts/format";
-import type { CardStatement } from "@/features/cards/data";
-import { paymentHref, pendingCents } from "@/features/cards/payment";
 import type { PeriodItemRow } from "@/features/periods/data";
 import { describeDueIn, isDueSoon } from "@/lib/due";
 import { formatMoney } from "@/lib/money";
@@ -18,51 +15,34 @@ type UpcomingPayment = {
   href: string;
 };
 
-/** Unpaid card statements and dated fixed expenses due within a week, overdue cards included. */
-function listUpcomingPayments(
-  cardStatements: CardStatement[],
-  fixedExpenses: PeriodItemRow[],
-  today: string,
-): UpcomingPayment[] {
-  const cards = cardStatements
-    .filter((statement) => pendingCents(statement) > 0)
-    .map((statement) => ({
-      id: statement.card.id,
-      name: accountLabel(statement.card),
-      amountCents: pendingCents(statement),
-      dueDate: statement.cycle.dueDate,
-      daysLeft: daysBetween(today, statement.cycle.dueDate),
-      href: paymentHref(statement),
-    }));
-
-  const expenses = fixedExpenses.flatMap(({ item }) => {
-    if (item.dueDay === null || item.paymentStatus === "paid") return [];
-    const dueDate = nextDayOfMonth(item.dueDay, today);
-    return [
-      {
-        id: item.id,
-        name: item.name,
-        amountCents: item.plannedCents,
-        dueDate,
-        daysLeft: daysBetween(today, dueDate),
-        href: `/partidas/${item.id}`,
-      },
-    ];
-  });
-
-  return [...cards, ...expenses]
+/** Dated fixed expenses due within a week (cards live in the Tarjetas section). */
+function listUpcomingPayments(fixedExpenses: PeriodItemRow[], today: string): UpcomingPayment[] {
+  return fixedExpenses
+    .flatMap(({ item }) => {
+      if (item.dueDay === null || item.paymentStatus === "paid") return [];
+      const dueDate = nextDayOfMonth(item.dueDay, today);
+      return [
+        {
+          id: item.id,
+          name: item.name,
+          amountCents: item.plannedCents,
+          dueDate,
+          daysLeft: daysBetween(today, dueDate),
+          href: `/partidas/${item.id}`,
+        },
+      ];
+    })
     .filter((payment) => isDueSoon(payment.daysLeft))
     .sort((a, b) => a.daysLeft - b.daysLeft);
 }
 
 type UpcomingPaymentsProps = {
-  cardStatements: CardStatement[];
   fixedExpenses: PeriodItemRow[];
   today: string;
 };
 
-export function UpcomingPayments({ cardStatements, fixedExpenses, today }: UpcomingPaymentsProps) {
-  const payments = listUpcomingPayments(cardStatements, fixedExpenses, today);
+export function UpcomingPayments({ fixedExpenses, today }: UpcomingPaymentsProps) {
+  const payments = listUpcomingPayments(fixedExpenses, today);
   if (payments.length === 0) return null;
 
   return (

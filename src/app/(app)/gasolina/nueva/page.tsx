@@ -2,7 +2,7 @@ import { EmptyState } from "@/components/empty-state";
 import { LinkButton } from "@/components/link-button";
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toCardOptionsByFundingAccount } from "@/features/accounts/format";
+import { toCardOptionsByFundingAccount, toMoneyAccountOptions } from "@/features/accounts/format";
 import { saveFuelLog } from "@/features/fuel/actions";
 import { FuelForm } from "@/features/fuel/components/fuel-form";
 import { listFuelLogs } from "@/features/fuel/data";
@@ -73,6 +73,7 @@ export default async function NewFuelLogPage({ searchParams }: PageProps<"/gasol
         defaultDate={today}
         lastOdometer={refills.at(-1)?.log.odometer ?? null}
         itemOptions={itemOptions}
+        accountOptions={toMoneyAccountOptions(accounts)}
         cardOptionsByAccount={toCardOptionsByFundingAccount(accounts)}
       />
     </>

@@ -33,7 +33,9 @@ export function ItemLink({ href, title, subtitle, trailing, muted, selectable = 
       >
         <div className={cn("flex min-w-0 flex-1 flex-col", selectable && "select-text")}>
           <span className="truncate font-medium">{title}</span>
-          {subtitle && <span className="truncate text-sm text-muted-foreground">{subtitle}</span>}
+          {subtitle && (
+            <span className="line-clamp-2 text-sm text-muted-foreground">{subtitle}</span>
+          )}
         </div>
         {trailing && (
           <div className={cn("text-right text-sm tabular-nums", selectable && "select-text")}>

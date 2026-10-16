@@ -120,9 +120,9 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
           detail="Solo gastos registrados"
         />
         <StatCard
-          label="Sobrante"
+          label="Sobrante contable"
           value={formatMoney(sum(summaries.map((summary) => summary.actualSurplusCents)))}
-          detail={`Reserva fijos pendientes · ahorrado al cerrar ${formatMoney(sum(reports.map((report) => report.savedCents)))}`}
+          detail={`Fijos en plan (pagados o no) · ahorrado al cerrar ${formatMoney(sum(reports.map((report) => report.savedCents)))}`}
         />
         <StatCard
           label="Excesos"

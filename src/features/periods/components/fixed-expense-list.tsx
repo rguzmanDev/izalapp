@@ -67,9 +67,9 @@ function FixedExpenseRow({ item, account, today, readOnly }: FixedExpenseRowProp
               </LinkButton>
               <ConfirmForm
                 action={setPaymentStatus.bind(null, item.id, "paid")}
-                confirmMessage={`¿Marcar "${item.name}" como pagado?`}
+                confirmMessage={`¿Marcar "${item.name}" como pagado? Se registra el gasto en la cuenta de la partida.`}
               >
-                <PendingButton size="sm">Pagar</PendingButton>
+                <PendingButton size="sm">Marcar pagado</PendingButton>
               </ConfirmForm>
             </>
           )}
@@ -77,9 +77,9 @@ function FixedExpenseRow({ item, account, today, readOnly }: FixedExpenseRowProp
             <>
               <ConfirmForm
                 action={setPaymentStatus.bind(null, item.id, "paid")}
-                confirmMessage={`¿Marcar "${item.name}" como pagado?`}
+                confirmMessage={`¿Marcar "${item.name}" como pagado? Se registra el gasto en la cuenta de la partida.`}
               >
-                <PendingButton size="sm">Pagar</PendingButton>
+                <PendingButton size="sm">Marcar pagado</PendingButton>
               </ConfirmForm>
               <ConfirmForm
                 action={setPaymentStatus.bind(null, item.id, "pending")}

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/form/delete-button";
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toCardOptionsByFundingAccount } from "@/features/accounts/format";
+import { toCardOptionsByFundingAccount, toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeFuelLog, saveFuelLog } from "@/features/fuel/actions";
 import { FuelForm } from "@/features/fuel/components/fuel-form";
 import { getFuelLog } from "@/features/fuel/data";
@@ -38,6 +38,7 @@ export default async function EditFuelLogPage({ params }: PageProps<"/gasolina/[
         defaultDate={row.transaction.occurredOn}
         lastOdometer={null}
         itemOptions={itemOptions}
+        accountOptions={toMoneyAccountOptions(accounts)}
         cardOptionsByAccount={toCardOptionsByFundingAccount(accounts)}
       />
       <DeleteButton

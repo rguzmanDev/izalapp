@@ -89,7 +89,8 @@ export function TransactionForm({
               {accountOptions.find((option) => option.value === lockedAccountId)?.label ??
                 "Cuenta de la partida"}
             </span>
-            . El dinero sale de esta cuenta. Si pagaste con tarjeta, elígelo abajo.
+            . Compra con tarjeta → baja esta cuenta y sube el «por pagar»; Pagar tarjeta → solo marca
+            liquidación.
           </p>
         </>
       ) : (
@@ -101,6 +102,7 @@ export function TransactionForm({
           options={accountOptions}
           value={accountId}
           onChange={(event) => handleAccountChange(event.target.value)}
+          hint="Sin presupuesto = «otros gastos». Elige la cuenta de donde salió el dinero."
         />
       )}
       {cardOptions.length > 0 && (
@@ -111,7 +113,7 @@ export function TransactionForm({
           options={cardOptions}
           value={creditCardId}
           onChange={(event) => setCreditCardId(event.target.value)}
-          hint="Directo = solo baja la cuenta. Tarjeta = baja la cuenta y suma al «por pagar» de esa tarjeta."
+          hint="Directo = solo baja la cuenta. Tarjeta = baja la cuenta y suma al «por pagar» (informativo)."
         />
       )}
       <TextField

@@ -6,10 +6,12 @@ import { cn } from "@/lib/utils";
 
 export function ExportCsvButton({ range }: { range: number }) {
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleClick() {
     if (pending) return;
     setPending(true);
+    setError(null);
     try {
       const response = await fetch(`/reportes/export?quincenas=${range}`, {
         cache: "no-store",
@@ -24,19 +26,27 @@ export function ExportCsvButton({ range }: { range: number }) {
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(url);
+    } catch {
+      setError("No se pudo exportar. Intenta de nuevo.");
     } finally {
       setPending(false);
     }
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={pending}
-      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-10")}
-    >
-      {pending ? "Exportando…" : "Exportar CSV"}
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={pending}
+        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-10")}
+      >
+        {pending ? "Exportando…" : "Exportar CSV"}
+      </button>
+      <span className="max-w-48 text-right text-[11px] text-muted-foreground">
+        Incluye todos los movimientos del rango
+      </span>
+      {error && <span className="max-w-48 text-right text-[11px] text-destructive">{error}</span>}
+    </div>
   );
 }

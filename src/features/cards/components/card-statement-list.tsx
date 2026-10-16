@@ -38,6 +38,7 @@ function CardStatementRow({ statement, today }: { statement: CardStatement; toda
           </span>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className="text-xs text-muted-foreground">Corte facturado</span>
           <span className="font-medium tabular-nums select-text">{formatMoney(statementCents)}</span>
           {statementCents === 0 ? (
             <Badge variant="outline">Sin saldo</Badge>
@@ -53,7 +54,7 @@ function CardStatementRow({ statement, today }: { statement: CardStatement; toda
       {pending > 0 && (
         <div className="flex justify-end">
           <Link href={paymentHref(statement)} className={buttonVariants({ size: "sm" })}>
-            Pagar
+            Registrar pago
           </Link>
         </div>
       )}

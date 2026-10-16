@@ -7,7 +7,10 @@ import type { FinancialAccount } from "@/db/schema";
 import { listAccounts } from "@/features/accounts/data";
 import { accountLabel, describeAccount } from "@/features/accounts/format";
 import { listAccountMoneyViews, type AccountMoneyView } from "@/features/accounts/money-view";
+import { listCardStatements, type CardStatement } from "@/features/cards/data";
+import { pendingCents } from "@/features/cards/payment";
 import { formatMoney } from "@/lib/money";
+import { todayIsoDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 
 const byBankThenName = (a: FinancialAccount, b: FinancialAccount) => {
@@ -20,24 +23,59 @@ const byBankThenName = (a: FinancialAccount, b: FinancialAccount) => {
 
 function bankSubtitle(view: AccountMoneyView | undefined): string {
   if (!view) return "";
-  if (view.cardReservedCents <= 0) return `Tras pagar tarjetas ${formatMoney(view.plannedBalanceCents)}`;
-  const parts = [
-    `En banco ${formatMoney(view.bankEstimateCents)}`,
-    `tras pagar ${formatMoney(view.plannedBalanceCents)}`,
-  ];
+  if (view.cardReservedCents <= 0) return "Saldo planificado";
+  const parts = [`tras pagar ${formatMoney(view.plannedBalanceCents)}`];
   if (view.cardDueCents > 0) parts.push(`por pagar ${formatMoney(view.cardDueCents)}`);
   if (view.cardCurrentCents > 0) parts.push(`próximo corte ${formatMoney(view.cardCurrentCents)}`);
   return parts.join(" · ");
+}
+
+function bankTrailing(view: AccountMoneyView | undefined) {
+  const cents = view?.bankEstimateCents ?? view?.plannedBalanceCents ?? 0;
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <span className="text-xs text-muted-foreground">En banco</span>
+      <span className="font-medium">{formatMoney(cents)}</span>
+    </div>
+  );
+}
+
+function cardSubtitle(statement: CardStatement | undefined, account: FinancialAccount): string {
+  const base = describeAccount(account);
+  if (!statement) {
+    return [base, "Seguimiento informativo"].filter(Boolean).join(" · ");
+  }
+  const pending = pendingCents(statement);
+  const parts = [base];
+  if (pending > 0) parts.push(`por pagar ${formatMoney(pending)}`);
+  if (statement.currentCents > 0) parts.push(`ciclo ${formatMoney(statement.currentCents)}`);
+  if (pending === 0 && statement.currentCents === 0) parts.push("sin saldo");
+  return parts.filter(Boolean).join(" · ");
+}
+
+function cardTrailing(statement: CardStatement | undefined) {
+  if (!statement) return null;
+  const pending = pendingCents(statement);
+  const cents = pending > 0 ? pending : statement.currentCents;
+  const label = pending > 0 ? "Por pagar" : "Próximo corte";
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="font-medium">{formatMoney(cents)}</span>
+    </div>
+  );
 }
 
 function AccountSection({
   title,
   accounts,
   views,
+  statementsByCard,
 }: {
   title: string;
   accounts: FinancialAccount[];
   views: Map<string, AccountMoneyView>;
+  statementsByCard: Map<string, CardStatement>;
 }) {
   if (accounts.length === 0) return null;
   return (
@@ -45,26 +83,25 @@ function AccountSection({
       <ItemList>
         {accounts.toSorted(byBankThenName).map((account) => {
           if (account.type === "credit") {
+            const statement = statementsByCard.get(account.id);
             return (
               <ItemLink
                 key={account.id}
                 href={`/cuentas/${account.id}`}
                 title={accountLabel(account)}
-                subtitle={[describeAccount(account), "Seguimiento informativo (compras / por pagar)"]
-                  .filter(Boolean)
-                  .join(" · ")}
+                subtitle={cardSubtitle(statement, account)}
+                trailing={cardTrailing(statement)}
               />
             );
           }
           const view = views.get(account.id);
-          const trailing = view?.bankEstimateCents ?? view?.plannedBalanceCents ?? 0;
           return (
             <ItemLink
               key={account.id}
               href={`/cuentas/${account.id}`}
               title={accountLabel(account)}
               subtitle={bankSubtitle(view)}
-              trailing={formatMoney(trailing)}
+              trailing={bankTrailing(view)}
             />
           );
         })}
@@ -75,10 +112,13 @@ function AccountSection({
 
 export default async function AccountsPage() {
   const user = await requireUser();
-  const [accounts, views] = await Promise.all([
+  const today = todayIsoDate();
+  const [accounts, views, statements] = await Promise.all([
     listAccounts(user.id),
-    listAccountMoneyViews(user.id),
+    listAccountMoneyViews(user.id, today),
+    listCardStatements(user.id, today),
   ]);
+  const statementsByCard = new Map(statements.map((statement) => [statement.card.id, statement]));
 
   return (
     <>
@@ -99,11 +139,13 @@ export default async function AccountsPage() {
             title="Cuentas bancarias"
             accounts={accounts.filter((account) => account.type !== "credit")}
             views={views}
+            statementsByCard={statementsByCard}
           />
           <AccountSection
             title="Tarjetas de crédito"
             accounts={accounts.filter((account) => account.type === "credit")}
             views={views}
+            statementsByCard={statementsByCard}
           />
         </>
       )}

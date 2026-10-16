@@ -30,6 +30,7 @@ type FuelFormProps = {
   defaultDate: string;
   lastOdometer: number | null;
   itemOptions: ItemOption[];
+  accountOptions: SelectOption[];
   cardOptionsByAccount: Record<string, SelectOption[]>;
 };
 
@@ -53,6 +54,7 @@ export function FuelForm({
   defaultDate,
   lastOdometer,
   itemOptions,
+  accountOptions,
   cardOptionsByAccount,
 }: FuelFormProps) {
   const initialItemId =
@@ -63,6 +65,10 @@ export function FuelForm({
   const fundingAccountId = itemOptions.find((option) => option.value === itemId)?.accountId;
   const cardOptions = fundingAccountId ? (cardOptionsByAccount[fundingAccountId] ?? []) : [];
   const [creditCardId, setCreditCardId] = useState(row?.transaction.creditCardId ?? "");
+  const fundingLabel = fundingAccountId
+    ? (accountOptions.find((option) => option.value === fundingAccountId)?.label ??
+      "Cuenta del presupuesto")
+    : null;
   const initialGallons = toUnits(row?.log.gallons, GALLON_SCALE);
   const initialPrice = toUnits(row?.log.pricePerGallon, PRICE_SCALE);
   const [gallons, setGallons] = useState(initialGallons ?? 0);
@@ -147,6 +153,12 @@ export function FuelForm({
           setCreditCardId("");
         }}
       />
+      {fundingLabel && (
+        <p className="text-sm text-muted-foreground">
+          Cuenta: <span className="font-medium text-foreground">{fundingLabel}</span>. Compra con
+          tarjeta → baja esta cuenta y sube el «por pagar»; Pagar tarjeta → solo marca liquidación.
+        </p>
+      )}
       {cardOptions.length > 0 && (
         <SelectField
           name="creditCardId"
@@ -155,7 +167,7 @@ export function FuelForm({
           options={cardOptions}
           value={creditCardId}
           onChange={(event) => setCreditCardId(event.target.value)}
-          hint="Si usaste tarjeta, elige cuál. El dinero sale de la cuenta del presupuesto."
+          hint="Directo = solo baja la cuenta. Tarjeta = baja la cuenta y suma al «por pagar» (informativo)."
         />
       )}
       <SubmitButton>Guardar</SubmitButton>

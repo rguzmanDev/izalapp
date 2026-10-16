@@ -37,7 +37,12 @@ function BudgetRow({ item, spentCents, readOnly }: BudgetRowProps) {
                 {item.isFuel ? "+ Carga" : "+ Gasto"}
               </Link>
             ) : (
-              <span className="text-sm text-muted-foreground">Aparta primero</span>
+              <Link
+                href={`/partidas/${item.id}/apartar`}
+                className="text-sm font-medium text-foreground hover:underline"
+              >
+                Aparta primero
+              </Link>
             )}
           </>
         )}

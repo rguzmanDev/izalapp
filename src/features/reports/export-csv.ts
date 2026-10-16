@@ -64,7 +64,10 @@ export async function buildReportsCsv(userId: string, range: number): Promise<st
         ["Quincenas incluidas", reports.length],
         ["Ingreso", csvMoney(sum(summaries.map((s) => s.incomeCents)))],
         ["Gastado (registrado)", csvMoney(sum(summaries.map(spentCentsOf)))],
-        ["Sobrante (reserva fijos pendientes)", csvMoney(sum(summaries.map((s) => s.actualSurplusCents)))],
+        [
+          "Sobrante contable (fijos en plan)",
+          csvMoney(sum(summaries.map((s) => s.actualSurplusCents))),
+        ],
         ["Ahorrado al cerrar", csvMoney(sum(reports.map((r) => r.savedCents)))],
         ["Excesos", csvMoney(sum(summaries.map((s) => s.overspentCents)))],
       ],

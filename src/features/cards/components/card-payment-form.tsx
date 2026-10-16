@@ -20,7 +20,7 @@ export function CardPaymentForm({
   return (
     <ActionForm
       action={action}
-      confirmMessage="¿Registrar este pago de tarjeta? No mueve dinero del banco (ya salió al comprar)."
+      confirmMessage="¿Registrar este pago de tarjeta? Solo marca liquidación; no mueve el banco."
     >
       <input type="hidden" name="cardId" value={cardId} />
       <MoneyField
@@ -29,7 +29,7 @@ export function CardPaymentForm({
         required
         defaultCents={defaultAmountCents > 0 ? defaultAmountCents : undefined}
         autoFocus
-        hint="Solo actualiza el «por pagar» de la tarjeta. Si también moviste dinero entre bancos, regístralo aparte como transferencia."
+        hint="Compra → ya bajó la cuenta fondeadora. Este paso solo baja el «por pagar». Si transferiste entre bancos, regístralo aparte."
       />
       <TextField
         name="occurredOn"
