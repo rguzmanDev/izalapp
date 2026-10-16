@@ -171,7 +171,7 @@
   <tr><td><b>Gasto fijo</b></td><td>Un pago recurrente con monto conocido.</td></tr>
   <tr><td><b>Presupuesto</b></td><td>Un tope para gastos variables. Puedes pasarte; la app solo te avisa.</td></tr>
   <tr><td><b>Sobrante</b></td><td>Lo que queda de tu ingreso después de gastos fijos y presupuestos. Al cerrar la quincena decides a dónde moverlo.</td></tr>
-  <tr><td><b>Transferencia</b></td><td>Dinero que mueves entre tus cuentas (fondeo, apartado o pagar una tarjeta). No cuenta como gasto.</td></tr>
+  <tr><td><b>Transferencia</b></td><td>Dinero que mueves entre tus cuentas bancarias o efectivo (fondeo, apartado, reposición). No cuenta como gasto. Pagar una tarjeta de crédito es otro paso (informativo).</td></tr>
 </table>
 
 <div class="tip"><strong>Confirmación</strong>Toda acción que mueva o cambie dinero (gastos, transferencias, apartar, pagar, cerrar quincena, etc.) te pide confirmar antes de aplicarla.</div>
@@ -224,7 +224,7 @@
   <li><b>Deuda inicial</b>: lo que ya debías al empezar (0 si partes de cero).</li>
 </ul>
 <p>El <b>Banco</b> se elige de la lista de bancos de El Salvador. Si el tuyo no aparece, elige <b>Otro…</b> y escribe su nombre.</p>
-<p>La lista de cuentas se divide en <b>Cuentas bancarias</b> (con su saldo planificado) y <b>Tarjetas de crédito</b> (con la deuda planificada). El saldo planificado = inicial + ingresos − gastos ± transferencias; no consulta el banco real.</p>
+<p>La lista se divide en <b>Cuentas bancarias</b> y <b>Tarjetas de crédito</b> (solo seguimiento). En bancos el número grande es <b>En banco</b> (estimado físico). El saldo planificado (= inicial + ingresos − gastos ± transferencias) es el «tras pagar»; no consulta el banco real.</p>
 <div class="tip"><strong>Consejo</strong>Crea al menos una cuenta de tipo <b>Ahorro</b>: al cerrar cada quincena la app la propone como destino del sobrante.</div>
 <div class="tip"><strong>Cómo se escriben los montos</strong>Escribe solo los dígitos, sin punto: se llenan de derecha a izquierda como en una caja registradora. Para $13.00 teclea 1, 3, 0, 0; para $1,059.65 teclea 1, 0, 5, 9, 6, 5. Las letras y los símbolos se ignoran.</div>
 
@@ -351,7 +351,7 @@
   <li><b>Apartar</b> en un presupuesto o gasto fijo hace lo mismo partida por partida: eliges el origen y se crea la transferencia.</li>
   <li><b>Deshacer</b> un apartado elimina esa transferencia y revierte el saldo planificado. Deshacer un pago solo quita el gasto; el apartado (y su transferencia) se quedan.</li>
   <li>Si moviste solo una parte, verás <b>Faltan $X</b>. Solo cuentan transferencias <b>Apartado: …</b> de las partidas pendientes de ese destino (no otras transferencias a la misma cuenta).</li>
-  <li>Presupuestos/gastos de <b>tarjeta</b>: el fondeo va a la cuenta «Se paga desde» (reservas el dinero del banco). El gasto posterior carga la <b>tarjeta</b>; el banco solo baja otra vez cuando <b>pagas la tarjeta</b>.</li>
+  <li>Presupuestos y gastos fijos van a una cuenta <b>bancaria o efectivo</b> (nunca a la tarjeta). Si luego pagas con tarjeta, etiquetas la compra: baja esa cuenta y suma al «por pagar» de la tarjeta. <b>Pagar</b> la tarjeta es solo informativo.</li>
 </ul>
 
 <h3>6.2 Transferencias manuales</h3>
@@ -384,9 +384,10 @@
 <h3>Pagar la tarjeta</h3>
 <ol class="steps">
   <li>Toca <span class="btn">Pagar</span>.</li>
-  <li>Registra el monto del pago (informativo). Baja el «por pagar»; <b>no</b> mueve el banco otra vez (ya salió al comprar).</li>
-  <li>Si en la vida real también moviste dinero entre cuentas, usa <b>Transferir</b> aparte.</li>
+  <li>Registra el monto del pago (informativo). Baja el «por pagar»; <b>no</b> mueve el banco (ya se reservó al comprar).</li>
+  <li>Si en la vida real también transferiste entre bancos el día del pago, usa <b>Transferir</b> aparte.</li>
 </ol>
+<div class="tip"><strong>En banco vs tras pagar</strong>Mientras no pagues el corte, el dinero sigue en la cuenta. <b>En banco</b> ≈ lo físico; <b>tras pagar</b> = lo que quedará cuando liquides NIU/TIGO/etc.</div>
 <div class="warn"><strong>Ten en cuenta</strong>Solo cuenta las compras que etiquetaste a esa tarjeta. Usa <b>Deuda inicial (informativa)</b> si empezaste a mitad de ciclo.</div>
 
 <!-- 8 -->
@@ -409,7 +410,8 @@
   <li><b>Costo por milla</b>, <b>Odómetro</b> actual y <b>Precio promedio</b> por galón.</li>
   <li>La lista de cargas, con el rendimiento de cada tanque lleno. Las cargas parciales se marcan como “parcial”.</li>
 </ul>
-<p>Cada carga también es un gasto normal: aparece en Movimientos y descuenta de tu presupuesto de gasolina.</p>
+<p>Cada carga también es un gasto normal: aparece en Movimientos y descuenta de tu presupuesto de gasolina. La cuenta del gasto es siempre la del presupuesto (por ejemplo Cusca).</p>
+<div class="tip"><strong>¿Pagué con otra cuenta?</strong>Ejemplo: presupuesto Gasolina en Cusca, pero en la gasolinera debitaste Planillera y luego repusiste con Cusca → Planillera. En la app registra <b>solo</b> la carga/gasto contra el presupuesto (Cusca). No registres el débito de Planillera ni la transferencia de reposición: el neto ya queda en Cusca y el presupuesto baja bien.</div>
 
 <!-- 9 -->
 <h2 id="cierre">9. Cerrar la quincena</h2>
@@ -432,6 +434,7 @@
 <ul>
   <li><b>Totales</b>: Ingreso, Gastado (solo registrados), Sobrante (reserva fijos pendientes y ahorrado al cerrar) y Excesos. Si pediste 6 quincenas y solo tienes 1, verás «1 de 6».</li>
   <li><b>Movimientos</b>: lista de ingresos (verde), gastos (rojo) y transferencias (amarillo) del rango. Filtra por tipo. Cada fila indica la quincena (el corte) y la fecha real del movimiento. El corte lo defines tú al cerrar/abrir; la fecha no cambia de periodo sola.</li>
+  <li><b>Saldo por cuenta</b>: <b>en banco</b>, <b>tras pagar tarjetas</b> y <b>reservado</b> (compras de tarjeta aún no liquidadas).</li>
   <li><b>Alertas</b>: saldo negativo, cuentas sin movimiento en el rango, tarjetas sin «Se paga desde» o sin cobertura para lo por pagar.</li>
   <li><b>Saldo por cuenta</b>: saldo planificado acumulado (opening + todas las quincenas), no solo el rango.</li>
   <li><b>Flujo por cuenta</b>: qué entró y qué salió <b>en este rango</b> (ingresos, gastos y transferencias).</li>
@@ -470,7 +473,11 @@
 </details>
 <details>
   <summary>¿Pagar la tarjeta cuenta como gasto?</summary>
-  <p>No. Los gastos se cuentan cuando haces cada compra con la tarjeta. Pagarla es solo mover dinero de tu cuenta a la tarjeta.</p>
+  <p>No. El gasto se cuenta al comprar (baja la cuenta «Se paga desde» y etiqueta la tarjeta). <b>Pagar</b> solo baja el «por pagar» informativo; no vuelve a mover el banco. Si transferiste dinero ese día, regístralo aparte.</p>
+</details>
+<details>
+  <summary>Pagué un presupuesto de Cusca con Planillera (o efectivo). ¿Cómo lo anoto?</summary>
+  <p>Si la partida es de Cusca, el gasto en la app va contra Cusca. Si en el banco pagaste con otra cuenta y luego repusiste desde Cusca, registra <b>solo</b> el gasto en Cusca (no el pago ni la reposición). Excepción: gasto en efectivo/otra cuenta <b>sin</b> usar el presupuesto, y aparte una transferencia Cusca → esa cuenta para liberar apartado («efecto 0»).</p>
 </details>
 <details>
   <summary>El odómetro no me deja guardar.</summary>
