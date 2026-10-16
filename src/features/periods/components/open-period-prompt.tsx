@@ -1,4 +1,5 @@
 import { EmptyState } from "@/components/empty-state";
+import { ConfirmForm } from "@/components/form/confirm-form";
 import { PendingButton } from "@/components/form/pending-button";
 import { LinkButton } from "@/components/link-button";
 import { openCurrentPeriod } from "../actions";
@@ -19,11 +20,14 @@ export function OpenPeriodPrompt({ hasIncome }: { hasIncome: boolean }) {
       title="Quincena sin abrir"
       description="Al abrirla se copian tu ingreso, gastos fijos y presupuestos activos para esta quincena."
       action={
-        <form action={openCurrentPeriod}>
+        <ConfirmForm
+          action={openCurrentPeriod}
+          confirmMessage="¿Abrir esta quincena? Se copiarán tus ingresos, gastos fijos y presupuestos activos."
+        >
           <PendingButton size="lg" className="h-10">
             Abrir quincena
           </PendingButton>
-        </form>
+        </ConfirmForm>
       }
     />
   );

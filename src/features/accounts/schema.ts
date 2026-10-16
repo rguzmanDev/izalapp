@@ -1,12 +1,16 @@
 import { z } from "zod";
 import {
   emptyToUndefined,
+  money,
   optionalDayOfMonth,
   optionalId,
   optionalText,
   requiredText,
 } from "@/lib/validation";
 import { ACCOUNT_TYPES, MAX_DAYS_AFTER_CUTOFF, PAYMENT_DUE_MODES } from "./constants";
+
+/** Opening cash position; empty means zero. Credit forms send debt as a positive amount. */
+const openingBalanceCents = z.preprocess(emptyToUndefined, money.optional()).transform((value) => value ?? 0);
 
 const lastFour = z
   .string()
@@ -37,6 +41,7 @@ export const accountSchema = z
     paymentDueDay: optionalDayOfMonth,
     paymentDueDaysAfterCutoff: daysAfterCutoff,
     paymentAccountId: optionalId,
+    openingBalanceCents,
   })
   .superRefine((account, ctx) => {
     if (account.type !== "credit") return;
@@ -65,9 +70,14 @@ export const accountSchema = z
         paymentAccountId: null,
       };
     }
+    // Credit form enters initial debt as a positive amount; store as negative cash position.
+    const withDebt = {
+      ...account,
+      openingBalanceCents: account.openingBalanceCents > 0 ? -account.openingBalanceCents : 0,
+    };
     return paymentDueMode === "daysAfterCutoff"
-      ? { ...account, paymentDueDay: null }
-      : { ...account, paymentDueDaysAfterCutoff: null };
+      ? { ...withDebt, paymentDueDay: null }
+      : { ...withDebt, paymentDueDaysAfterCutoff: null };
   });
 
 export type AccountInput = z.output<typeof accountSchema>;

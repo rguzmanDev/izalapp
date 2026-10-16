@@ -19,7 +19,7 @@ export function ClosePeriodForm({
   accountOptions,
 }: ClosePeriodFormProps) {
   return (
-    <ActionForm action={action}>
+    <ActionForm action={action} confirmMessage="¿Cerrar la quincena? Si hay sobrante, se registrará la transferencia.">
       <MoneyField
         name="surplusCents"
         label="¿Cuánto vas a mover?"

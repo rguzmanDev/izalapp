@@ -74,7 +74,7 @@ export default async function HomePage() {
       {transferPlan.steps.length > 0 && (
         <Section
           title="Fondear cuentas"
-          description="Solo lo pendiente de fondear. Si apartas o pagas una partida, baja de aquí; al completar el paso, lo restante queda apartado."
+          description="Solo lo pendiente de apartar. «Ya lo moví» elige el origen; el avance ignora otras transferencias a la misma cuenta."
         >
           <TransferPlanList
             periodId={period.id}

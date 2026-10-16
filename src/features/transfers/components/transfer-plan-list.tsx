@@ -1,10 +1,9 @@
 import { ArrowDownIcon } from "lucide-react";
-import { PendingButton } from "@/components/form/pending-button";
+import { LinkButton } from "@/components/link-button";
 import { Badge } from "@/components/ui/badge";
 import type { FinancialAccount } from "@/db/schema";
 import { accountLabel } from "@/features/accounts/format";
 import { formatMoney } from "@/lib/money";
-import { completeTransferStep } from "../actions";
 import type { TransferStep, TransferStepCover } from "../plan";
 
 type TransferPlanListProps = {
@@ -32,11 +31,13 @@ export function TransferPlanList({ periodId, steps, accounts, readOnly }: Transf
         const covers = coversLabel(step.covers);
         return (
           <li
-            key={`${step.fromAccountId}-${step.toAccountId}`}
+            key={step.toAccountId}
             className="flex items-center justify-between gap-3 px-4 py-3"
           >
             <div className="flex min-w-0 flex-col text-sm select-text">
-              <span className="truncate">{labelOf(step.fromAccountId)}</span>
+              <span className="truncate text-muted-foreground">
+                Sugerido: {labelOf(step.suggestedFromAccountId)}
+              </span>
               <ArrowDownIcon className="size-3.5 text-muted-foreground" />
               <span className="truncate">{labelOf(step.toAccountId)}</span>
               {covers && (
@@ -57,16 +58,12 @@ export function TransferPlanList({ periodId, steps, accounts, readOnly }: Transf
                     </span>
                   )}
                   {!readOnly && (
-                    <form
-                      action={completeTransferStep.bind(
-                        null,
-                        periodId,
-                        step.fromAccountId,
-                        step.toAccountId,
-                      )}
+                    <LinkButton
+                      href={`/fondear/${periodId}/${step.toAccountId}`}
+                      size="sm"
                     >
-                      <PendingButton size="sm">Ya lo moví</PendingButton>
-                    </form>
+                      Ya lo moví
+                    </LinkButton>
                   )}
                 </>
               )}

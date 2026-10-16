@@ -4,8 +4,10 @@ import { LinkButton } from "@/components/link-button";
 import { PageHeader } from "@/components/page-header";
 import { Section } from "@/components/section";
 import type { FinancialAccount } from "@/db/schema";
+import { listAccountBalances } from "@/features/accounts/balance";
 import { listAccounts } from "@/features/accounts/data";
 import { accountLabel, describeAccount } from "@/features/accounts/format";
+import { formatMoney } from "@/lib/money";
 import { requireUser } from "@/lib/session";
 
 const byBankThenName = (a: FinancialAccount, b: FinancialAccount) => {
@@ -16,19 +18,37 @@ const byBankThenName = (a: FinancialAccount, b: FinancialAccount) => {
   );
 };
 
-function AccountSection({ title, accounts }: { title: string; accounts: FinancialAccount[] }) {
+function AccountSection({
+  title,
+  accounts,
+  balances,
+}: {
+  title: string;
+  accounts: FinancialAccount[];
+  balances: Map<string, { plannedBalanceCents: number }>;
+}) {
   if (accounts.length === 0) return null;
   return (
     <Section title={title}>
       <ItemList>
-        {accounts.toSorted(byBankThenName).map((account) => (
-          <ItemLink
-            key={account.id}
-            href={`/cuentas/${account.id}`}
-            title={accountLabel(account)}
-            subtitle={describeAccount(account)}
-          />
-        ))}
+        {accounts.toSorted(byBankThenName).map((account) => {
+          const planned = balances.get(account.id)?.plannedBalanceCents ?? 0;
+          const subtitle =
+            account.type === "credit"
+              ? [describeAccount(account), planned < 0 ? `Deuda ${formatMoney(-planned)}` : "Sin deuda planificada"]
+                  .filter(Boolean)
+                  .join(" · ")
+              : describeAccount(account);
+          return (
+            <ItemLink
+              key={account.id}
+              href={`/cuentas/${account.id}`}
+              title={accountLabel(account)}
+              subtitle={subtitle}
+              trailing={account.type === "credit" ? undefined : formatMoney(planned)}
+            />
+          );
+        })}
       </ItemList>
     </Section>
   );
@@ -36,30 +56,35 @@ function AccountSection({ title, accounts }: { title: string; accounts: Financia
 
 export default async function AccountsPage() {
   const user = await requireUser();
-  const accounts = await listAccounts(user.id);
+  const [accounts, balances] = await Promise.all([
+    listAccounts(user.id),
+    listAccountBalances(user.id),
+  ]);
 
   return (
     <>
       <PageHeader
         title="Cuentas"
-        description="Cuentas bancarias y tarjetas de crédito"
+        description="Saldo planificado: inicial + ingresos − gastos ± transferencias (no es el saldo del banco)."
         backHref="/ajustes"
         action={<LinkButton href="/cuentas/nueva">Nueva</LinkButton>}
       />
       {accounts.length === 0 ? (
         <EmptyState
           title="Aún no tienes cuentas"
-          description="Agrega la cuenta donde recibes tu salario y las demás a las que mueves dinero."
+          description="Agrega las cuentas donde recibes y mueves dinero. Para efectivo, crea una cuenta llamada Efectivo."
         />
       ) : (
         <>
           <AccountSection
             title="Cuentas bancarias"
             accounts={accounts.filter((account) => account.type !== "credit")}
+            balances={balances}
           />
           <AccountSection
             title="Tarjetas de crédito"
             accounts={accounts.filter((account) => account.type === "credit")}
+            balances={balances}
           />
         </>
       )}

@@ -7,10 +7,15 @@ export type TransferStepCover = {
 };
 
 export type TransferStep = {
-  fromAccountId: string;
   toAccountId: string;
+  /** Suggested origin from the plan (where income surplus is). */
+  suggestedFromAccountId: string;
   amountCents: number;
-  /** Already moved between these two accounts during the period. */
+  /**
+   * Progress toward funding the *pending* partidas in `covers`.
+   * Only counts transfers tagged `Apartado: {nombre}` for those partidas —
+   * not other money that happened to land in the same account.
+   */
   doneCents: number;
   /** Planned expenses and budgets this transfer is meant to fund. */
   covers: TransferStepCover[];
@@ -19,7 +24,7 @@ export type TransferStep = {
 type TransferPlanInput = {
   items: PeriodItem[];
   accounts: FinancialAccount[];
-  transfers: Pick<Transfer, "fromAccountId" | "toAccountId" | "amountCents">[];
+  transfers: Pick<Transfer, "fromAccountId" | "toAccountId" | "amountCents" | "note">[];
 };
 
 type Balance = { accountId: string; cents: number };
@@ -36,6 +41,11 @@ export function stillNeedsFunding(item: PeriodItem): boolean {
   return (
     (item.kind === "fixed_expense" || item.kind === "budget") && item.paymentStatus === "pending"
   );
+}
+
+/** Note on funding transfers so Deshacer apartado can remove them (Apartar and Fondear). */
+export function setAsideTransferNote(itemName: string) {
+  return `Apartado: ${itemName}`;
 }
 
 function coversForAccount(
@@ -60,6 +70,9 @@ function coversForAccount(
  * Moves that leave each account with what its pending expenses need: income lands in the
  * deposit accounts and is sent to the accounts that pay fixed expenses and budgets still
  * awaiting funding. Apartados and pagados are skipped. Surplus stays where income landed.
+ *
+ * Steps are one per destination account. Progress only counts Apartado transfers for the
+ * pending partidas still listed in `covers` (not unrelated transfers to the same account).
  */
 export function buildTransferPlan({ items, accounts, transfers }: TransferPlanInput): TransferStep[] {
   const accountsById = new Map(accounts.map((account) => [account.id, account]));
@@ -83,29 +96,43 @@ export function buildTransferPlan({ items, accounts, transfers }: TransferPlanIn
     .map((entry) => ({ ...entry, cents: -entry.cents }))
     .sort(largestFirst);
 
-  const steps: Omit<TransferStep, "doneCents" | "covers">[] = [];
+  const merged = new Map<string, { suggestedFromAccountId: string; amountCents: number }>();
   for (const need of needs) {
     for (const source of sources) {
       if (need.cents === 0) break;
       if (source.cents === 0) continue;
       const amountCents = Math.min(source.cents, need.cents);
-      steps.push({ fromAccountId: source.accountId, toAccountId: need.accountId, amountCents });
+      const existing = merged.get(need.accountId);
+      if (!existing) {
+        merged.set(need.accountId, {
+          suggestedFromAccountId: source.accountId,
+          amountCents,
+        });
+      } else {
+        existing.amountCents += amountCents;
+      }
       source.cents -= amountCents;
       need.cents -= amountCents;
     }
   }
 
-  return steps.map((step) => {
+  return [...merged.entries()].map(([toAccountId, { suggestedFromAccountId, amountCents }]) => {
+    const covers = coversForAccount(items, accountsById, toAccountId);
+    const coverNotes = new Set(covers.map((cover) => setAsideTransferNote(cover.name)));
     const moved = transfers
       .filter(
         (transfer) =>
-          transfer.fromAccountId === step.fromAccountId && transfer.toAccountId === step.toAccountId,
+          transfer.toAccountId === toAccountId &&
+          transfer.note != null &&
+          coverNotes.has(transfer.note),
       )
       .reduce((total, transfer) => total + transfer.amountCents, 0);
     return {
-      ...step,
-      doneCents: Math.min(moved, step.amountCents),
-      covers: coversForAccount(items, accountsById, step.toAccountId),
+      toAccountId,
+      suggestedFromAccountId,
+      amountCents,
+      doneCents: Math.min(moved, amountCents),
+      covers,
     };
   });
 }

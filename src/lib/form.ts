@@ -3,6 +3,8 @@ import { z } from "zod";
 /** Result returned by Server Actions used with <ActionForm>. */
 export type FormState = {
   error?: string;
+  /** Soft warning that can be overridden by resubmitting with confirmInsufficient=1. */
+  warning?: string;
   fieldErrors?: Record<string, string[] | undefined>;
 };
 

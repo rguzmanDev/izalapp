@@ -16,14 +16,14 @@ export default async function BudgetsPage() {
     <>
       <PageHeader
         title="Presupuestos"
-        description="Topes para gastos variables como gasolina o citas"
+        description="Topes mensuales para gastos variables"
         backHref="/ajustes"
         action={<LinkButton href="/presupuestos/nuevo">Nuevo</LinkButton>}
       />
       {rows.length === 0 ? (
         <EmptyState
           title="Aún no tienes presupuestos"
-          description="Define un tope mensual para gastos como gasolina o salidas con tu pareja."
+          description="Define un tope mensual para cada categoría de gasto variable."
         />
       ) : (
         <ItemList>

@@ -64,7 +64,10 @@ export function FuelForm({
   const estimate = estimateCents(gallons, price);
 
   return (
-    <ActionForm action={action}>
+    <ActionForm
+      action={action}
+      confirmMessage={row ? "¿Guardar los cambios de esta carga?" : "¿Registrar esta carga de gasolina?"}
+    >
       <TextField
         name="occurredOn"
         label="Fecha"

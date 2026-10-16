@@ -1,0 +1,1 @@
+ALTER TABLE "financial_accounts" ADD COLUMN "opening_balance_cents" integer DEFAULT 0 NOT NULL;

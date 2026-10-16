@@ -28,12 +28,15 @@ export function FixedExpenseForm({ action, expense, accountOptions }: FixedExpen
   const [dueMode, setDueMode] = useState<DueMode>(expense?.dueDay ? "dueDate" : "onPayday");
 
   return (
-    <ActionForm action={action}>
+    <ActionForm
+      action={action}
+      confirmMessage={expense ? "¿Guardar los cambios de este gasto fijo?" : "¿Crear este gasto fijo?"}
+    >
       <TextField
         name="name"
         label="Nombre"
         required
-        placeholder="Préstamo"
+        placeholder="Nombre del gasto"
         maxLength={NAME_MAX_LENGTH}
         defaultValue={expense?.name}
       />
@@ -43,8 +46,8 @@ export function FixedExpenseForm({ action, expense, accountOptions }: FixedExpen
         label="¿Cuándo se paga?"
         hint={
           dueMode === "onPayday"
-            ? "Un compromiso sin fecha, como un apoyo familiar: se paga cuando recibes tu pago."
-            : "Un servicio o préstamo con fecha límite, como el teléfono."
+            ? "Sin día de vencimiento: se paga cuando recibes tu ingreso."
+            : "Tiene un día límite en el mes para liquidarlo."
         }
         required
         options={dueModeOptions}

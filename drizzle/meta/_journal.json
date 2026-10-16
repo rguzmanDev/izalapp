@@ -50,6 +50,13 @@
       "when": 1792163460795,
       "tag": "0006_fuel_price_two_decimals",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792171086041,
+      "tag": "0007_account_opening_balance",
+      "breakpoints": true
     }
   ]
 }

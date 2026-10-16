@@ -14,12 +14,15 @@ type IncomeFormProps = {
 
 export function IncomeForm({ action, income, accountOptions }: IncomeFormProps) {
   return (
-    <ActionForm action={action}>
+    <ActionForm
+      action={action}
+      confirmMessage={income ? "¿Guardar los cambios de este ingreso?" : "¿Crear este ingreso?"}
+    >
       <TextField
         name="name"
         label="Nombre"
         required
-        placeholder="Salario"
+        placeholder="Nombre del ingreso"
         maxLength={NAME_MAX_LENGTH}
         defaultValue={income?.name}
       />

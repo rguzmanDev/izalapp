@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { financialAccounts, periodItems, transfers } from "@/db/schema";
 import { listAccounts } from "@/features/accounts/data";
 import { isUuid } from "@/lib/validation";
-import { buildTransferPlan, fundingAccountId } from "./plan";
+import { buildTransferPlan, fundingAccountId, setAsideTransferNote } from "./plan";
 import type { TransferInput } from "./schema";
 
 type TransferValues = TransferInput & { periodId: string };
@@ -63,21 +63,13 @@ export async function getTransferPlan(userId: string, periodId: string) {
   return { steps: buildTransferPlan({ items, accounts, transfers: done }), accounts };
 }
 
-/**
- * When the payment account is fully funded for what is still pending, those fixed
- * expenses and budgets (or cards paid from that account) become "apartado".
- */
-export async function setAsideIfAccountFullyFunded(
+/** Marks pending fixed expenses and budgets funded by this account as apartado. */
+export async function setAsidePendingForAccount(
   userId: string,
   periodId: string,
   toAccountId: string,
 ) {
-  const { steps, accounts } = await getTransferPlan(userId, periodId);
-  const forAccount = steps.filter((step) => step.toAccountId === toAccountId);
-  if (forAccount.length === 0 || forAccount.some((step) => step.doneCents < step.amountCents)) {
-    return;
-  }
-
+  const accounts = await listAccounts(userId);
   const accountsById = new Map(accounts.map((account) => [account.id, account]));
   const items = await db
     .select()
@@ -102,4 +94,103 @@ export async function setAsideIfAccountFullyFunded(
     .update(periodItems)
     .set({ paymentStatus: "set_aside" })
     .where(and(eq(periodItems.userId, userId), inArray(periodItems.id, ids)));
+}
+
+/**
+ * When the payment account is fully funded for what is still pending, those fixed
+ * expenses and budgets (or cards paid from that account) become "apartado".
+ */
+export async function setAsideIfAccountFullyFunded(
+  userId: string,
+  periodId: string,
+  toAccountId: string,
+) {
+  const { steps } = await getTransferPlan(userId, periodId);
+  const step = steps.find((candidate) => candidate.toAccountId === toAccountId);
+  if (!step || step.doneCents < step.amountCents) return;
+  await setAsidePendingForAccount(userId, periodId, toAccountId);
+}
+
+type FundAccountStepInput = {
+  userId: string;
+  periodId: string;
+  fromAccountId: string;
+  toAccountId: string;
+  pendingCents: number;
+  occurredOn: string;
+};
+
+/**
+ * Records funding transfers like Apartar (one per pending partida, with Apartado note)
+ * and marks fully funded items as apartado. Same undo path as Apartar.
+ */
+export async function fundAccountStep({
+  userId,
+  periodId,
+  fromAccountId,
+  toAccountId,
+  pendingCents,
+  occurredOn,
+}: FundAccountStepInput) {
+  const accounts = await listAccounts(userId);
+  const accountsById = new Map(accounts.map((account) => [account.id, account]));
+  const pendingItems = (
+    await db
+      .select()
+      .from(periodItems)
+      .where(
+        and(
+          eq(periodItems.userId, userId),
+          eq(periodItems.periodId, periodId),
+          eq(periodItems.paymentStatus, "pending"),
+          inArray(periodItems.kind, ["fixed_expense", "budget"]),
+        ),
+      )
+  )
+    .filter(
+      (item) => fundingAccountId(accountsById.get(item.accountId), item.accountId) === toAccountId,
+    )
+    .sort((a, b) => a.name.localeCompare(b.name, "es"));
+
+  await db.transaction(async (tx) => {
+    let remaining = pendingCents;
+    const fundedIds: string[] = [];
+
+    for (const item of pendingItems) {
+      if (remaining <= 0) break;
+
+      if (item.plannedCents > remaining) {
+        await tx.insert(transfers).values({
+          userId,
+          periodId,
+          fromAccountId,
+          toAccountId,
+          amountCents: remaining,
+          occurredOn,
+          note: setAsideTransferNote(item.name),
+        });
+        remaining = 0;
+        break;
+      }
+
+      await tx.insert(transfers).values({
+        userId,
+        periodId,
+        fromAccountId,
+        toAccountId,
+        amountCents: item.plannedCents,
+        occurredOn,
+        note: setAsideTransferNote(item.name),
+      });
+      remaining -= item.plannedCents;
+      fundedIds.push(item.id);
+    }
+
+    if (fundedIds.length > 0) {
+      await tx
+        .update(periodItems)
+        .set({ paymentStatus: "set_aside" })
+        .where(and(eq(periodItems.userId, userId), inArray(periodItems.id, fundedIds)));
+    }
+  });
 }

@@ -32,18 +32,23 @@ export function TransactionForm({
 
   const initialItemId = transaction?.itemId ?? defaultItemId ?? "";
   const [itemId, setItemId] = useState(initialItemId);
+  const lockedAccountId = itemId ? accountOfItem(itemId) : undefined;
   const [accountId, setAccountId] = useState(
-    transaction?.accountId ?? accountOfItem(initialItemId) ?? "",
+    transaction?.accountId ?? lockedAccountId ?? "",
   );
 
   function handleItemChange(nextItemId: string) {
     setItemId(nextItemId);
     const itemAccountId = accountOfItem(nextItemId);
     if (itemAccountId) setAccountId(itemAccountId);
+    else if (!nextItemId) setAccountId("");
   }
 
   return (
-    <ActionForm action={action}>
+    <ActionForm
+      action={action}
+      confirmMessage={transaction ? "¿Guardar los cambios de este gasto?" : "¿Registrar este gasto?"}
+    >
       <MoneyField
         name="amountCents"
         label="Monto"
@@ -59,15 +64,30 @@ export function TransactionForm({
         value={itemId}
         onChange={(event) => handleItemChange(event.target.value)}
       />
-      <SelectField
-        name="accountId"
-        label="Cuenta"
-        required
-        placeholder="Selecciona una cuenta"
-        options={accountOptions}
-        value={accountId}
-        onChange={(event) => setAccountId(event.target.value)}
-      />
+      {lockedAccountId ? (
+        <>
+          <input type="hidden" name="accountId" value={lockedAccountId} />
+          <p className="text-sm text-muted-foreground">
+            Cuenta:{" "}
+            <span className="font-medium text-foreground">
+              {accountOptions.find((option) => option.value === lockedAccountId)?.label ??
+                "Cuenta de la partida"}
+            </span>
+            . Los gastos de un presupuesto o gasto fijo siempre usan su cuenta (en tarjeta, la deuda
+            de la tarjeta; el banco solo se mueve al pagar o fondear).
+          </p>
+        </>
+      ) : (
+        <SelectField
+          name="accountId"
+          label="Cuenta"
+          required
+          placeholder="Selecciona una cuenta"
+          options={accountOptions}
+          value={accountId}
+          onChange={(event) => setAccountId(event.target.value)}
+        />
+      )}
       <TextField
         name="occurredOn"
         label="Fecha"

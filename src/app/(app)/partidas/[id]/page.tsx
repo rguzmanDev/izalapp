@@ -34,7 +34,10 @@ export default async function EditPeriodItemPage({ params }: PageProps<"/partida
         }
         backHref="/"
       />
-      <ActionForm action={savePeriodItem.bind(null, item.id)}>
+      <ActionForm
+        action={savePeriodItem.bind(null, item.id)}
+        confirmMessage="¿Guardar el monto de esta partida?"
+      >
         <MoneyField
           name="plannedCents"
           label="Monto en esta quincena"

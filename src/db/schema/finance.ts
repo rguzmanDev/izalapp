@@ -41,6 +41,11 @@ export const financialAccounts = pgTable(
     paymentAccountId: uuid().references((): AnyPgColumn => financialAccounts.id, {
       onDelete: "set null",
     }),
+    /**
+     * Planned cash position before movements in the app.
+     * Banks/savings: money on hand. Credit: typically 0 or negative if you start with debt.
+     */
+    openingBalanceCents: integer().notNull().default(0),
     ...timestamps,
   },
   (table) => [index().on(table.userId)],

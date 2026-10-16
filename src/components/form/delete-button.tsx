@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
+import { ConfirmDialog } from "@/components/form/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import type { FormState } from "@/lib/form";
 
@@ -11,19 +12,46 @@ type DeleteButtonProps = {
 
 export function DeleteButton({ action, confirmMessage }: DeleteButtonProps) {
   const [state, formAction, pending] = useActionState(action, {});
+  const startedRef = useRef(false);
+  const [open, setOpen] = useState(false);
+
+  function runAction() {
+    if (startedRef.current || pending) return;
+    startedRef.current = true;
+    formAction();
+    startedRef.current = false;
+  }
 
   return (
-    <form
-      action={formAction}
-      onSubmit={(event) => {
-        if (!window.confirm(confirmMessage)) event.preventDefault();
-      }}
-      className="flex flex-col gap-2"
-    >
-      {state.error && <p className="text-sm text-destructive">{state.error}</p>}
-      <Button type="submit" variant="destructive" size="lg" className="h-10" disabled={pending}>
-        {pending ? "Eliminando…" : "Eliminar"}
-      </Button>
-    </form>
+    <>
+      <div className="flex flex-col gap-2">
+        {state.error && <p className="text-sm text-destructive">{state.error}</p>}
+        <Button
+          type="button"
+          variant="destructive"
+          size="lg"
+          className="h-10"
+          disabled={pending}
+          onClick={() => {
+            if (pending || startedRef.current) return;
+            setOpen(true);
+          }}
+        >
+          {pending ? "Eliminando…" : "Eliminar"}
+        </Button>
+      </div>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        message={confirmMessage}
+        title="Eliminar"
+        confirmLabel="Eliminar"
+        destructive
+        onConfirm={() => {
+          setOpen(false);
+          runAction();
+        }}
+      />
+    </>
   );
 }

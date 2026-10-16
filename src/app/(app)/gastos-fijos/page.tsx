@@ -24,7 +24,7 @@ export default async function FixedExpensesPage() {
       {rows.length === 0 ? (
         <EmptyState
           title="Aún no tienes gastos fijos"
-          description="Agrega pagos como préstamos, seguros, teléfono o el aporte de la casa."
+          description="Agrega los pagos recurrentes de tu plan mensual."
         />
       ) : (
         <ItemList>

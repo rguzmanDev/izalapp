@@ -19,7 +19,7 @@ export function PeriodSummary({ summary, closed }: { summary: Summary; closed?: 
         detail={`${summary.fixedPaidCount} de ${summary.fixedCount} pagados`}
       />
       <StatCard
-        label="Presupuestos"
+        label="Presupuesto consumido"
         value={formatMoney(summary.budgetSpentCents)}
         detail={`de ${formatMoney(summary.budgetPlannedCents)}`}
       />

@@ -1,21 +1,28 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { isOwnedAccount } from "@/features/accounts/data";
+import { getPlannedBalance } from "@/features/accounts/balance";
+import { getAccount, isOwnedAccount } from "@/features/accounts/data";
 import { isPeriodOpen, resolveOpenPeriod } from "@/features/periods/data";
 import { parseFormData, type FormState } from "@/lib/form";
+import { confirmInsufficient, insufficientBalanceState } from "@/lib/insufficient-balance";
 import { todayIsoDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
+import { requiredId } from "@/lib/validation";
+import { z } from "zod";
 import {
   createTransfer,
   deleteTransfer,
+  fundAccountStep,
   getTransfer,
   getTransferPlan,
   setAsideIfAccountFullyFunded,
+  setAsidePendingForAccount,
   updateTransfer,
 } from "./data";
 import { transferSchema } from "./schema";
+
+const completeStepSchema = z.object({ fromAccountId: requiredId });
 
 const CLOSED_PERIOD_ERROR = "La quincena de esta transferencia ya está cerrada";
 
@@ -28,12 +35,17 @@ export async function saveTransfer(
   const parsed = parseFormData(transferSchema, formData);
   if (!parsed.success) return parsed.state;
 
-  const { fromAccountId, toAccountId, occurredOn } = parsed.data;
+  const { fromAccountId, toAccountId, occurredOn, amountCents } = parsed.data;
   const owned = await Promise.all([
     isOwnedAccount(user.id, fromAccountId),
     isOwnedAccount(user.id, toAccountId),
   ]);
   if (owned.includes(false)) return { error: "Cuenta inválida" };
+
+  const fromAccount = await getAccount(user.id, fromAccountId);
+  if (fromAccount?.type === "credit") {
+    return { fieldErrors: { fromAccountId: ["El origen no puede ser una tarjeta de crédito"] } };
+  }
 
   if (id) {
     const current = await getTransfer(user.id, id);
@@ -43,6 +55,14 @@ export async function saveTransfer(
 
   const resolved = await resolveOpenPeriod(user.id, occurredOn);
   if ("error" in resolved) return { fieldErrors: { occurredOn: [resolved.error] } };
+
+  const balance = await getPlannedBalance(user.id, fromAccountId);
+  const warning = insufficientBalanceState(
+    balance,
+    amountCents,
+    confirmInsufficient(formData),
+  );
+  if (warning) return warning;
 
   const values = { ...parsed.data, periodId: resolved.periodId };
   if (id) {
@@ -64,31 +84,60 @@ export async function removeTransfer(id: string): Promise<FormState> {
   redirect("/movimientos");
 }
 
-/** Records the pending part of a planned transfer as done today. */
+/**
+ * Records the pending part of a planned funding step as done today.
+ * The user chooses the origin account; the plan only suggests one.
+ */
 export async function completeTransferStep(
   periodId: string,
-  fromAccountId: string,
   toAccountId: string,
-) {
+  _state: FormState,
+  formData: FormData,
+): Promise<FormState> {
   const user = await requireUser();
-  if (!(await isPeriodOpen(user.id, periodId))) return;
+  if (!(await isPeriodOpen(user.id, periodId))) return { error: CLOSED_PERIOD_ERROR };
+
+  const parsed = parseFormData(completeStepSchema, formData);
+  if (!parsed.success) return parsed.state;
+  const { fromAccountId } = parsed.data;
+
+  if (!(await isOwnedAccount(user.id, fromAccountId))) {
+    return { fieldErrors: { fromAccountId: ["Cuenta inválida"] } };
+  }
+  if (!(await isOwnedAccount(user.id, toAccountId))) {
+    return { error: "Cuenta de destino inválida" };
+  }
+
+  const fromAccount = await getAccount(user.id, fromAccountId);
+  if (fromAccount?.type === "credit") {
+    return { fieldErrors: { fromAccountId: ["El origen no puede ser una tarjeta de crédito"] } };
+  }
 
   const { steps } = await getTransferPlan(user.id, periodId);
-  const step = steps.find(
-    (candidate) =>
-      candidate.fromAccountId === fromAccountId && candidate.toAccountId === toAccountId,
-  );
+  const step = steps.find((candidate) => candidate.toAccountId === toAccountId);
   const pendingCents = step ? step.amountCents - step.doneCents : 0;
-  if (pendingCents <= 0) return;
+  if (pendingCents <= 0) return { error: "Este fondeo ya está completo" };
 
-  await createTransfer(user.id, {
+  if (fromAccountId === toAccountId) {
+    await setAsidePendingForAccount(user.id, periodId, toAccountId);
+    redirect("/");
+  }
+
+  const balance = await getPlannedBalance(user.id, fromAccountId);
+  const warning = insufficientBalanceState(
+    balance,
+    pendingCents,
+    confirmInsufficient(formData),
+  );
+  if (warning) return warning;
+
+  await fundAccountStep({
+    userId: user.id,
     periodId,
     fromAccountId,
     toAccountId,
-    amountCents: pendingCents,
+    pendingCents,
     occurredOn: todayIsoDate(),
-    note: null,
   });
-  await setAsideIfAccountFullyFunded(user.id, periodId, toAccountId);
-  revalidatePath("/");
+  redirect("/");
 }

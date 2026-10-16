@@ -165,15 +165,18 @@
 <table>
   <tr><th>Concepto</th><th>Qué significa</th></tr>
   <tr><td><b>Quincena</b></td><td>La 1ª va del día 1 al 15; la 2ª del 16 al último día del mes. Todo se organiza por quincena.</td></tr>
-  <tr><td><b>Cuenta</b></td><td>Una cuenta corriente, una cuenta de ahorro o una tarjeta de crédito.</td></tr>
-  <tr><td><b>Ingreso</b></td><td>Tu salario u otro ingreso fijo, con la cuenta donde se deposita.</td></tr>
-  <tr><td><b>Gasto fijo</b></td><td>Un pago recurrente con monto conocido: préstamo, aporte familiar, servicios, etc.</td></tr>
-  <tr><td><b>Presupuesto</b></td><td>Un tope para gastos variables, como gasolina o citas. Puedes pasarte; la app solo te avisa.</td></tr>
+  <tr><td><b>Cuenta</b></td><td>Una cuenta corriente, una cuenta de ahorro o una tarjeta de crédito. El efectivo se modela como una cuenta corriente/ahorro llamada «Efectivo».</td></tr>
+  <tr><td><b>Saldo planificado</b></td><td>Saldo inicial + ingresos depositados − gastos ± transferencias. No es el saldo del banco real: lo registras tú a mano.</td></tr>
+  <tr><td><b>Ingreso</b></td><td>Un ingreso fijo recurrente, con la cuenta donde se deposita.</td></tr>
+  <tr><td><b>Gasto fijo</b></td><td>Un pago recurrente con monto conocido.</td></tr>
+  <tr><td><b>Presupuesto</b></td><td>Un tope para gastos variables. Puedes pasarte; la app solo te avisa.</td></tr>
   <tr><td><b>Sobrante</b></td><td>Lo que queda de tu ingreso después de gastos fijos y presupuestos. Al cerrar la quincena decides a dónde moverlo.</td></tr>
-  <tr><td><b>Transferencia</b></td><td>Dinero que mueves entre tus cuentas (incluido pagar una tarjeta). No cuenta como gasto.</td></tr>
+  <tr><td><b>Transferencia</b></td><td>Dinero que mueves entre tus cuentas (fondeo, apartado o pagar una tarjeta). No cuenta como gasto.</td></tr>
 </table>
 
-<div class="tip"><strong>Nunca te bloquea</strong>Si gastas más de lo planeado, la app lo registra y lo marca como “Excedido”, pero siempre te deja guardar.</div>
+<div class="tip"><strong>Confirmación</strong>Toda acción que mueva o cambie dinero (gastos, transferencias, apartar, pagar, cerrar quincena, etc.) te pide confirmar antes de aplicarla.</div>
+
+<div class="tip"><strong>Saldo insuficiente</strong>Si un gasto o transferencia supera el saldo planificado de la cuenta, la app te avisa y te deja continuar si confirmas (por si repondrás después).</div>
 
 <!-- 2 -->
 <h2 id="inicio-rapido">2. Primeros pasos</h2>
@@ -211,14 +214,16 @@
 <h3>3.1 Cuentas</h3>
 <p>Registra cada cuenta con su <b>Tipo</b> (Corriente, Ahorro o Tarjeta de crédito), un <b>Nombre</b>, el <b>Banco</b> y, si quieres, los <b>Últimos 4 dígitos</b>. Si tu cuenta tiene tarjeta de débito, regístrala con el tipo de la cuenta a la que está ligada (normalmente Ahorro o Corriente).</p>
 <p>El nombre es solo un apodo: el tipo ya aparece escrito dentro del campo y no se puede borrar. Una tarjeta llamada "NICO" del BAC terminada en 1234 se muestra como <b>Tarjeta de crédito NICO ••1234 · BAC</b>. Los últimos 4 dígitos son opcionales y sirven para distinguir dos tarjetas o cuentas parecidas.</p>
+<p>En cuentas corrientes y de ahorro indica el <b>Saldo inicial</b>: el dinero que ya tenía la cuenta al empezar con IzalApp. Para efectivo, crea una cuenta corriente o de ahorro llamada <b>Efectivo</b>.</p>
 <p>Si es <b>tarjeta de crédito</b>, aparecen más campos:</p>
 <ul>
   <li><b>Día de corte</b>: el día del mes en que cierra el estado de cuenta.</li>
   <li><b>Fecha límite de pago</b>: elige <b>Un día fijo del mes</b> (por ejemplo, el 5) o <b>Días después del corte</b> (por ejemplo, 20 días), según lo que diga tu estado de cuenta. Los días se cuentan desde el día siguiente al corte: con corte el 23 de septiembre y 25 días, el pago es el 18 de octubre. Si la fecha cae en sábado o domingo, se pasa al lunes.</li>
-  <li><b>Se paga desde</b>: la cuenta (corriente o de ahorro) con la que normalmente la pagas.</li>
+  <li><b>Se paga desde</b>: la cuenta (corriente o de ahorro) con la que normalmente la pagas. Obligatoria para poder apartar/fondear presupuestos de esa tarjeta.</li>
+  <li><b>Deuda inicial</b>: lo que ya debías al empezar (0 si partes de cero).</li>
 </ul>
 <p>El <b>Banco</b> se elige de la lista de bancos de El Salvador. Si el tuyo no aparece, elige <b>Otro…</b> y escribe su nombre.</p>
-<p>La lista de cuentas se divide en <b>Cuentas bancarias</b> y <b>Tarjetas de crédito</b>, cada una ordenada alfabéticamente por banco.</p>
+<p>La lista de cuentas se divide en <b>Cuentas bancarias</b> (con su saldo planificado) y <b>Tarjetas de crédito</b> (con la deuda planificada). El saldo planificado = inicial + ingresos − gastos ± transferencias; no consulta el banco real.</p>
 <div class="tip"><strong>Consejo</strong>Crea al menos una cuenta de tipo <b>Ahorro</b>: al cerrar cada quincena la app la propone como destino del sobrante.</div>
 <div class="tip"><strong>Cómo se escriben los montos</strong>Escribe solo los dígitos, sin punto: se llenan de derecha a izquierda como en una caja registradora. Para $13.00 teclea 1, 3, 0, 0; para $1,059.65 teclea 1, 0, 5, 9, 6, 5. Las letras y los símbolos se ignoran.</div>
 
@@ -238,8 +243,8 @@
 <h3>3.4 Gastos fijos</h3>
 <p>Nombre, monto mensual, reparto, <b>¿Cuándo se paga?</b> y la cuenta o tarjeta con la que <b>se paga</b>.</p>
 <ul>
-  <li><b>El día que recibo mi pago</b>: compromisos sin fecha, como un apoyo familiar de $75 cada quincena.</li>
-  <li><b>Tiene fecha de vencimiento</b>: servicios o préstamos con fecha límite, como el teléfono; indica el día en que vence. Una semana antes empezará a aparecer en <b>Próximos pagos</b> (ver 4.2).</li>
+  <li><b>El día que recibo mi pago</b>: sin día de vencimiento; se paga cuando recibes tu ingreso.</li>
+  <li><b>Tiene fecha de vencimiento</b>: indica el día del mes en que vence. Una semana antes empezará a aparecer en <b>Próximos pagos</b> (ver 4.2).</li>
 </ul>
 
 <h3>3.5 Presupuestos</h3>
@@ -272,12 +277,12 @@
 <div class="example">
   <div class="stat"><small>Ingreso</small><b>$1,200.00</b></div>
   <div class="stat"><small>Gastos fijos</small><b>$450.00</b><em>1 de 3 pagados</em></div>
-  <div class="stat"><small>Presupuestos</small><b>$120.00</b><em>de $300.00</em></div>
+  <div class="stat"><small>Presupuesto consumido</small><b>$120.00</b><em>de $300.00</em></div>
   <div class="stat"><small>Sobrante estimado</small><b>$450.00</b><em>Planeado $450.00</em></div>
 </div>
 <ul>
   <li><b>Gastos fijos</b>: total planeado y cuántos ya marcaste como pagados.</li>
-  <li><b>Presupuestos</b>: lo que llevas gastado contra el total de topes.</li>
+  <li><b>Presupuesto consumido</b>: lo que llevas gastado contra el total de topes.</li>
   <li><b>Sobrante estimado</b>: lo que te quedaría al final. Baja si tienes gastos sin presupuesto (“otros gastos”) o si te pasas de algún presupuesto (“excesos”). Se pone en rojo si es negativo.</li>
 </ul>
 
@@ -291,28 +296,28 @@
   <div style="display:flex;justify-content:space-between;font-size:14px"><span class="muted">$0 de $75.00</span><span class="btn outline">Apartar</span></div>
 </div>
 <p>Cada presupuesto muestra una barra de avance, lo gastado contra el tope y lo que te queda. Empieza en <b>Pendiente</b>: debes <b>Apartar</b> (o completar el fondeo de su cuenta) antes de poder registrar gastos. Mientras esté pendiente verás “Aparta primero” en lugar de <b>+ Gasto</b> / <b>+ Carga</b>.</p>
-<p>Al apartarlo queda <span class="badge gray">Apartado</span> y baja del plan de fondeo. Si te pasas del tope verás <span class="red">Excedido $X</span>.</p>
+<p>Al tocar <b>Apartar</b> eliges la cuenta de <b>origen</b>; la app registra una transferencia hacia la cuenta de la partida (o hacia «Se paga desde» si es tarjeta), deja la partida <span class="badge gray">Apartado</span> y la saca del plan de fondeo. Si te pasas del tope verás <span class="red">Excedido $X</span>.</p>
 
 <h3>4.5 Gastos fijos</h3>
 <p>Cada gasto fijo tiene un estado:</p>
 <table>
   <tr><th>Estado</th><th>Significado</th><th>Botones</th></tr>
   <tr><td><span class="badge">Pendiente</span></td><td>Aún no está fondeado. Cuenta en “Fondear cuentas”. No puedes cargarle gastos sueltos todavía.</td><td><span class="btn outline">Apartar</span> <span class="btn">Pagar</span></td></tr>
-  <tr><td><span class="badge gray">Apartado</span></td><td>Ya separaste el dinero. Sale del fondeo. También pasa solo al completar el fondeo de esa cuenta.</td><td><span class="btn">Pagar</span> <span class="btn outline">Deshacer</span></td></tr>
+  <tr><td><span class="badge gray">Apartado</span></td><td>Ya hay una transferencia de fondeo registrada (o se apartó al completar “Fondear cuentas”).</td><td><span class="btn">Pagar</span> <span class="btn outline">Deshacer</span></td></tr>
   <tr><td><span class="badge solid">Pagado</span></td><td>Ya está pagado; también sale del fondeo.</td><td><span class="btn outline">Deshacer</span></td></tr>
 </table>
-<p>Si el monto real fue distinto al planeado, registra el gasto con el botón <b>+</b> eligiendo ese gasto fijo (debe estar apartado o pagado) y la app usará el mayor de los dos.</p>
+<p><b>Apartar</b> pide la cuenta de origen y crea la transferencia. <b>Deshacer</b> un apartado revierte el estado y elimina esa transferencia de apartado. Si el monto real fue distinto al planeado, registra el gasto con <b>+</b> eligiendo ese gasto fijo (debe estar apartado o pagado).</p>
 
 <h3>4.6 Ingresos extra</h3>
 <p>Si en una quincena te llega dinero fuera de tu plan (un bono, un trabajo extra, un reembolso), en la sección <b>Ingresos</b> de Inicio toca <b>+ Ingreso extra</b> y llena:</p>
 <ul>
-  <li><b>Concepto</b>: por ejemplo “Bono”.</li>
+  <li><b>Concepto</b>.</li>
   <li><b>Monto</b>.</li>
-  <li><b>Se depositó en</b>: la cuenta donde cayó el dinero (trae preseleccionada la de tu salario).</li>
+  <li><b>Se depositó en</b>: la cuenta donde cayó el dinero (trae preseleccionada la de tu ingreso principal, si hay una).</li>
 </ul>
 <p>El ingreso extra aparece en la lista marcado como <b>Extra</b>, se suma al Ingreso y al Sobrante de esa quincena, y al cerrarla lo puedes mover a tu ahorro junto con el resto del sobrante. Solo cuenta en esa quincena: no se repite en las siguientes.</p>
 <p>Para corregir el monto o eliminarlo, toca su nombre en la lista.</p>
-<div class="tip"><strong>¿Extra o fijo?</strong>Si el ingreso se va a repetir cada mes, mejor agrégalo en <b>Ajustes → Ingresos</b>. Si solo cambió el monto de tu salario en esta quincena (por ejemplo, horas extra), toca <b>Salario</b> y ajusta su monto.</div>
+<div class="tip"><strong>¿Extra o fijo?</strong>Si el ingreso se va a repetir cada mes, agrégalo en <b>Ajustes → Ingresos</b>. Si solo cambió el monto de un ingreso fijo en esta quincena, tócalo en Inicio y ajusta su monto.</div>
 
 <!-- 5 -->
 <h2 id="gastos">5. Registrar gastos</h2>
@@ -320,10 +325,11 @@
 <ul>
   <li><b>Monto</b>: escribe solo los dígitos; para $25.50 teclea 2, 5, 5, 0 (ver el consejo en 3.1).</li>
   <li><b>Presupuesto o gasto fijo</b>: solo aparecen partidas ya apartadas o pagadas. Déjalo en <b>Sin presupuesto</b> para un gasto imprevisto; se suma como “otros gastos”.</li>
-  <li><b>Cuenta</b>: se llena sola con la cuenta de la partida, pero puedes cambiarla.</li>
+  <li><b>Cuenta</b>: si eliges una partida, queda fija la cuenta de esa partida (no se puede cambiar). Así un presupuesto de tarjeta carga la <b>deuda de la tarjeta</b>, no el banco. Solo eliges cuenta a mano cuando es “Sin presupuesto”.</li>
   <li><b>Fecha</b>: por defecto hoy.</li>
   <li><b>Nota</b>: opcional, por ejemplo “Cena”.</li>
 </ul>
+<p>Si el gasto supera el saldo planificado de una cuenta bancaria, verás un aviso y podrás confirmar para continuar.</p>
 <p>Para corregir o borrar un gasto, búscalo en <b>Movimientos</b> y tócalo.</p>
 <div class="tip"><strong>¿En qué quincena cae?</strong>Si eliges una partida, el gasto va a la quincena de esa partida. Si es “Sin presupuesto”, va a la quincena que corresponde a la fecha. En ambos casos esa quincena debe estar abierta.</div>
 
@@ -331,24 +337,24 @@
 <h2 id="transferencias">6. Transferencias</h2>
 
 <h3>6.1 Fondear cuentas</h3>
-<p>Tu sueldo cae en una cuenta, pero tus gastos salen de varias. En Inicio, la sección <b>Fondear cuentas</b> suma solo lo <b>pendiente</b> (gastos fijos y presupuestos aún no apartados ni pagados) y te dice cuánto mover. Si apartas o pagas una partida a mano, el monto baja. Debajo del destino verás el desglose:</p>
+<p>Tu sueldo cae en una cuenta, pero tus gastos salen de varias. En Inicio, <b>Fondear cuentas</b> suma solo lo <b>pendiente</b> y propone un destino, monto y origen sugerido. Debajo del destino verás el desglose:</p>
 <div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <div>Cuenta corriente Nómina · Banco Agrícola<br><span class="muted">↓</span><br>Cuenta de ahorro Gastos · BAC<br><span class="muted" style="font-size:12px">Luz $40.00 · Internet $35.00</span></div>
+    <div><span class="muted">Sugerido: Cuenta corriente Nómina · Banco Agrícola</span><br><span class="muted">↓</span><br>Cuenta de ahorro Gastos · BAC<br><span class="muted" style="font-size:12px">Luz $40.00 · Internet $35.00</span></div>
     <div style="text-align:right"><b>$75.00</b><br><span class="btn">Ya lo moví</span></div>
   </div>
 </div>
 <ul>
-  <li>Cuando hagas la transferencia en tu banco, toca <b>Ya lo moví</b> y se registra automáticamente con fecha de hoy.</li>
-  <li>Si moviste solo una parte (registrada a mano), verás <b>Faltan $X</b>.</li>
-  <li>Al completarse aparece <span class="badge solid">Hecho</span> y lo pendiente de esa cuenta (gastos fijos y presupuestos) pasa a <b>Apartado</b>.</li>
-  <li>Sin apartar / fondear no puedes registrar gastos ni cargas contra esa partida (si pagaste de otra cuenta, repones después).</li>
-  <li>Los gastos que se pagan con tarjeta de crédito se cubren desde la cuenta con la que pagas esa tarjeta (“Se paga desde”).</li>
+  <li><b>Ya lo moví</b> abre una pantalla para elegir la cuenta de <b>origen</b> (viene preseleccionada la sugerida). Crea transferencias <b>Apartado: …</b> por cada partida pendiente de esa cuenta (igual que Apartar) y las deja apartadas.</li>
+  <li><b>Apartar</b> en un presupuesto o gasto fijo hace lo mismo partida por partida: eliges el origen y se crea la transferencia.</li>
+  <li><b>Deshacer</b> un apartado elimina esa transferencia y revierte el saldo planificado. Deshacer un pago solo quita el gasto; el apartado (y su transferencia) se quedan.</li>
+  <li>Si moviste solo una parte, verás <b>Faltan $X</b>. Solo cuentan transferencias <b>Apartado: …</b> de las partidas pendientes de ese destino (no otras transferencias a la misma cuenta).</li>
+  <li>Presupuestos/gastos de <b>tarjeta</b>: el fondeo va a la cuenta «Se paga desde» (reservas el dinero del banco). El gasto posterior carga la <b>tarjeta</b>; el banco solo baja otra vez cuando <b>pagas la tarjeta</b>.</li>
 </ul>
 
 <h3>6.2 Transferencias manuales</h3>
-<p>En <b>Movimientos</b> toca <span class="btn outline">Transferir</span>. Llena monto, <b>Desde</b>, <b>Hacia</b>, fecha y nota. Las cuentas de origen y destino deben ser distintas.</p>
-<p>Las transferencias aparecen en Movimientos junto con tus gastos, pero <b>no cuentan como gasto</b>.</p>
+<p>En <b>Movimientos</b> toca <span class="btn outline">Transferir</span>. Llena monto, <b>Desde</b>, <b>Hacia</b>, fecha y nota. Origen y destino distintos; el origen no puede ser una tarjeta.</p>
+<p>Las transferencias aparecen en Movimientos junto con tus gastos, pero <b>no cuentan como gasto</b>. Sí mueven el saldo planificado.</p>
 
 <!-- 7 -->
 <h2 id="tarjetas">7. Tarjetas de crédito</h2>
@@ -371,14 +377,15 @@
   <li><b>Llevas … para el próximo corte</b>: lo que has cargado después del último corte.</li>
   <li>Estados: <span class="badge">Por pagar $X</span> <span class="badge solid">Pagada</span> <span class="badge red">Vencida $X</span> <span class="badge">Sin saldo</span></li>
 </ul>
+<p><b>Compra con presupuesto de tarjeta:</b> el gasto queda en la tarjeta (sube la deuda / “llevas…”). No descuenta el banco. El banco solo se mueve al fondear/apartar (reserva en «Se paga desde») y al <b>pagar la tarjeta</b>.</p>
 <h3>Pagar la tarjeta</h3>
 <ol class="steps">
   <li>Toca <span class="btn">Pagar</span>.</li>
-  <li>Se abre una transferencia ya llena: el monto pendiente, la cuenta “Se paga desde” y la tarjeta como destino. Ajusta lo que necesites.</li>
-  <li>Toca <b>Guardar</b>. El pendiente baja; si pagaste todo, la tarjeta queda como <b>Pagada</b>.</li>
+  <li>Se abre una transferencia: monto pendiente, cuenta “Se paga desde” → tarjeta. Ajusta lo que necesites.</li>
+  <li>Toca <b>Guardar</b>. El pendiente baja; si pagaste todo, queda <b>Pagada</b>. Esa transferencia sí reduce el saldo planificado del banco.</li>
 </ol>
-<p>También puedes pagarla desde <b>Movimientos → Transferir</b> eligiendo la tarjeta en <b>Hacia</b>. Puedes hacer varios abonos.</p>
-<div class="warn"><strong>Ten en cuenta</strong>Solo cuenta los cargos registrados en la app. Si usaste la tarjeta antes de empezar con IzalApp, esos cargos no aparecen.</div>
+<p>También desde <b>Movimientos → Transferir</b> eligiendo la tarjeta en <b>Hacia</b>. Puedes hacer varios abonos.</p>
+<div class="warn"><strong>Ten en cuenta</strong>Solo cuenta los cargos registrados en la app. Usa <b>Deuda inicial</b> en la tarjeta si empezaste a mitad de ciclo.</div>
 
 <!-- 8 -->
 <h2 id="gasolina">8. Gasolina</h2>

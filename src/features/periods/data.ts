@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   financialAccounts,
@@ -10,11 +10,14 @@ import {
   type PeriodItem,
 } from "@/db/schema";
 import { getActiveTemplates } from "@/features/plan/data";
+import { fundingAccountId, setAsideTransferNote } from "@/features/transfers/plan";
 import { splitAmount } from "@/lib/allocation";
 import { amountForHalf, periodKeyOf, type PeriodKey } from "@/lib/period";
 import { isUuid } from "@/lib/validation";
 import type { PaymentStatus } from "./constants";
 import type { ExtraIncomeInput } from "./schema";
+
+export { setAsideTransferNote };
 
 export async function findPeriod(userId: string, { year, month, half }: PeriodKey) {
   const [period] = await db
@@ -190,26 +193,110 @@ export async function deleteExtraIncome(userId: string, id: string) {
     );
 }
 
-/** Paying a fixed expense records its planned amount as spent; undoing the payment removes it. */
+type SetAsideTransfer = {
+  fromAccountId: string;
+  toAccountId: string;
+  occurredOn: string;
+};
+
+/**
+ * Marks a pending item as apartado and, when origin ≠ destination, records the funding transfer.
+ * Locks the item row so a double submit cannot create two transfers.
+ */
+export async function setAsideItem(
+  item: PeriodItem,
+  transfer: SetAsideTransfer | null,
+): Promise<"ok" | "not_pending"> {
+  return db.transaction(async (tx) => {
+    const [fresh] = await tx
+      .select()
+      .from(periodItems)
+      .where(eq(periodItems.id, item.id))
+      .for("update")
+      .limit(1);
+    if (!fresh || fresh.paymentStatus !== "pending") return "not_pending";
+
+    if (transfer) {
+      await tx.insert(transfers).values({
+        userId: fresh.userId,
+        periodId: fresh.periodId,
+        fromAccountId: transfer.fromAccountId,
+        toAccountId: transfer.toAccountId,
+        amountCents: fresh.plannedCents,
+        occurredOn: transfer.occurredOn,
+        note: setAsideTransferNote(fresh.name),
+      });
+    }
+
+    await tx
+      .update(periodItems)
+      .set({ paymentStatus: "set_aside" })
+      .where(eq(periodItems.id, fresh.id));
+    return "ok";
+  });
+}
+
+/**
+ * Paying a fixed expense records its planned amount as spent; undoing the payment removes it.
+ * Undoing an apartado removes the matching funding transfer created by Apartar.
+ * Re-reads the row inside the transaction so a double submit cannot insert twice.
+ */
 export async function changePaymentStatus(
   item: PeriodItem,
   status: PaymentStatus,
   paidOn: string,
 ) {
   await db.transaction(async (tx) => {
+    const [fresh] = await tx
+      .select()
+      .from(periodItems)
+      .where(eq(periodItems.id, item.id))
+      .for("update")
+      .limit(1);
+    if (!fresh || fresh.paymentStatus === status) return;
+
     await tx.update(periodItems).set({ paymentStatus: status }).where(eq(periodItems.id, item.id));
 
-    if (status === "paid" && item.paymentStatus !== "paid") {
+    if (status === "paid" && fresh.paymentStatus !== "paid") {
       await tx.insert(transactions).values({
-        userId: item.userId,
-        periodId: item.periodId,
-        itemId: item.id,
-        accountId: item.accountId,
-        amountCents: item.plannedCents,
+        userId: fresh.userId,
+        periodId: fresh.periodId,
+        itemId: fresh.id,
+        accountId: fresh.accountId,
+        amountCents: fresh.plannedCents,
         occurredOn: paidOn,
       });
-    } else if (status !== "paid" && item.paymentStatus === "paid") {
-      await tx.delete(transactions).where(eq(transactions.itemId, item.id));
+    } else if (status !== "paid" && fresh.paymentStatus === "paid") {
+      await tx.delete(transactions).where(eq(transactions.itemId, fresh.id));
+    }
+
+    if (fresh.paymentStatus === "set_aside" && status === "pending") {
+      const [account] = await tx
+        .select()
+        .from(financialAccounts)
+        .where(eq(financialAccounts.id, fresh.accountId))
+        .limit(1);
+      const toAccountId = fundingAccountId(account, fresh.accountId);
+      const note = setAsideTransferNote(fresh.name);
+
+      // Apartar / Fondear tag transfers with the note; also clear legacy unlabeled fondeo rows.
+      await tx
+        .delete(transfers)
+        .where(
+          and(
+            eq(transfers.userId, fresh.userId),
+            eq(transfers.periodId, fresh.periodId),
+            eq(transfers.isSurplus, false),
+            or(
+              eq(transfers.note, note),
+              and(
+                isNull(transfers.note),
+                eq(transfers.toAccountId, toAccountId),
+                eq(transfers.amountCents, fresh.plannedCents),
+              ),
+            ),
+          ),
+        );
     }
   });
 }

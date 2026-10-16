@@ -1,9 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { isOwnedAccount } from "@/features/accounts/data";
+import { getPlannedBalance } from "@/features/accounts/balance";
+import { getAccount, isOwnedAccount } from "@/features/accounts/data";
 import { isPeriodOpen } from "@/features/periods/data";
 import { parseFormData, type FormState } from "@/lib/form";
+import { confirmInsufficient, insufficientBalanceState } from "@/lib/insufficient-balance";
 import { requireUser } from "@/lib/session";
 import { createTransaction, deleteTransaction, getTransaction, updateTransaction } from "./data";
 import { CLOSED_EXPENSE_ERROR, fundingRequiredError, resolveExpensePeriod } from "./period";
@@ -18,7 +20,12 @@ export async function saveTransaction(
   const parsed = parseFormData(transactionSchema, formData);
   if (!parsed.success) return parsed.state;
 
-  if (!(await isOwnedAccount(user.id, parsed.data.accountId))) {
+  const resolved = await resolveExpensePeriod(user.id, parsed.data);
+  if ("fieldErrors" in resolved) return { fieldErrors: resolved.fieldErrors };
+
+  // Partidas always charge their own account (card debt vs bank cash).
+  const accountId = resolved.item?.accountId ?? parsed.data.accountId;
+  if (!(await isOwnedAccount(user.id, accountId))) {
     return { fieldErrors: { accountId: ["Cuenta inválida"] } };
   }
 
@@ -28,15 +35,23 @@ export async function saveTransaction(
     if (!(await isPeriodOpen(user.id, current.periodId))) return { error: CLOSED_EXPENSE_ERROR };
   }
 
-  const resolved = await resolveExpensePeriod(user.id, parsed.data);
-  if ("fieldErrors" in resolved) return { fieldErrors: resolved.fieldErrors };
-
   if (!id && resolved.item) {
     const fundingError = fundingRequiredError(resolved.item);
     if (fundingError) return { fieldErrors: fundingError };
   }
 
-  const values = { ...parsed.data, periodId: resolved.periodId };
+  const account = await getAccount(user.id, accountId);
+  if (account && account.type !== "credit") {
+    const balance = await getPlannedBalance(user.id, accountId);
+    const warning = insufficientBalanceState(
+      balance,
+      parsed.data.amountCents,
+      confirmInsufficient(formData),
+    );
+    if (warning) return warning;
+  }
+
+  const values = { ...parsed.data, accountId, periodId: resolved.periodId };
   if (id) {
     await updateTransaction(user.id, id, values);
     redirect("/movimientos");

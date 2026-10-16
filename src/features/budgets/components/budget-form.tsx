@@ -14,12 +14,15 @@ type BudgetFormProps = {
 
 export function BudgetForm({ action, budget, accountOptions }: BudgetFormProps) {
   return (
-    <ActionForm action={action}>
+    <ActionForm
+      action={action}
+      confirmMessage={budget ? "¿Guardar los cambios de este presupuesto?" : "¿Crear este presupuesto?"}
+    >
       <TextField
         name="name"
         label="Nombre"
         required
-        placeholder="Gasolina"
+        placeholder="Nombre del presupuesto"
         maxLength={NAME_MAX_LENGTH}
         defaultValue={budget?.name}
       />

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ConfirmForm } from "@/components/form/confirm-form";
 import { PendingButton } from "@/components/form/pending-button";
 import { LinkButton } from "@/components/link-button";
 import type { Period } from "@/db/schema";
@@ -39,11 +40,14 @@ export function ClosedPeriodNotice({ periodId }: { periodId: string }) {
       title="Quincena cerrada"
       description="Al reabrirla se quita el traspaso del sobrante."
       action={
-        <form action={reopenPeriodAction.bind(null, periodId)}>
+        <ConfirmForm
+          action={reopenPeriodAction.bind(null, periodId)}
+          confirmMessage="¿Reabrir la quincena? Se quitará el traspaso del sobrante."
+        >
           <PendingButton variant="outline" className="h-10">
             Reabrir
           </PendingButton>
-        </form>
+        </ConfirmForm>
       }
     />
   );

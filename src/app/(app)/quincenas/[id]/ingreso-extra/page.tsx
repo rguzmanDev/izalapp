@@ -28,15 +28,18 @@ export default async function ExtraIncomePage({ params }: PageProps<"/quincenas/
     <>
       <PageHeader
         title="Ingreso extra"
-        description={`Bono, trabajo extra o cualquier ingreso fuera de tu plan. Solo cuenta en la ${periodLabel(toPeriodKey(period))}.`}
+        description={`Ingreso fuera de tu plan fijo. Solo cuenta en la ${periodLabel(toPeriodKey(period))}.`}
         backHref="/"
       />
-      <ActionForm action={saveExtraIncome.bind(null, period.id)}>
+      <ActionForm
+        action={saveExtraIncome.bind(null, period.id)}
+        confirmMessage="¿Registrar este ingreso extra?"
+      >
         <TextField
           name="name"
           label="Concepto"
           required
-          placeholder="Bono"
+          placeholder="Concepto del ingreso"
           maxLength={NAME_MAX_LENGTH}
         />
         <MoneyField name="plannedCents" label="Monto" required />

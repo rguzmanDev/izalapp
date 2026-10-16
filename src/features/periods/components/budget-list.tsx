@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { ConfirmForm } from "@/components/form/confirm-form";
 import { PendingButton } from "@/components/form/pending-button";
+import { LinkButton } from "@/components/link-button";
 import { ProgressBar } from "@/components/progress-bar";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/money";
@@ -7,16 +9,10 @@ import { setPaymentStatus } from "../actions";
 import { PAYMENT_STATUS_LABELS, type PaymentStatus } from "../constants";
 import type { PeriodItemRow } from "../data";
 
-const NEXT_ACTIONS: Partial<Record<PaymentStatus, { status: PaymentStatus; label: string }[]>> = {
-  pending: [{ status: "set_aside", label: "Apartar" }],
-  set_aside: [{ status: "pending", label: "Deshacer" }],
-};
-
 type BudgetRowProps = PeriodItemRow & { readOnly?: boolean };
 
 function BudgetRow({ item, spentCents, readOnly }: BudgetRowProps) {
   const remaining = item.plannedCents - spentCents;
-  const actions = NEXT_ACTIONS[item.paymentStatus] ?? [];
   const canSpend = item.paymentStatus !== "pending";
 
   return (
@@ -53,7 +49,7 @@ function BudgetRow({ item, spentCents, readOnly }: BudgetRowProps) {
         </span>
         <div className="flex items-center gap-2">
           {item.paymentStatus !== "pending" && (
-            <Badge variant="secondary">{PAYMENT_STATUS_LABELS[item.paymentStatus]}</Badge>
+            <Badge variant="secondary">{PAYMENT_STATUS_LABELS[item.paymentStatus as PaymentStatus]}</Badge>
           )}
           {remaining >= 0 ? (
             <span>Quedan {formatMoney(remaining)}</span>
@@ -62,15 +58,23 @@ function BudgetRow({ item, spentCents, readOnly }: BudgetRowProps) {
           )}
         </div>
       </div>
-      {!readOnly && actions.length > 0 && (
+      {!readOnly && (
         <div className="flex justify-end gap-2">
-          {actions.map(({ status, label }) => (
-            <form key={status} action={setPaymentStatus.bind(null, item.id, status)}>
+          {item.paymentStatus === "pending" && (
+            <LinkButton href={`/partidas/${item.id}/apartar`} variant="outline" size="sm">
+              Apartar
+            </LinkButton>
+          )}
+          {item.paymentStatus === "set_aside" && (
+            <ConfirmForm
+              action={setPaymentStatus.bind(null, item.id, "pending")}
+              confirmMessage={`¿Deshacer el apartado de "${item.name}"?`}
+            >
               <PendingButton variant="outline" size="sm">
-                {label}
+                Deshacer
               </PendingButton>
-            </form>
-          ))}
+            </ConfirmForm>
+          )}
         </div>
       )}
     </li>

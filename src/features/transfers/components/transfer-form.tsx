@@ -18,7 +18,7 @@ type TransferFormProps = {
 
 export function TransferForm({ action, defaults, accountOptions }: TransferFormProps) {
   return (
-    <ActionForm action={action}>
+    <ActionForm action={action} confirmMessage="¿Registrar esta transferencia?">
       <MoneyField
         name="amountCents"
         label="Monto"

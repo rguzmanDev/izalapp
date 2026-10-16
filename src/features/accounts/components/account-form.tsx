@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { ActionForm } from "@/components/form/action-form";
-import { IntegerField, SelectField, TextField, type SelectOption } from "@/components/form/fields";
+import {
+  IntegerField,
+  MoneyField,
+  SelectField,
+  TextField,
+  type SelectOption,
+} from "@/components/form/fields";
 import { SubmitButton } from "@/components/form/submit-button";
 import type { FinancialAccount } from "@/db/schema";
 import type { FormState } from "@/lib/form";
@@ -40,7 +46,10 @@ export function AccountForm({ action, account, paymentAccountOptions }: AccountF
   );
 
   return (
-    <ActionForm action={action}>
+    <ActionForm
+      action={action}
+      confirmMessage={account ? "¿Guardar los cambios de esta cuenta?" : "¿Crear esta cuenta?"}
+    >
       <SelectField
         name="type"
         label="Tipo"
@@ -55,7 +64,7 @@ export function AccountForm({ action, account, paymentAccountOptions }: AccountF
         hint="Solo un apodo para reconocerla; el tipo ya va incluido."
         required
         startText={ACCOUNT_NAME_PREFIXES[type]}
-        placeholder="Emprendimiento"
+        placeholder="Apodo de la cuenta"
         maxLength={NAME_MAX_LENGTH}
         defaultValue={account?.name}
       />
@@ -119,7 +128,23 @@ export function AccountForm({ action, account, paymentAccountOptions }: AccountF
             options={paymentAccountOptions}
             defaultValue={account?.paymentAccountId ?? ""}
           />
+          <MoneyField
+            name="openingBalanceCents"
+            label="Deuda inicial"
+            hint="Lo que ya debías al empezar a usar IzalApp. Déjalo en 0 si partes de cero."
+            defaultCents={
+              account && account.openingBalanceCents < 0 ? -account.openingBalanceCents : 0
+            }
+          />
         </>
+      )}
+      {type !== "credit" && (
+        <MoneyField
+          name="openingBalanceCents"
+          label="Saldo inicial"
+          hint="Dinero que ya tenía esta cuenta al empezar. Puedes usar una cuenta «Efectivo»."
+          defaultCents={account?.type !== "credit" ? (account?.openingBalanceCents ?? 0) : 0}
+        />
       )}
       <SubmitButton>Guardar</SubmitButton>
     </ActionForm>

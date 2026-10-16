@@ -16,14 +16,14 @@ export default async function IncomesPage() {
     <>
       <PageHeader
         title="Ingresos"
-        description="Salario y otros ingresos fijos"
+        description="Ingresos fijos de tu plan mensual"
         backHref="/ajustes"
         action={<LinkButton href="/ingresos/nuevo">Nuevo</LinkButton>}
       />
       {rows.length === 0 ? (
         <EmptyState
           title="Aún no tienes ingresos"
-          description="Registra tu salario mensual y en qué cuenta lo recibes."
+          description="Registra cada ingreso recurrente y la cuenta donde se deposita."
         />
       ) : (
         <ItemList>

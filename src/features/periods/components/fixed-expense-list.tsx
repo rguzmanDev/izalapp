@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { ConfirmForm } from "@/components/form/confirm-form";
 import { PendingButton } from "@/components/form/pending-button";
+import { LinkButton } from "@/components/link-button";
 import { Badge } from "@/components/ui/badge";
 import { accountLabel } from "@/features/accounts/format";
 import { describeDueDay } from "@/features/fixed-expenses/constants";
@@ -10,18 +12,6 @@ import { cn } from "@/lib/utils";
 import { setPaymentStatus } from "../actions";
 import { PAYMENT_STATUS_LABELS, type PaymentStatus } from "../constants";
 import type { PeriodItemRow } from "../data";
-
-const NEXT_ACTIONS: Record<PaymentStatus, { status: PaymentStatus; label: string }[]> = {
-  pending: [
-    { status: "set_aside", label: "Apartar" },
-    { status: "paid", label: "Pagar" },
-  ],
-  set_aside: [
-    { status: "paid", label: "Pagar" },
-    { status: "pending", label: "Deshacer" },
-  ],
-  paid: [{ status: "set_aside", label: "Deshacer" }],
-};
 
 const BADGE_VARIANTS: Record<PaymentStatus, "outline" | "secondary" | "default"> = {
   pending: "outline",
@@ -70,13 +60,47 @@ function FixedExpenseRow({ item, account, today, readOnly }: FixedExpenseRowProp
       </div>
       {!readOnly && (
         <div className="flex justify-end gap-2">
-          {NEXT_ACTIONS[item.paymentStatus].map(({ status, label }) => (
-            <form key={status} action={setPaymentStatus.bind(null, item.id, status)}>
-              <PendingButton variant={status === "paid" ? "default" : "outline"} size="sm">
-                {label}
+          {item.paymentStatus === "pending" && (
+            <>
+              <LinkButton href={`/partidas/${item.id}/apartar`} variant="outline" size="sm">
+                Apartar
+              </LinkButton>
+              <ConfirmForm
+                action={setPaymentStatus.bind(null, item.id, "paid")}
+                confirmMessage={`¿Marcar "${item.name}" como pagado?`}
+              >
+                <PendingButton size="sm">Pagar</PendingButton>
+              </ConfirmForm>
+            </>
+          )}
+          {item.paymentStatus === "set_aside" && (
+            <>
+              <ConfirmForm
+                action={setPaymentStatus.bind(null, item.id, "paid")}
+                confirmMessage={`¿Marcar "${item.name}" como pagado?`}
+              >
+                <PendingButton size="sm">Pagar</PendingButton>
+              </ConfirmForm>
+              <ConfirmForm
+                action={setPaymentStatus.bind(null, item.id, "pending")}
+                confirmMessage={`¿Deshacer el apartado de "${item.name}"?`}
+              >
+                <PendingButton variant="outline" size="sm">
+                  Deshacer
+                </PendingButton>
+              </ConfirmForm>
+            </>
+          )}
+          {item.paymentStatus === "paid" && (
+            <ConfirmForm
+              action={setPaymentStatus.bind(null, item.id, "set_aside")}
+              confirmMessage={`¿Deshacer el pago de "${item.name}"?`}
+            >
+              <PendingButton variant="outline" size="sm">
+                Deshacer
               </PendingButton>
-            </form>
-          ))}
+            </ConfirmForm>
+          )}
         </div>
       )}
     </li>
