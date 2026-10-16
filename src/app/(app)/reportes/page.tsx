@@ -1,11 +1,11 @@
 import { EmptyState } from "@/components/empty-state";
-import { LinkButton } from "@/components/link-button";
 import { PageHeader } from "@/components/page-header";
 import { Section } from "@/components/section";
 import { StatCard } from "@/components/stat-card";
 import { listFuelLogs } from "@/features/fuel/data";
 import { refillStats } from "@/features/fuel/stats";
 import { AccountReportSections } from "@/features/reports/components/account-report-sections";
+import { ExportCsvButton } from "@/features/reports/components/export-csv-button";
 import { FuelChart } from "@/features/reports/components/fuel-chart";
 import { MovementFilter } from "@/features/reports/components/movement-filter";
 import { MovementReportList } from "@/features/reports/components/movement-report-list";
@@ -55,11 +55,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
     <PageHeader
       title="Reportes"
       description="Cómo se usó tu dinero en las últimas quincenas"
-      action={
-        <LinkButton href={`/reportes/export?quincenas=${range}`} variant="outline" size="sm">
-          Exportar CSV
-        </LinkButton>
-      }
+      action={<ExportCsvButton range={range} />}
     />
   );
 
