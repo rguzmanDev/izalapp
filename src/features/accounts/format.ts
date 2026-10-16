@@ -28,3 +28,36 @@ export function describeAccount(account: FinancialAccount): string | undefined {
 export function toAccountOptions(accounts: FinancialAccount[]): SelectOption[] {
   return accounts.map((account) => ({ value: account.id, label: accountLabel(account) }));
 }
+
+/** Bank/checking/savings/efectivo — never credit cards. */
+export function toMoneyAccountOptions(accounts: FinancialAccount[]): SelectOption[] {
+  return toAccountOptions(accounts.filter((account) => account.type !== "credit"));
+}
+
+/** Credit cards whose «Se paga desde» is `fundingAccountId`. */
+export function toCardOptionsForAccount(
+  cards: FinancialAccount[],
+  fundingAccountId: string,
+): SelectOption[] {
+  return toAccountOptions(
+    cards.filter(
+      (account) => account.type === "credit" && account.paymentAccountId === fundingAccountId,
+    ),
+  );
+}
+
+/** Map fundingAccountId → card select options. */
+export function toCardOptionsByFundingAccount(
+  accounts: FinancialAccount[],
+): Record<string, SelectOption[]> {
+  const cards = accounts.filter((account) => account.type === "credit");
+  const map: Record<string, SelectOption[]> = {};
+  for (const card of cards) {
+    if (!card.paymentAccountId) continue;
+    (map[card.paymentAccountId] ??= []).push({
+      value: card.id,
+      label: accountLabel(card),
+    });
+  }
+  return map;
+}

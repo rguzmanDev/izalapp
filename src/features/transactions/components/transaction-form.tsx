@@ -17,6 +17,8 @@ type TransactionFormProps = {
   defaultDate: string;
   itemOptions: ItemOption[];
   accountOptions: SelectOption[];
+  /** All credit cards; filtered client-side by the funding account. */
+  cardOptionsByAccount: Record<string, SelectOption[]>;
 };
 
 export function TransactionForm({
@@ -26,6 +28,7 @@ export function TransactionForm({
   defaultDate,
   itemOptions,
   accountOptions,
+  cardOptionsByAccount,
 }: TransactionFormProps) {
   const accountOfItem = (itemId: string) =>
     itemOptions.find((option) => option.value === itemId)?.accountId;
@@ -36,12 +39,25 @@ export function TransactionForm({
   const [accountId, setAccountId] = useState(
     transaction?.accountId ?? lockedAccountId ?? "",
   );
+  const fundingAccountId = lockedAccountId ?? accountId;
+  const cardOptions = fundingAccountId ? (cardOptionsByAccount[fundingAccountId] ?? []) : [];
+  const [creditCardId, setCreditCardId] = useState(transaction?.creditCardId ?? "");
 
   function handleItemChange(nextItemId: string) {
     setItemId(nextItemId);
     const itemAccountId = accountOfItem(nextItemId);
-    if (itemAccountId) setAccountId(itemAccountId);
-    else if (!nextItemId) setAccountId("");
+    if (itemAccountId) {
+      setAccountId(itemAccountId);
+      setCreditCardId("");
+    } else if (!nextItemId) {
+      setAccountId("");
+      setCreditCardId("");
+    }
+  }
+
+  function handleAccountChange(nextAccountId: string) {
+    setAccountId(nextAccountId);
+    setCreditCardId("");
   }
 
   return (
@@ -73,8 +89,7 @@ export function TransactionForm({
               {accountOptions.find((option) => option.value === lockedAccountId)?.label ??
                 "Cuenta de la partida"}
             </span>
-            . Los gastos de un presupuesto o gasto fijo siempre usan su cuenta (en tarjeta, la deuda
-            de la tarjeta; el banco solo se mueve al pagar o fondear).
+            . El dinero sale de esta cuenta. Si pagaste con tarjeta, elígelo abajo.
           </p>
         </>
       ) : (
@@ -85,7 +100,18 @@ export function TransactionForm({
           placeholder="Selecciona una cuenta"
           options={accountOptions}
           value={accountId}
-          onChange={(event) => setAccountId(event.target.value)}
+          onChange={(event) => handleAccountChange(event.target.value)}
+        />
+      )}
+      {cardOptions.length > 0 && (
+        <SelectField
+          name="creditCardId"
+          label="¿Cómo pagaste?"
+          placeholder="Directo a la cuenta"
+          options={cardOptions}
+          value={creditCardId}
+          onChange={(event) => setCreditCardId(event.target.value)}
+          hint="Directo = solo baja la cuenta. Tarjeta = baja la cuenta y suma al «por pagar» de esa tarjeta."
         />
       )}
       <TextField
@@ -93,7 +119,7 @@ export function TransactionForm({
         label="Fecha"
         type="date"
         required
-        hint="La fecha es cuándo moviste el dinero. El gasto va al corte que tengas abierto, no al día del calendario."
+        hint="La fecha es cuándo moviste el dinero. El gasto va al corte que tengas abierto."
         defaultValue={transaction?.occurredOn ?? defaultDate}
       />
       <TextField

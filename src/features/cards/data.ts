@@ -1,7 +1,7 @@
 import "server-only";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { transactions, transfers, type FinancialAccount } from "@/db/schema";
+import { cardPayments, transactions, type FinancialAccount } from "@/db/schema";
 import { listAccounts } from "@/features/accounts/data";
 import { lastCardCycle, paymentDueOf, type CardCycle } from "./cycle";
 
@@ -10,7 +10,7 @@ export type CardStatement = {
   cycle: CardCycle;
   /** Charged between the previous cutoff and the last one: what must be paid by the due date. */
   statementCents: number;
-  /** Paid (transfers into the card) since the last cutoff. */
+  /** Informative payments recorded since the last cutoff. */
   paidCents: number;
   /** Charged since the last cutoff; goes into the next statement. */
   currentCents: number;
@@ -34,18 +34,18 @@ async function getCardStatement(
       .where(
         and(
           eq(transactions.userId, userId),
-          eq(transactions.accountId, card.id),
+          eq(transactions.creditCardId, card.id),
           gt(transactions.occurredOn, cycle.previousCutoff),
         ),
       ),
     db
-      .select({ paidCents: sql<number>`coalesce(sum(${transfers.amountCents}), 0)::int` })
-      .from(transfers)
+      .select({ paidCents: sql<number>`coalesce(sum(${cardPayments.amountCents}), 0)::int` })
+      .from(cardPayments)
       .where(
         and(
-          eq(transfers.userId, userId),
-          eq(transfers.toAccountId, card.id),
-          gt(transfers.occurredOn, cycle.cutoff),
+          eq(cardPayments.userId, userId),
+          eq(cardPayments.cardId, card.id),
+          gt(cardPayments.occurredOn, cycle.cutoff),
         ),
       ),
   ]);

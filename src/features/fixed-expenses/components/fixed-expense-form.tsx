@@ -68,7 +68,8 @@ export function FixedExpenseForm({ action, expense, accountOptions }: FixedExpen
         name="paymentAccountId"
         label="Se paga con"
         required
-        placeholder="Selecciona una cuenta o tarjeta"
+        placeholder="Selecciona una cuenta bancaria o efectivo"
+        hint="El dinero sale de esta cuenta. Al gastar podrás marcar si usaste una tarjeta ligada."
         options={accountOptions}
         defaultValue={expense?.paymentAccountId ?? ""}
       />

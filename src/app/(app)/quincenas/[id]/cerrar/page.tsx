@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
+import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { closePeriodAction } from "@/features/periods/actions";
 import { ClosePeriodForm } from "@/features/periods/components/close-period-form";
 import { ClosingSummary } from "@/features/periods/components/closing-summary";
@@ -52,7 +52,7 @@ export default async function ClosePeriodPage({ params }: PageProps<"/quincenas/
         surplusCents={summary.actualSurplusCents}
         defaultFromAccountId={incomeAccountId}
         defaultToAccountId={savingsAccountId}
-        accountOptions={toAccountOptions(accounts)}
+        accountOptions={toMoneyAccountOptions(accounts)}
       />
     </>
   );

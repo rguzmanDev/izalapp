@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/form/delete-button";
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
+import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeBudget, saveBudget } from "@/features/budgets/actions";
 import { BudgetForm } from "@/features/budgets/components/budget-form";
 import { getBudget } from "@/features/budgets/data";
@@ -20,7 +20,7 @@ export default async function EditBudgetPage({ params }: PageProps<"/presupuesto
       <BudgetForm
         action={saveBudget.bind(null, budget.id)}
         budget={budget}
-        accountOptions={toAccountOptions(accounts)}
+        accountOptions={toMoneyAccountOptions(accounts)}
       />
       <DeleteButton
         action={removeBudget.bind(null, budget.id)}

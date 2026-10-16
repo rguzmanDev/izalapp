@@ -145,7 +145,7 @@ export function AccountReportSections({
 
       <Section
         title="Fondeo vs uso"
-        description="Apartado hacia la cuenta vs compras con tarjetas que se pagan desde ella"
+        description="Apartado hacia la cuenta vs compras etiquetadas con tarjetas que se pagan desde ella"
       >
         {fundingRows.length === 0 ? (
           <EmptyNote>Sin fondeo ni uso en este rango.</EmptyNote>
@@ -178,7 +178,10 @@ export function AccountReportSections({
       </Section>
 
       {cardRows.length > 0 && (
-        <Section title="Tarjetas" description="Compras y pagos del rango; por pagar según el ciclo actual">
+        <Section
+          title="Tarjetas"
+          description="Seguimiento informativo: compras etiquetadas y pagos registrados; el dinero ya salió de la cuenta «Se paga desde»"
+        >
           <ReportList>
             {cardRows.map((row) => (
               <li key={row.accountId} className="flex flex-col gap-1.5 px-4 py-3 text-sm">

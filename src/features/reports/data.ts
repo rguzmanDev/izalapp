@@ -1,8 +1,9 @@
 import "server-only";
-import { and, desc, eq, inArray, isNull, like, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, isNull, like, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import {
+  cardPayments,
   financialAccounts,
   fuelLogs,
   periodItems,
@@ -14,7 +15,7 @@ import { listAccounts } from "@/features/accounts/data";
 import { listAccountBalances } from "@/features/accounts/balance";
 import { listCardStatements } from "@/features/cards/data";
 import { summarizePeriod } from "@/features/periods/summary";
-import { todayIsoDate } from "@/lib/period";
+import { periodBounds, todayIsoDate, toPeriodKey } from "@/lib/period";
 import {
   buildAccountAlerts,
   buildAccountBalanceRows,
@@ -27,7 +28,7 @@ import {
 const fromAccount = alias(financialAccounts, "from_account");
 const toAccount = alias(financialAccounts, "to_account");
 
-const total = (column: typeof transactions.amountCents | typeof transfers.amountCents) =>
+const total = (column: typeof transactions.amountCents | typeof transfers.amountCents | typeof cardPayments.amountCents) =>
   sql<number>`coalesce(sum(${column}), 0)::int`;
 
 function toCentsMap(rows: { accountId: string; cents: number }[]) {
@@ -96,11 +97,14 @@ export type PeriodReport = Awaited<ReturnType<typeof getPeriodReports>>[number];
 export async function listMovementsForPeriods(userId: string, periodIds: string[]) {
   if (periodIds.length === 0) return { expenses: [], transfers: [], incomes: [] };
 
+  const creditCard = alias(financialAccounts, "credit_card");
+
   const [expenses, transferRows, incomes] = await Promise.all([
     db
       .select({
         transaction: transactions,
         account: financialAccounts,
+        creditCard,
         itemName: periodItems.name,
         fuelLogId: fuelLogs.id,
         station: fuelLogs.station,
@@ -109,6 +113,7 @@ export async function listMovementsForPeriods(userId: string, periodIds: string[
       .from(transactions)
       .innerJoin(financialAccounts, eq(transactions.accountId, financialAccounts.id))
       .innerJoin(periods, eq(transactions.periodId, periods.id))
+      .leftJoin(creditCard, eq(transactions.creditCardId, creditCard.id))
       .leftJoin(periodItems, eq(transactions.itemId, periodItems.id))
       .leftJoin(fuelLogs, eq(fuelLogs.transactionId, transactions.id))
       .where(and(eq(transactions.userId, userId), inArray(transactions.periodId, periodIds)))
@@ -175,7 +180,13 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
     };
   }
 
-  const creditIds = accounts.filter((account) => account.type === "credit").map((account) => account.id);
+  const rangePeriods = await db.select().from(periods).where(inArray(periods.id, periodIds));
+  const rangeDates = rangePeriods.flatMap((period) => {
+    const { start, end } = periodBounds(toPeriodKey(period));
+    return [start, end];
+  });
+  const rangeStart = rangeDates.toSorted()[0];
+  const rangeEnd = rangeDates.toSorted().at(-1)!;
 
   const [
     incomeRows,
@@ -183,6 +194,7 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
     transferInRows,
     transferOutRows,
     apartadoInRows,
+    cardTaggedExpenseRows,
     cardPaymentRows,
     transferPairs,
   ] = await Promise.all([
@@ -226,19 +238,31 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
         ),
       )
       .groupBy(transfers.toAccountId),
-    creditIds.length === 0
-      ? Promise.resolve([] as { accountId: string; cents: number }[])
-      : db
-          .select({ accountId: transfers.toAccountId, cents: total(transfers.amountCents) })
-          .from(transfers)
-          .where(
-            and(
-              eq(transfers.userId, userId),
-              inArray(transfers.periodId, periodIds),
-              inArray(transfers.toAccountId, creditIds),
-            ),
-          )
-          .groupBy(transfers.toAccountId),
+    db
+      .select({
+        accountId: transactions.creditCardId,
+        cents: total(transactions.amountCents),
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          inArray(transactions.periodId, periodIds),
+          isNotNull(transactions.creditCardId),
+        ),
+      )
+      .groupBy(transactions.creditCardId),
+    db
+      .select({ accountId: cardPayments.cardId, cents: total(cardPayments.amountCents) })
+      .from(cardPayments)
+      .where(
+        and(
+          eq(cardPayments.userId, userId),
+          gte(cardPayments.occurredOn, rangeStart),
+          lte(cardPayments.occurredOn, rangeEnd),
+        ),
+      )
+      .groupBy(cardPayments.cardId),
     db
       .select({
         fromAccountId: transfers.fromAccountId,
@@ -254,11 +278,16 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
   const transferInByAccount = toCentsMap(transferInRows);
   const transferOutByAccount = toCentsMap(transferOutRows);
   const apartadoInByAccount = toCentsMap(apartadoInRows);
+  const cardTaggedByCard = toCentsMap(
+    cardTaggedExpenseRows.filter(
+      (row): row is { accountId: string; cents: number } => row.accountId !== null,
+    ),
+  );
   const paymentsByAccount = toCentsMap(cardPaymentRows);
 
   const balanceRows = buildAccountBalanceRows(accounts, balances);
   const flowRows = buildAccountFlowRows({
-    accounts,
+    accounts: accounts.filter((account) => account.type !== "credit"),
     incomesByAccount,
     expensesByAccount,
     transferInByAccount,
@@ -267,11 +296,11 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
   const fundingRows = buildFundingUseRows({
     accounts,
     apartadoInByAccount,
-    expensesByAccount,
+    expensesByAccount: cardTaggedByCard,
   });
   const cardRows = buildCardReportRows(
     statements,
-    expensesByAccount,
+    cardTaggedByCard,
     paymentsByAccount,
     balances,
     accountsById,

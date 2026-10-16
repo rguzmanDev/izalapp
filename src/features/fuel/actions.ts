@@ -32,7 +32,20 @@ export async function saveFuelLog(
     return { fieldErrors: { itemId: ["Elige un presupuesto de gasolina"] } };
   }
 
-  const input: FuelLogInput = { ...parsed.data, accountId: item.accountId };
+  const account = await getAccount(user.id, item.accountId);
+  if (!account || account.type === "credit") {
+    return { fieldErrors: { itemId: ["El presupuesto de gasolina debe usar una cuenta bancaria"] } };
+  }
+
+  let creditCardId = parsed.data.creditCardId ?? null;
+  if (creditCardId) {
+    const card = await getAccount(user.id, creditCardId);
+    if (!card || card.type !== "credit" || card.paymentAccountId !== item.accountId) {
+      return { fieldErrors: { creditCardId: ["Esa tarjeta no se paga desde la cuenta del presupuesto"] } };
+    }
+  }
+
+  const input: FuelLogInput = { ...parsed.data, accountId: item.accountId, creditCardId };
 
   const current = id ? await getFuelLog(user.id, id) : null;
   if (id && !current) return { error: "La carga ya no existe" };
@@ -53,8 +66,7 @@ export async function saveFuelLog(
   const resolved = await resolveExpensePeriod(user.id, input);
   if ("fieldErrors" in resolved) return { fieldErrors: resolved.fieldErrors };
 
-  const account = await getAccount(user.id, input.accountId);
-  if (!id && account && account.type !== "credit") {
+  if (!id) {
     const balance = await getPlannedBalance(user.id, input.accountId);
     const warning = insufficientBalanceState(
       balance,

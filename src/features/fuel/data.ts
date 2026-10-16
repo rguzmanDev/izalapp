@@ -56,14 +56,17 @@ export async function findOdometerBounds(userId: string, occurredOn: string, exc
   return bounds;
 }
 
-type ExpenseValues = Pick<FuelLogInput, "itemId" | "accountId" | "amountCents" | "occurredOn"> & {
+type ExpenseValues = Pick<
+  FuelLogInput,
+  "itemId" | "accountId" | "amountCents" | "occurredOn" | "creditCardId"
+> & {
   periodId: string;
 };
 type FuelDetails = Pick<FuelLogInput, "odometer" | "gallons" | "pricePerGallon" | "station" | "isFullTank">;
 
 function splitInput(input: FuelLogInput, periodId: string): [ExpenseValues, FuelDetails] {
-  const { itemId, accountId, amountCents, occurredOn, ...details } = input;
-  return [{ itemId, accountId, amountCents, occurredOn, periodId }, details];
+  const { itemId, accountId, amountCents, occurredOn, creditCardId, ...details } = input;
+  return [{ itemId, accountId, amountCents, occurredOn, creditCardId, periodId }, details];
 }
 
 /** Records the refill as an expense (so it counts against the budget) plus its fuel details. */

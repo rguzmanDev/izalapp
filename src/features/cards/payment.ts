@@ -5,10 +5,8 @@ export function pendingCents({ statementCents, paidCents }: CardStatement): numb
   return Math.max(0, statementCents - paidCents);
 }
 
-/** Transfer form prefilled to pay the pending amount from the card's usual account. */
+/** Form to record an informative card payment (does not move bank money). */
 export function paymentHref(statement: CardStatement): string {
-  const { card } = statement;
-  const params = new URLSearchParams({ hacia: card.id, monto: String(pendingCents(statement)) });
-  if (card.paymentAccountId) params.set("desde", card.paymentAccountId);
-  return `/transferencias/nueva?${params}`;
+  const params = new URLSearchParams({ monto: String(pendingCents(statement)) });
+  return `/tarjetas/${statement.card.id}/pagar?${params}`;
 }

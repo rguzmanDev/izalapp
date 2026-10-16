@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
+import { toCardOptionsByFundingAccount, toMoneyAccountOptions } from "@/features/accounts/format";
 import { OpenPeriodPrompt } from "@/features/periods/components/open-period-prompt";
 import { ClosedPeriodNotice } from "@/features/periods/components/period-notices";
 import { getWorkingPeriod, listPeriodItems } from "@/features/periods/data";
@@ -40,7 +40,8 @@ export default async function NewTransactionPage({
         defaultItemId={typeof partida === "string" ? partida : undefined}
         defaultDate={today}
         itemOptions={toItemOptions(rows.map((row) => row.item))}
-        accountOptions={toAccountOptions(accounts)}
+        accountOptions={toMoneyAccountOptions(accounts)}
+        cardOptionsByAccount={toCardOptionsByFundingAccount(accounts)}
       />
     </>
   );

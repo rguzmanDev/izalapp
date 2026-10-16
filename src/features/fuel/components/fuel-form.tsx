@@ -10,6 +10,7 @@ import {
   TextField,
 } from "@/components/form/fields";
 import { SubmitButton } from "@/components/form/submit-button";
+import type { SelectOption } from "@/components/form/fields";
 import type { ItemOption } from "@/features/transactions/components/transaction-form";
 import type { FormState } from "@/lib/form";
 import {
@@ -29,6 +30,7 @@ type FuelFormProps = {
   defaultDate: string;
   lastOdometer: number | null;
   itemOptions: ItemOption[];
+  cardOptionsByAccount: Record<string, SelectOption[]>;
 };
 
 /** Gallons use thousandths; price per gallon uses hundredths (like cents). */
@@ -51,12 +53,16 @@ export function FuelForm({
   defaultDate,
   lastOdometer,
   itemOptions,
+  cardOptionsByAccount,
 }: FuelFormProps) {
   const initialItemId =
     row?.transaction.itemId ??
     defaultItemId ??
     (itemOptions.length === 1 ? itemOptions[0].value : "");
   const [itemId, setItemId] = useState(initialItemId);
+  const fundingAccountId = itemOptions.find((option) => option.value === itemId)?.accountId;
+  const cardOptions = fundingAccountId ? (cardOptionsByAccount[fundingAccountId] ?? []) : [];
+  const [creditCardId, setCreditCardId] = useState(row?.transaction.creditCardId ?? "");
   const initialGallons = toUnits(row?.log.gallons, GALLON_SCALE);
   const initialPrice = toUnits(row?.log.pricePerGallon, PRICE_SCALE);
   const [gallons, setGallons] = useState(initialGallons ?? 0);
@@ -136,8 +142,22 @@ export function FuelForm({
         placeholder={itemId ? undefined : "Selecciona un presupuesto"}
         options={itemOptions}
         value={itemId}
-        onChange={(event) => setItemId(event.target.value)}
+        onChange={(event) => {
+          setItemId(event.target.value);
+          setCreditCardId("");
+        }}
       />
+      {cardOptions.length > 0 && (
+        <SelectField
+          name="creditCardId"
+          label="¿Cómo pagaste?"
+          placeholder="Directo a la cuenta"
+          options={cardOptions}
+          value={creditCardId}
+          onChange={(event) => setCreditCardId(event.target.value)}
+          hint="Si usaste tarjeta, elige cuál. El dinero sale de la cuenta del presupuesto."
+        />
+      )}
       <SubmitButton>Guardar</SubmitButton>
     </ActionForm>
   );

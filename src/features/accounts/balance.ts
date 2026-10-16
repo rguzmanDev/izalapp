@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { financialAccounts, periodItems, transactions, transfers } from "@/db/schema";
 
@@ -10,12 +10,10 @@ export type AccountBalance = {
 };
 
 /**
- * Planned balance = opening
- *   + incomes deposited into the account (period items)
- *   + transfers in − transfers out
- *   − expenses charged to the account
+ * Planned balance for bank/cash accounts only:
+ *   opening + incomes + transfers in − transfers out − expenses
  *
- * On a credit card, expenses push the balance down (debt) and payments (transfers in) raise it.
+ * Credit cards are excluded — their “por pagar” comes from card statements.
  */
 export async function listAccountBalances(userId: string): Promise<Map<string, AccountBalance>> {
   const [accounts, incomeRows, expenseRows, transferInRows, transferOutRows] = await Promise.all([
@@ -25,7 +23,7 @@ export async function listAccountBalances(userId: string): Promise<Map<string, A
         openingBalanceCents: financialAccounts.openingBalanceCents,
       })
       .from(financialAccounts)
-      .where(eq(financialAccounts.userId, userId)),
+      .where(and(eq(financialAccounts.userId, userId), ne(financialAccounts.type, "credit"))),
     db
       .select({
         accountId: periodItems.accountId,

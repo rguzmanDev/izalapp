@@ -3,7 +3,7 @@ import { owner, timestamps } from "./columns";
 import { financialAccounts } from "./finance";
 import { periods } from "./periods";
 
-/** Money moved between the user's own accounts (including credit card payments). Not spending. */
+/** Money moved between the user's own bank/cash accounts. Not spending. Credit cards are not transfer targets. */
 export const transfers = pgTable(
   "transfers",
   {

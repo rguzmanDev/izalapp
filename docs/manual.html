@@ -325,13 +325,14 @@
 <ul>
   <li><b>Monto</b>: escribe solo los dígitos; para $25.50 teclea 2, 5, 5, 0 (ver el consejo en 3.1).</li>
   <li><b>Presupuesto o gasto fijo</b>: solo aparecen partidas ya apartadas o pagadas. Déjalo en <b>Sin presupuesto</b> para un gasto imprevisto; se suma como “otros gastos”.</li>
-  <li><b>Cuenta</b>: si eliges una partida, queda fija la cuenta de esa partida (no se puede cambiar). Así un presupuesto de tarjeta carga la <b>deuda de la tarjeta</b>, no el banco. Solo eliges cuenta a mano cuando es “Sin presupuesto”.</li>
+  <li><b>Cuenta</b>: si eliges una partida, queda fija la cuenta bancaria/efectivo de esa partida. En <b>¿Cómo pagaste?</b> eliges Directo o una tarjeta ligada a esa cuenta.</li>
   <li><b>Fecha</b>: por defecto hoy.</li>
   <li><b>Nota</b>: opcional, por ejemplo “Cena”.</li>
 </ul>
 <p>Si el gasto supera el saldo planificado de una cuenta bancaria, verás un aviso y podrás confirmar para continuar.</p>
 <p>Para corregir o borrar un gasto, búscalo en <b>Movimientos</b> y tócalo.</p>
 <div class="tip"><strong>¿En qué quincena cae?</strong>Al corte que tengas <b>abierto</b>, no al día del calendario. Si te pagan el 15 a las 5&nbsp;pm, cierras el corte anterior y abres el nuevo: desde ese momento todo va al nuevo. Si te pagan tarde el 17 y aún no cerraste la primera quincena, los movimientos siguen en esa hasta que la cierres. La fecha del gasto solo registra cuándo moviste el dinero.</div>
+<div class="tip"><strong>¿Tarjeta o directo?</strong>Los presupuestos y gastos fijos usan una cuenta <b>bancaria o efectivo</b>. Al registrar el gasto, si esa cuenta es «Se paga desde» de alguna tarjeta, puedes elegir <b>Directo a la cuenta</b> o la tarjeta. El dinero siempre baja la cuenta; la tarjeta solo acumula el «por pagar» informativo.</div>
 
 <!-- 6 -->
 <h2 id="transferencias">6. Transferencias</h2>
@@ -358,6 +359,7 @@
 
 <!-- 7 -->
 <h2 id="tarjetas">7. Tarjetas de crédito</h2>
+<p>Las tarjetas son <b>seguimiento informativo</b>: no administran dinero. Al comprar, el gasto baja la cuenta bancaria «Se paga desde»; la tarjeta solo registra cuánto gastaste y cuánto «por pagar» del corte. Al tocar <span class="btn">Pagar</span> registras un pago informativo (no vuelve a mover el banco). Si también transferiste entre bancos, regístralo aparte.</p>
 <p>Si tienes tarjetas con día de corte y día de pago, Inicio muestra la sección <b>Tarjetas</b>:</p>
 <div class="card">
   <div style="display:flex;justify-content:space-between;gap:12px">
@@ -377,15 +379,14 @@
   <li><b>Llevas … para el próximo corte</b>: lo que has cargado después del último corte.</li>
   <li>Estados: <span class="badge">Por pagar $X</span> <span class="badge solid">Pagada</span> <span class="badge red">Vencida $X</span> <span class="badge">Sin saldo</span></li>
 </ul>
-<p><b>Compra con presupuesto de tarjeta:</b> el gasto queda en la tarjeta (sube la deuda / “llevas…”). No descuenta el banco. El banco solo se mueve al fondear/apartar (reserva en «Se paga desde») y al <b>pagar la tarjeta</b>.</p>
+<p><b>Compra etiquetada con tarjeta:</b> eliges el presupuesto (cuenta Cusca, por ejemplo) y en «¿Cómo pagaste?» eliges la NIU. Baja Cusca y sube el «llevas… / por pagar» de la NIU.</p>
 <h3>Pagar la tarjeta</h3>
 <ol class="steps">
   <li>Toca <span class="btn">Pagar</span>.</li>
-  <li>Se abre una transferencia: monto pendiente, cuenta “Se paga desde” → tarjeta. Ajusta lo que necesites.</li>
-  <li>Toca <b>Guardar</b>. El pendiente baja; si pagaste todo, queda <b>Pagada</b>. Esa transferencia sí reduce el saldo planificado del banco.</li>
+  <li>Registra el monto del pago (informativo). Baja el «por pagar»; <b>no</b> mueve el banco otra vez (ya salió al comprar).</li>
+  <li>Si en la vida real también moviste dinero entre cuentas, usa <b>Transferir</b> aparte.</li>
 </ol>
-<p>También desde <b>Movimientos → Transferir</b> eligiendo la tarjeta en <b>Hacia</b>. Puedes hacer varios abonos.</p>
-<div class="warn"><strong>Ten en cuenta</strong>Solo cuenta los cargos registrados en la app. Usa <b>Deuda inicial</b> en la tarjeta si empezaste a mitad de ciclo.</div>
+<div class="warn"><strong>Ten en cuenta</strong>Solo cuenta las compras que etiquetaste a esa tarjeta. Usa <b>Deuda inicial (informativa)</b> si empezaste a mitad de ciclo.</div>
 
 <!-- 8 -->
 <h2 id="gasolina">8. Gasolina</h2>
@@ -433,8 +434,8 @@
   <li><b>Alertas</b>: saldo negativo, cuentas sin movimiento en el rango, tarjetas sin «Se paga desde» o sin cobertura para lo por pagar.</li>
   <li><b>Saldo por cuenta</b>: saldo planificado acumulado (opening + todas las quincenas), no solo el rango.</li>
   <li><b>Flujo por cuenta</b>: qué entró y qué salió <b>en este rango</b> (ingresos, gastos y transferencias).</li>
-  <li><b>Fondeo vs uso</b>: lo apartado hacia una cuenta vs compras con tarjetas que se pagan desde ella (no cuenta gastos directos de la cuenta).</li>
-  <li><b>Tarjetas</b>: compras y pagos del rango, por pagar del ciclo, y saldo de la cuenta «Se paga desde».</li>
+  <li><b>Fondeo vs uso</b>: lo apartado hacia una cuenta vs compras etiquetadas con tarjetas que se pagan desde ella.</li>
+  <li><b>Tarjetas</b>: seguimiento informativo (compras etiquetadas, pagos registrados, por pagar); el saldo real está en la cuenta «Se paga desde».</li>
   <li><b>Mapa de transferencias</b>: totales origen → destino en el rango.</li>
   <li><b>Por quincena</b>: una gráfica de barras con gastos fijos registrados, presupuestos, otros gastos y sobrante de cada quincena.</li>
   <li><b>Rendimiento de gasolina</b>: cómo ha cambiado tu rendimiento por tanque lleno (aparece cuando hay al menos dos cargas).</li>

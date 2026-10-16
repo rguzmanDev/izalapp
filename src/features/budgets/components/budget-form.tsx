@@ -31,7 +31,8 @@ export function BudgetForm({ action, budget, accountOptions }: BudgetFormProps) 
         name="spendingAccountId"
         label="Se gasta desde"
         required
-        placeholder="Selecciona una cuenta o tarjeta"
+        placeholder="Selecciona una cuenta bancaria o efectivo"
+        hint="El dinero sale de esta cuenta. Al gastar podrás marcar si usaste una tarjeta ligada."
         options={accountOptions}
         defaultValue={budget?.spendingAccountId ?? ""}
       />

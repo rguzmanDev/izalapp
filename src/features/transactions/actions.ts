@@ -23,10 +23,32 @@ export async function saveTransaction(
   const resolved = await resolveExpensePeriod(user.id, parsed.data);
   if ("fieldErrors" in resolved) return { fieldErrors: resolved.fieldErrors };
 
-  // Partidas always charge their own account (card debt vs bank cash).
+  // Partidas always debit their bank/cash account; creditCardId is only a tag.
   const accountId = resolved.item?.accountId ?? parsed.data.accountId;
   if (!(await isOwnedAccount(user.id, accountId))) {
     return { fieldErrors: { accountId: ["Cuenta inválida"] } };
+  }
+
+  const account = await getAccount(user.id, accountId);
+  if (!account || account.type === "credit") {
+    return { fieldErrors: { accountId: ["Elige una cuenta bancaria o efectivo"] } };
+  }
+
+  let creditCardId = parsed.data.creditCardId ?? null;
+  if (creditCardId) {
+    const card = await getAccount(user.id, creditCardId);
+    if (!card || card.type !== "credit") {
+      return { fieldErrors: { creditCardId: ["Tarjeta inválida"] } };
+    }
+    if (card.paymentAccountId !== accountId) {
+      return {
+        fieldErrors: {
+          creditCardId: ["Esa tarjeta no se paga desde esta cuenta"],
+        },
+      };
+    }
+  } else {
+    creditCardId = null;
   }
 
   if (id) {
@@ -40,18 +62,20 @@ export async function saveTransaction(
     if (fundingError) return { fieldErrors: fundingError };
   }
 
-  const account = await getAccount(user.id, accountId);
-  if (account && account.type !== "credit") {
-    const balance = await getPlannedBalance(user.id, accountId);
-    const warning = insufficientBalanceState(
-      balance,
-      parsed.data.amountCents,
-      confirmInsufficient(formData),
-    );
-    if (warning) return warning;
-  }
+  const balance = await getPlannedBalance(user.id, accountId);
+  const warning = insufficientBalanceState(
+    balance,
+    parsed.data.amountCents,
+    confirmInsufficient(formData),
+  );
+  if (warning) return warning;
 
-  const values = { ...parsed.data, accountId, periodId: resolved.periodId };
+  const values = {
+    ...parsed.data,
+    accountId,
+    creditCardId,
+    periodId: resolved.periodId,
+  };
   if (id) {
     await updateTransaction(user.id, id, values);
     redirect("/movimientos");

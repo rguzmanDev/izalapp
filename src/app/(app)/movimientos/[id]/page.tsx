@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { DeleteButton } from "@/components/form/delete-button";
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
+import { toCardOptionsByFundingAccount, toMoneyAccountOptions } from "@/features/accounts/format";
 import { findFuelLogIdByTransaction } from "@/features/fuel/data";
 import { listPeriodItems } from "@/features/periods/data";
 import { removeTransaction, saveTransaction } from "@/features/transactions/actions";
@@ -37,7 +37,8 @@ export default async function EditTransactionPage({ params }: PageProps<"/movimi
           rows.map((row) => row.item),
           { includeId: transaction.itemId },
         )}
-        accountOptions={toAccountOptions(accounts)}
+        accountOptions={toMoneyAccountOptions(accounts)}
+        cardOptionsByAccount={toCardOptionsByFundingAccount(accounts)}
       />
       <DeleteButton
         action={removeTransaction.bind(null, transaction.id)}

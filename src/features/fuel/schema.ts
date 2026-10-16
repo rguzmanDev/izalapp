@@ -6,6 +6,7 @@ import {
 } from "@/lib/limits";
 import {
   checkbox,
+  optionalId,
   optionalMoney,
   optionalText,
   positiveNumber,
@@ -23,10 +24,12 @@ export const fuelLogSchema = z
     station: optionalText,
     isFullTank: checkbox,
     itemId: requiredId,
+    creditCardId: optionalId,
   })
   .transform((value) => ({
     ...value,
     amountCents: value.amountCents ?? Math.round(value.gallons * value.pricePerGallon * 100),
+    creditCardId: value.creditCardId ?? null,
   }));
 
 export type FuelLogInput = z.output<typeof fuelLogSchema> & { accountId: string };

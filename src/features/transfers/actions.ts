@@ -42,9 +42,19 @@ export async function saveTransfer(
   ]);
   if (owned.includes(false)) return { error: "Cuenta inválida" };
 
-  const fromAccount = await getAccount(user.id, fromAccountId);
+  const [fromAccount, toAccount] = await Promise.all([
+    getAccount(user.id, fromAccountId),
+    getAccount(user.id, toAccountId),
+  ]);
   if (fromAccount?.type === "credit") {
     return { fieldErrors: { fromAccountId: ["El origen no puede ser una tarjeta de crédito"] } };
+  }
+  if (toAccount?.type === "credit") {
+    return {
+      fieldErrors: {
+        toAccountId: ["Las tarjetas solo se pagan con «Pagar» (no mueven el banco otra vez)"],
+      },
+    };
   }
 
   if (id) {

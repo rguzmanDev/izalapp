@@ -74,9 +74,12 @@ export const transactions = pgTable(
       .notNull()
       .references(() => periods.id, { onDelete: "cascade" }),
     itemId: uuid().references(() => periodItems.id, { onDelete: "set null" }),
+    /** Bank/cash account that loses the money. Never a credit card. */
     accountId: uuid()
       .notNull()
       .references(() => financialAccounts.id, { onDelete: "restrict" }),
+    /** Optional credit card tag: purchase counts toward that card's statement. */
+    creditCardId: uuid().references(() => financialAccounts.id, { onDelete: "set null" }),
     amountCents: integer().notNull(),
     occurredOn: date().notNull(),
     note: text(),

@@ -34,6 +34,7 @@ type ExpenseRow = {
     periodId: string;
   };
   account: Pick<FinancialAccount, "type" | "name" | "lastFour" | "bank">;
+  creditCard: Pick<FinancialAccount, "type" | "name" | "lastFour" | "bank"> | null;
   itemName: string | null;
   fuelLogId: string | null;
   station: string | null;
@@ -63,16 +64,23 @@ export function buildMovementReport(
   filter: MovementFilter = "todos",
 ): MovementReportEntry[] {
   const expenses: MovementReportEntry[] = expenseRows.map(
-    ({ transaction, account, itemName, fuelLogId, station, period }) => ({
-      id: transaction.id,
-      kind: "expense",
-      href: fuelLogId ? `/gasolina/${fuelLogId}` : `/movimientos/${transaction.id}`,
-      title: [itemName ?? "Sin presupuesto", transaction.note ?? station].filter(Boolean).join(" · "),
-      subtitle: `${shortPeriodLabel(toPeriodKey(period))} · ${formatShortDate(transaction.occurredOn)} · ${accountLabel(account)}`,
-      amountCents: transaction.amountCents,
-      occurredOn: transaction.occurredOn,
-      createdAt: transaction.createdAt,
-    }),
+    ({ transaction, account, creditCard, itemName, fuelLogId, station, period }) => {
+      const payWith = creditCard
+        ? `${accountLabel(account)} · ${accountLabel(creditCard)}`
+        : accountLabel(account);
+      return {
+        id: transaction.id,
+        kind: "expense" as const,
+        href: fuelLogId ? `/gasolina/${fuelLogId}` : `/movimientos/${transaction.id}`,
+        title: [itemName ?? "Sin presupuesto", transaction.note ?? station]
+          .filter(Boolean)
+          .join(" · "),
+        subtitle: `${shortPeriodLabel(toPeriodKey(period))} · ${formatShortDate(transaction.occurredOn)} · ${payWith}`,
+        amountCents: transaction.amountCents,
+        occurredOn: transaction.occurredOn,
+        createdAt: transaction.createdAt,
+      };
+    },
   );
 
   const transfers: MovementReportEntry[] = transferRows.map(({ transfer, from, to, period }) => ({

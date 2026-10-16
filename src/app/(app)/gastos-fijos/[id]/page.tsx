@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/form/delete-button";
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
+import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeFixedExpense, saveFixedExpense } from "@/features/fixed-expenses/actions";
 import { FixedExpenseForm } from "@/features/fixed-expenses/components/fixed-expense-form";
 import { getFixedExpense } from "@/features/fixed-expenses/data";
@@ -23,7 +23,7 @@ export default async function EditFixedExpensePage({ params }: PageProps<"/gasto
       <FixedExpenseForm
         action={saveFixedExpense.bind(null, expense.id)}
         expense={expense}
-        accountOptions={toAccountOptions(accounts)}
+        accountOptions={toMoneyAccountOptions(accounts)}
       />
       <DeleteButton
         action={removeFixedExpense.bind(null, expense.id)}

@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { isOwnedAccount } from "@/features/accounts/data";
+import { getAccount, isOwnedAccount } from "@/features/accounts/data";
 import { parseFormData, type FormState } from "@/lib/form";
 import { requireUser } from "@/lib/session";
 import { createFixedExpense, deleteFixedExpense, updateFixedExpense } from "./data";
@@ -18,6 +18,12 @@ export async function saveFixedExpense(
 
   if (!(await isOwnedAccount(user.id, parsed.data.paymentAccountId))) {
     return { fieldErrors: { paymentAccountId: ["Cuenta inválida"] } };
+  }
+  const account = await getAccount(user.id, parsed.data.paymentAccountId);
+  if (!account || account.type === "credit") {
+    return {
+      fieldErrors: { paymentAccountId: ["Elige una cuenta bancaria o efectivo, no una tarjeta"] },
+    };
   }
 
   if (id) {

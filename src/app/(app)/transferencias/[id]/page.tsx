@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/form/delete-button";
 import { PageHeader } from "@/components/page-header";
 import { listAccounts } from "@/features/accounts/data";
-import { toAccountOptions } from "@/features/accounts/format";
+import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeTransfer, saveTransfer } from "@/features/transfers/actions";
 import { TransferForm } from "@/features/transfers/components/transfer-form";
 import { getTransfer } from "@/features/transfers/data";
@@ -26,7 +26,7 @@ export default async function EditTransferPage({ params }: PageProps<"/transfere
       <TransferForm
         action={saveTransfer.bind(null, transfer.id)}
         defaults={transfer}
-        accountOptions={toAccountOptions(accounts)}
+        accountOptions={toMoneyAccountOptions(accounts)}
       />
       <DeleteButton
         action={removeTransfer.bind(null, transfer.id)}

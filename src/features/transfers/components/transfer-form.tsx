@@ -38,7 +38,7 @@ export function TransferForm({ action, defaults, accountOptions }: TransferFormP
         name="toAccountId"
         label="Hacia"
         required
-        hint="Para pagar una tarjeta, elígela como destino."
+        hint="Solo cuentas bancarias o efectivo. Para el «por pagar» de una tarjeta usa Pagar en Inicio."
         placeholder="Selecciona una cuenta"
         options={accountOptions}
         defaultValue={defaults.toAccountId ?? ""}

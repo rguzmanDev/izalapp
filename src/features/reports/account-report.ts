@@ -82,11 +82,12 @@ export function buildAccountBalanceRows(
   balances: Map<string, AccountBalance>,
 ): AccountBalanceRow[] {
   return accounts
+    .filter((account) => account.type !== "credit")
     .map((account) => ({
       accountId: account.id,
       label: accountLabel(account),
       plannedBalanceCents: balances.get(account.id)?.plannedBalanceCents ?? 0,
-      isCredit: account.type === "credit",
+      isCredit: false,
     }))
     .sort((a, b) => a.label.localeCompare(b.label, "es"));
 }
@@ -123,8 +124,8 @@ export function buildAccountFlowRows({
 }
 
 /**
- * Apartado into a funding account vs card spend that draws on that account
- * (via «Se paga desde»). Direct bank expenses are not "uso" of fondeo.
+ * Apartado into a funding account vs purchases tagged to cards paid from that account.
+ * Direct bank expenses (sin tarjeta) are not "uso" of fondeo.
  */
 export function buildFundingUseRows({
   accounts,
@@ -136,6 +137,7 @@ export function buildFundingUseRows({
 
   for (const account of accounts) {
     if (account.type !== "credit") continue;
+    // expensesByAccount is keyed by creditCardId for this map when built for funding.
     const expense = cents(expensesByAccount, account.id);
     if (expense <= 0) continue;
     const fundingId = fundingAccountId(account, account.id);
@@ -226,8 +228,9 @@ export function buildAccountAlerts({
   const activeIds = new Set(flowRows.map((row) => row.accountId));
 
   for (const account of accounts) {
+    if (account.type === "credit") continue;
     const balance = balances.get(account.id)?.plannedBalanceCents ?? 0;
-    if (account.type !== "credit" && balance < 0) {
+    if (balance < 0) {
       alerts.push({
         id: `neg-${account.id}`,
         severity: "danger",

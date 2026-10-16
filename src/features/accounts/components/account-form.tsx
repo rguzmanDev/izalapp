@@ -130,8 +130,8 @@ export function AccountForm({ action, account, paymentAccountOptions }: AccountF
           />
           <MoneyField
             name="openingBalanceCents"
-            label="Deuda inicial"
-            hint="Lo que ya debías al empezar a usar IzalApp. Déjalo en 0 si partes de cero."
+            label="Deuda inicial (informativa)"
+            hint="Referencia de lo que ya debías al empezar. No mueve el saldo de la cuenta «Se paga desde»."
             defaultCents={
               account && account.openingBalanceCents < 0 ? -account.openingBalanceCents : 0
             }

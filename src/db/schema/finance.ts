@@ -42,8 +42,8 @@ export const financialAccounts = pgTable(
       onDelete: "set null",
     }),
     /**
-     * Planned cash position before movements in the app.
-     * Banks/savings: money on hand. Credit: typically 0 or negative if you start with debt.
+     * Banks/savings: planned cash on hand before movements.
+     * Credit: informative starting debt (negative); not part of the money ledger.
      */
     openingBalanceCents: integer().notNull().default(0),
     ...timestamps,

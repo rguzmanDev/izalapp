@@ -35,7 +35,7 @@ function AccountSection({
           const planned = balances.get(account.id)?.plannedBalanceCents ?? 0;
           const subtitle =
             account.type === "credit"
-              ? [describeAccount(account), planned < 0 ? `Deuda ${formatMoney(-planned)}` : "Sin deuda planificada"]
+              ? [describeAccount(account), "Seguimiento informativo (compras / por pagar)"]
                   .filter(Boolean)
                   .join(" · ")
               : describeAccount(account);

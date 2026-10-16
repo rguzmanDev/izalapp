@@ -1,6 +1,8 @@
 import { EmptyState } from "@/components/empty-state";
 import { LinkButton } from "@/components/link-button";
 import { PageHeader } from "@/components/page-header";
+import { listAccounts } from "@/features/accounts/data";
+import { toCardOptionsByFundingAccount } from "@/features/accounts/format";
 import { saveFuelLog } from "@/features/fuel/actions";
 import { FuelForm } from "@/features/fuel/components/fuel-form";
 import { listFuelLogs } from "@/features/fuel/data";
@@ -27,9 +29,10 @@ export default async function NewFuelLogPage({ searchParams }: PageProps<"/gasol
     );
   }
 
-  const [rows, refills] = await Promise.all([
+  const [rows, refills, accounts] = await Promise.all([
     listPeriodItems(user.id, period.id),
     listFuelLogs(user.id),
+    listAccounts(user.id),
   ]);
   const items = rows.map((row) => row.item);
   const itemOptions = toFuelItemOptions(items);
@@ -70,6 +73,7 @@ export default async function NewFuelLogPage({ searchParams }: PageProps<"/gasol
         defaultDate={today}
         lastOdometer={refills.at(-1)?.log.odometer ?? null}
         itemOptions={itemOptions}
+        cardOptionsByAccount={toCardOptionsByFundingAccount(accounts)}
       />
     </>
   );
