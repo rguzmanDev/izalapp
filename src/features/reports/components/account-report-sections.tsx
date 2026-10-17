@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { ArrowDownIcon } from "lucide-react";
-import { ProgressBar } from "@/components/progress-bar";
 import { Section } from "@/components/section";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
@@ -9,7 +8,6 @@ import type {
   AccountBalanceRow,
   AccountFlowRow,
   CardReportRow,
-  FundingUseRow,
   TransferMapRow,
 } from "../account-report";
 
@@ -32,14 +30,12 @@ function EmptyNote({ children }: { children: ReactNode }) {
 export function AccountReportSections({
   balanceRows,
   flowRows,
-  fundingRows,
   cardRows,
   transferMapRows,
   alerts,
 }: {
   balanceRows: AccountBalanceRow[];
   flowRows: AccountFlowRow[];
-  fundingRows: FundingUseRow[];
   cardRows: CardReportRow[];
   transferMapRows: TransferMapRow[];
   alerts: AccountAlert[];
@@ -144,40 +140,6 @@ export function AccountReportSections({
                 </div>
               </li>
             ))}
-          </ReportList>
-        )}
-      </Section>
-
-      <Section
-        title="Fondeo vs uso"
-        description="Apartado hacia la cuenta vs compras etiquetadas con tarjetas que se pagan desde ella"
-      >
-        {fundingRows.length === 0 ? (
-          <EmptyNote>Sin fondeo ni uso en este rango.</EmptyNote>
-        ) : (
-          <ReportList>
-            {fundingRows.map((row) => {
-              const max = Math.max(row.fundedCents, row.spentCents, 1);
-              return (
-                <li key={row.accountId} className="flex flex-col gap-2 px-4 py-3">
-                  <span className="truncate text-sm font-medium select-text">{row.label}</span>
-                  <div className="flex justify-between gap-3 text-xs tabular-nums select-text">
-                    <span className="text-amber-800 dark:text-amber-400">
-                      Apartado {formatMoney(row.fundedCents)}
-                    </span>
-                    <span className="text-red-700 dark:text-red-400">
-                      Usado en tarjetas {formatMoney(row.spentCents)}
-                    </span>
-                  </div>
-                  <ProgressBar value={row.spentCents} max={max} />
-                  {row.spentCents > row.fundedCents && (
-                    <span className="text-xs text-red-700 dark:text-red-400">
-                      Usaste {formatMoney(row.spentCents - row.fundedCents)} más de lo apartado
-                    </span>
-                  )}
-                </li>
-              );
-            })}
           </ReportList>
         )}
       </Section>

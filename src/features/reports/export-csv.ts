@@ -65,7 +65,7 @@ export async function buildReportsCsv(userId: string, range: number): Promise<st
         ["Ingreso", csvMoney(sum(summaries.map((s) => s.incomeCents)))],
         ["Gastado (registrado)", csvMoney(sum(summaries.map(spentCentsOf)))],
         [
-          "Sobrante contable (fijos en plan)",
+          "Sobrante (fijos en plan)",
           csvMoney(sum(summaries.map((s) => s.actualSurplusCents))),
         ],
         ["Ahorrado al cerrar", csvMoney(sum(reports.map((r) => r.savedCents)))],
@@ -152,15 +152,6 @@ export async function buildReportsCsv(userId: string, range: number): Promise<st
         csvMoney(row.inCents),
         csvMoney(row.outCents),
         csvMoney(row.netCents),
-      ]),
-    },
-    {
-      title: "Fondeo vs uso",
-      headers: ["cuenta", "apartado", "usado_en_tarjetas"],
-      rows: accountReport.fundingRows.map((row) => [
-        row.label,
-        csvMoney(row.fundedCents),
-        csvMoney(row.spentCents),
       ]),
     },
     {

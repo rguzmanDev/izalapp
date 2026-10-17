@@ -280,12 +280,12 @@
   <div class="stat"><small>Ingreso</small><b>$1,200.00</b></div>
   <div class="stat"><small>Gastos fijos</small><b>$450.00</b><em>1 de 3 pagados</em></div>
   <div class="stat"><small>Presupuesto consumido</small><b>$120.00</b><em>de $300.00</em></div>
-  <div class="stat"><small>Sobrante estimado</small><b>$450.00</b><em>Planeado $450.00</em></div>
+  <div class="stat"><small>Sobrante</small><b>$450.00</b></div>
 </div>
 <ul>
   <li><b>Gastos fijos</b>: total planeado y cuántos ya marcaste como pagados.</li>
   <li><b>Presupuesto consumido</b>: lo que llevas gastado contra el total de topes.</li>
-  <li><b>Sobrante estimado</b>: lo que te quedaría al final. Baja si tienes gastos sin presupuesto (“otros gastos”) o si te pasas de algún presupuesto (“excesos”). Se pone en rojo si es negativo.</li>
+  <li><b>Sobrante</b>: ingreso − fijos del plan − lo ya gastado de presupuestos − otros gastos. Es el mismo número que en Reportes. Al cerrar la quincena pasa a llamarse <b>Sobrante real</b>.</li>
 </ul>
 
 <h3>4.3 Cambiar un monto solo en esta quincena</h3>
@@ -308,7 +308,7 @@
   <tr><td><span class="badge gray">Apartado</span></td><td>Ya hay una transferencia de fondeo registrada (o se apartó al completar “Fondear cuentas”).</td><td><span class="btn">Pagar</span> <span class="btn outline">Deshacer</span></td></tr>
   <tr><td><span class="badge solid">Pagado</span></td><td>Ya está pagado; también sale del fondeo.</td><td><span class="btn outline">Deshacer</span></td></tr>
 </table>
-<p><b>Apartar</b> pide la cuenta de origen y crea la transferencia. <b>Deshacer</b> un apartado revierte el estado y elimina esa transferencia de apartado. Si el monto real fue distinto al planeado, registra el gasto con <b>+</b> eligiendo ese gasto fijo (debe estar apartado o pagado).</p>
+<p><b>Apartar</b> pide la cuenta de origen y crea la transferencia. <b>Marcar pagado</b> registra el gasto en la cuenta de la partida; si esa cuenta fondea tarjetas, puedes elegir <b>Directo</b> o con qué tarjeta pagaste (igual que un gasto normal: baja la cuenta y, si hay tarjeta, suma al «por pagar»). <b>Deshacer</b> un apartado revierte el estado y elimina esa transferencia; deshacer un pago elimina el gasto registrado. Si el monto real fue distinto al planeado, registra el gasto con <b>+</b> eligiendo ese gasto fijo (debe estar apartado o pagado).</p>
 
 <h3>4.6 Ingresos extra</h3>
 <p>Si en una quincena te llega dinero fuera de tu plan (un bono, un trabajo extra, un reembolso), en la sección <b>Ingresos</b> de Inicio toca <b>+ Ingreso extra</b> y llena:</p>
@@ -433,13 +433,12 @@
 <h2 id="reportes">10. Reportes</h2>
 <p>Elige ver las últimas <b>6</b>, <b>12</b> o <b>24</b> quincenas. Con <b>Exportar CSV</b> descargas un archivo con todas las secciones del reporte (totales, movimientos, cuentas, tarjetas, transferencias, gasolina, etc.) del rango elegido.</p>
 <ul>
-  <li><b>Totales</b>: Ingreso, Gastado (solo registrados), Sobrante (reserva fijos pendientes y ahorrado al cerrar) y Excesos. Si pediste 6 quincenas y solo tienes 1, verás «1 de 6».</li>
+  <li><b>Totales</b>: Ingreso, Gastado (solo registrados), Sobrante (misma fórmula que en Inicio) y Excesos. Si pediste 6 quincenas y solo tienes 1, verás «1 de 6».</li>
   <li><b>Movimientos</b>: lista de ingresos (verde), gastos (rojo) y transferencias (amarillo) del rango. Filtra por tipo. Cada fila indica la quincena (el corte) y la fecha real del movimiento. El corte lo defines tú al cerrar/abrir; la fecha no cambia de periodo sola.</li>
   <li><b>Saldo por cuenta</b>: <b>en banco</b>, <b>tras pagar tarjetas</b> y <b>reservado</b> (compras de tarjeta aún no liquidadas).</li>
   <li><b>Alertas</b>: saldo negativo, cuentas sin movimiento en el rango, tarjetas sin «Se paga desde» o sin cobertura para lo por pagar.</li>
   <li><b>Saldo por cuenta</b>: saldo planificado acumulado (opening + todas las quincenas), no solo el rango.</li>
   <li><b>Flujo por cuenta</b>: qué entró y qué salió <b>en este rango</b> (ingresos, gastos y transferencias).</li>
-  <li><b>Fondeo vs uso</b>: lo apartado hacia una cuenta vs compras etiquetadas con tarjetas que se pagan desde ella.</li>
   <li><b>Tarjetas</b>: seguimiento informativo (compras etiquetadas, pagos registrados, por pagar); el saldo real está en la cuenta «Se paga desde».</li>
   <li><b>Mapa de transferencias</b>: totales origen → destino en el rango.</li>
   <li><b>Por quincena</b>: una gráfica de barras con gastos fijos registrados, presupuestos, otros gastos y sobrante de cada quincena.</li>
@@ -450,7 +449,7 @@
 <h2 id="faq">11. Preguntas frecuentes</h2>
 <details>
   <summary>Me pasé de un presupuesto, ¿qué pasa?</summary>
-  <p>Nada se bloquea. El presupuesto muestra “Excedido” y tu sobrante estimado baja. En Reportes verás cuántas veces te pasaste.</p>
+  <p>Nada se bloquea. El presupuesto muestra “Excedido” y tu sobrante baja. En Reportes verás cuántas veces te pasaste.</p>
 </details>
 <details>
   <summary>Cambié mi salario en Ajustes y la quincena actual no cambió.</summary>

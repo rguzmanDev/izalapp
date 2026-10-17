@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, gte, inArray, isNotNull, isNull, like, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, isNull, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import {
@@ -21,7 +21,6 @@ import {
   buildAccountBalanceRows,
   buildAccountFlowRows,
   buildCardReportRows,
-  buildFundingUseRows,
   buildTransferMapRows,
   cardReservedByFundingAccount,
 } from "./account-report";
@@ -171,7 +170,6 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
     return {
       balanceRows,
       flowRows: [],
-      fundingRows: [],
       cardRows,
       transferMapRows: [],
       alerts: buildAccountAlerts({
@@ -196,7 +194,6 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
     expenseRows,
     transferInRows,
     transferOutRows,
-    apartadoInRows,
     cardTaggedExpenseRows,
     cardPaymentRows,
     transferPairs,
@@ -230,17 +227,6 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
       .from(transfers)
       .where(and(eq(transfers.userId, userId), inArray(transfers.periodId, periodIds)))
       .groupBy(transfers.fromAccountId),
-    db
-      .select({ accountId: transfers.toAccountId, cents: total(transfers.amountCents) })
-      .from(transfers)
-      .where(
-        and(
-          eq(transfers.userId, userId),
-          inArray(transfers.periodId, periodIds),
-          like(transfers.note, "Apartado:%"),
-        ),
-      )
-      .groupBy(transfers.toAccountId),
     db
       .select({
         accountId: transactions.creditCardId,
@@ -280,7 +266,6 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
   const expensesByAccount = toCentsMap(expenseRows);
   const transferInByAccount = toCentsMap(transferInRows);
   const transferOutByAccount = toCentsMap(transferOutRows);
-  const apartadoInByAccount = toCentsMap(apartadoInRows);
   const cardTaggedByCard = toCentsMap(
     cardTaggedExpenseRows.filter(
       (row): row is { accountId: string; cents: number } => row.accountId !== null,
@@ -296,11 +281,6 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
     transferInByAccount,
     transferOutByAccount,
   });
-  const fundingRows = buildFundingUseRows({
-    accounts,
-    apartadoInByAccount,
-    expensesByAccount: cardTaggedByCard,
-  });
   const cardRows = buildCardReportRows(
     statements,
     cardTaggedByCard,
@@ -311,5 +291,5 @@ export async function getAccountReports(userId: string, periodIds: string[]) {
   const transferMapRows = buildTransferMapRows(transferPairs, accountsById);
   const alerts = buildAccountAlerts({ accounts, balances, flowRows, cardRows });
 
-  return { balanceRows, flowRows, fundingRows, cardRows, transferMapRows, alerts };
+  return { balanceRows, flowRows, cardRows, transferMapRows, alerts };
 }

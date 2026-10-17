@@ -65,22 +65,16 @@ function FixedExpenseRow({ item, account, today, readOnly }: FixedExpenseRowProp
               <LinkButton href={`/partidas/${item.id}/apartar`} variant="outline" size="sm">
                 Apartar
               </LinkButton>
-              <ConfirmForm
-                action={setPaymentStatus.bind(null, item.id, "paid")}
-                confirmMessage={`¿Marcar "${item.name}" como pagado? Se registra el gasto en la cuenta de la partida.`}
-              >
-                <PendingButton size="sm">Marcar pagado</PendingButton>
-              </ConfirmForm>
+              <LinkButton href={`/partidas/${item.id}/pagar`} size="sm">
+                Marcar pagado
+              </LinkButton>
             </>
           )}
           {item.paymentStatus === "set_aside" && (
             <>
-              <ConfirmForm
-                action={setPaymentStatus.bind(null, item.id, "paid")}
-                confirmMessage={`¿Marcar "${item.name}" como pagado? Se registra el gasto en la cuenta de la partida.`}
-              >
-                <PendingButton size="sm">Marcar pagado</PendingButton>
-              </ConfirmForm>
+              <LinkButton href={`/partidas/${item.id}/pagar`} size="sm">
+                Marcar pagado
+              </LinkButton>
               <ConfirmForm
                 action={setPaymentStatus.bind(null, item.id, "pending")}
                 confirmMessage={`¿Deshacer el apartado de "${item.name}"?`}

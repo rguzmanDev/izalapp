@@ -281,6 +281,7 @@ export async function changePaymentStatus(
   item: PeriodItem,
   status: PaymentStatus,
   paidOn: string,
+  creditCardId?: string | null,
 ) {
   await db.transaction(async (tx) => {
     const [fresh] = await tx
@@ -299,6 +300,7 @@ export async function changePaymentStatus(
         periodId: fresh.periodId,
         itemId: fresh.id,
         accountId: fresh.accountId,
+        creditCardId: creditCardId ?? null,
         amountCents: fresh.plannedCents,
         occurredOn: paidOn,
         note: paidFixedExpenseNote(fresh.name),

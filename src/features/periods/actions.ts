@@ -94,6 +94,8 @@ export async function setPaymentStatus(id: string, status: PaymentStatus) {
 
   // Fresh apartados need an origin account (setAsideWithTransfer). Undo-to-apartado is fine here.
   if (status === "set_aside" && item.paymentStatus === "pending") return;
+  // Marking fixed expenses paid goes through markFixedExpensePaid (optional card tag).
+  if (status === "paid" && item.kind === "fixed_expense") return;
 
   if (item.kind === "fixed_expense") {
     await changePaymentStatus(item, status, todayIsoDate());
@@ -104,6 +106,43 @@ export async function setPaymentStatus(id: string, status: PaymentStatus) {
   }
 
   revalidatePath("/");
+}
+
+const markPaidSchema = z.object({
+  creditCardId: z
+    .string()
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : null)),
+});
+
+/** Marks a fixed expense paid; optional credit card tag (same model as a normal expense). */
+export async function markFixedExpensePaid(
+  itemId: string,
+  _state: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const user = await requireUser();
+  const parsed = parseFormData(markPaidSchema, formData);
+  if (!parsed.success) return parsed.state;
+
+  const item = await getPeriodItem(user.id, itemId);
+  if (!item || item.kind !== "fixed_expense") return { error: "Partida inválida" };
+  if (item.paymentStatus === "paid") return { error: "Esta partida ya está pagada" };
+  if (!(await isPeriodOpen(user.id, item.periodId))) {
+    return { error: "La quincena ya está cerrada" };
+  }
+
+  const creditCardId = parsed.data.creditCardId;
+  if (creditCardId) {
+    const card = await getAccount(user.id, creditCardId);
+    if (!card || card.type !== "credit" || card.paymentAccountId !== item.accountId) {
+      return { fieldErrors: { creditCardId: ["Tarjeta inválida para esta cuenta"] } };
+    }
+  }
+
+  await changePaymentStatus(item, "paid", todayIsoDate(), creditCardId);
+  revalidatePath("/");
+  redirect("/");
 }
 
 /**

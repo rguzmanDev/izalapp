@@ -30,13 +30,6 @@ export type AccountFlowRow = {
   netCents: number;
 };
 
-export type FundingUseRow = {
-  accountId: string;
-  label: string;
-  fundedCents: number;
-  spentCents: number;
-};
-
 export type CardReportRow = {
   accountId: string;
   label: string;
@@ -69,14 +62,6 @@ type FlowInput = {
   expensesByAccount: Map<string, number>;
   transferInByAccount: Map<string, number>;
   transferOutByAccount: Map<string, number>;
-};
-
-type FundingInput = {
-  accounts: FinancialAccount[];
-  /** Transfers into an account tagged as Apartado in the range. */
-  apartadoInByAccount: Map<string, number>;
-  /** Expenses charged to each spending account in the range. */
-  expensesByAccount: Map<string, number>;
 };
 
 function cents(map: Map<string, number>, id: string) {
@@ -150,42 +135,6 @@ export function buildAccountFlowRows({
     })
     .filter((row) => row.inCents > 0 || row.outCents > 0)
     .sort((a, b) => Math.abs(b.netCents) - Math.abs(a.netCents));
-}
-
-/**
- * Apartado into a funding account vs purchases tagged to cards paid from that account.
- * Direct bank expenses (sin tarjeta) are not "uso" of fondeo.
- */
-export function buildFundingUseRows({
-  accounts,
-  apartadoInByAccount,
-  expensesByAccount,
-}: FundingInput): FundingUseRow[] {
-  const accountsById = new Map(accounts.map((account) => [account.id, account]));
-  const spentOnFunding = new Map<string, number>();
-
-  for (const account of accounts) {
-    if (account.type !== "credit") continue;
-    // expensesByAccount is keyed by creditCardId for this map when built for funding.
-    const expense = cents(expensesByAccount, account.id);
-    if (expense <= 0) continue;
-    const fundingId = fundingAccountId(account, account.id);
-    if (fundingId === account.id) continue;
-    spentOnFunding.set(fundingId, (spentOnFunding.get(fundingId) ?? 0) + expense);
-  }
-
-  const fundingIds = new Set<string>([...apartadoInByAccount.keys(), ...spentOnFunding.keys()]);
-
-  return [...fundingIds]
-    .flatMap((accountId) => {
-      const account = accountsById.get(accountId);
-      if (!account || account.type === "credit") return [];
-      const fundedCents = cents(apartadoInByAccount, accountId);
-      const spentCents = cents(spentOnFunding, accountId);
-      if (fundedCents <= 0 && spentCents <= 0) return [];
-      return [{ accountId, label: accountLabel(account), fundedCents, spentCents }];
-    })
-    .sort((a, b) => b.spentCents - a.spentCents);
 }
 
 export function buildCardReportRows(

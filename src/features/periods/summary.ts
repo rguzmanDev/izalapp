@@ -16,11 +16,7 @@ export type PeriodSummary = {
   unbudgetedCents: number;
   /** Spending above the planned amount of budgets and fixed expenses. */
   overspentCents: number;
-  /** Income minus everything planned. */
-  plannedSurplusCents: number;
-  /** Planned surplus minus overspending and unbudgeted expenses. */
-  projectedSurplusCents: number;
-  /** What is left when unspent budgets are released; fixed expenses always count in full. */
+  /** Income − fijos del plan − presupuestos gastados − otros. Misma cifra en Inicio y Reportes. */
   actualSurplusCents: number;
 };
 
@@ -45,7 +41,6 @@ export function summarizePeriod(rows: ItemWithSpent[], unbudgetedCents: number):
   const fixedPlannedCents = sum(fixed.map((row) => row.item.plannedCents));
   const budgetPlannedCents = sum(budgets.map((row) => row.item.plannedCents));
   const overspentCents = sum([...fixed, ...budgets].map(overspentOf));
-  const plannedSurplusCents = incomeCents - fixedPlannedCents - budgetPlannedCents;
   const budgetSpentCents = sum(budgets.map((row) => row.spentCents));
   const fixedSpentCents = sum(fixed.map((row) => row.spentCents));
   const fixedCommittedCents = sum(fixed.map((row) => Math.max(row.item.plannedCents, row.spentCents)));
@@ -61,8 +56,6 @@ export function summarizePeriod(rows: ItemWithSpent[], unbudgetedCents: number):
     budgetSpentCents,
     unbudgetedCents,
     overspentCents,
-    plannedSurplusCents,
-    projectedSurplusCents: plannedSurplusCents - overspentCents - unbudgetedCents,
     actualSurplusCents: incomeCents - fixedCommittedCents - budgetSpentCents - unbudgetedCents,
   };
 }
