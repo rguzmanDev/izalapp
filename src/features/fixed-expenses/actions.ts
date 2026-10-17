@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getAccount, isOwnedAccount } from "@/features/accounts/data";
-import { sourceAccountLocked } from "@/features/periods/locks";
+import { sourceUsedInPeriod } from "@/features/periods/locks";
 import { parseFormData, type FormState } from "@/lib/form";
 import { requireUser } from "@/lib/session";
 import { createFixedExpense, deleteFixedExpense, getFixedExpense, updateFixedExpense } from "./data";
@@ -32,21 +32,42 @@ export async function saveFixedExpense(
     const current = await getFixedExpense(user.id, id);
     if (!current) return { error: "El gasto fijo ya no existe" };
 
-    const accountLocked = await sourceAccountLocked(user.id, id);
-    if (accountLocked && input.paymentAccountId !== current.paymentAccountId) {
-      return {
-        fieldErrors: {
-          paymentAccountId: [
-            "No se puede cambiar la cuenta: ya está apartado o pagado en una quincena",
-          ],
-        },
+    const locked = await sourceUsedInPeriod(user.id, id);
+    if (locked) {
+      if (input.paymentAccountId !== current.paymentAccountId) {
+        return {
+          fieldErrors: {
+            paymentAccountId: [
+              "No se puede cambiar la cuenta: este gasto ya se usó en una quincena",
+            ],
+          },
+        };
+      }
+      if (
+        input.split !== current.split ||
+        input.customFirstHalfCents !== current.customFirstHalfCents
+      ) {
+        return {
+          fieldErrors: {
+            split: ["No se puede cambiar el reparto: este gasto ya se usó en una quincena"],
+          },
+        };
+      }
+      if (input.dueDay !== current.dueDay) {
+        return {
+          fieldErrors: {
+            dueDay: ["No se puede cambiar el vencimiento: este gasto ya se usó en una quincena"],
+          },
+        };
+      }
+      input = {
+        ...input,
+        paymentAccountId: current.paymentAccountId,
+        split: current.split,
+        customFirstHalfCents: current.customFirstHalfCents,
+        dueDay: current.dueDay,
       };
     }
-
-    input = {
-      ...input,
-      paymentAccountId: accountLocked ? current.paymentAccountId : input.paymentAccountId,
-    };
 
     await updateFixedExpense(user.id, id, input);
   } else {
@@ -57,6 +78,11 @@ export async function saveFixedExpense(
 
 export async function removeFixedExpense(id: string): Promise<FormState> {
   const user = await requireUser();
+  if (await sourceUsedInPeriod(user.id, id)) {
+    return {
+      error: "No se puede eliminar: ya se usó en una quincena. Desactívalo si ya no aplica.",
+    };
+  }
   await deleteFixedExpense(user.id, id);
   redirect("/gastos-fijos");
 }

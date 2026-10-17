@@ -15,7 +15,7 @@ export default async function EditIncomePage({ params }: PageProps<"/ingresos/[i
   const [income, accounts] = await Promise.all([getIncome(user.id, id), listAccounts(user.id)]);
   if (!income) notFound();
 
-  const lockAccount = await sourceUsedInPeriod(user.id, id);
+  const lockStructure = await sourceUsedInPeriod(user.id, id);
 
   return (
     <>
@@ -24,12 +24,18 @@ export default async function EditIncomePage({ params }: PageProps<"/ingresos/[i
         action={saveIncome.bind(null, income.id)}
         income={income}
         accountOptions={toMoneyAccountOptions(accounts)}
-        lockAccount={lockAccount}
+        lockStructure={lockStructure}
       />
-      <DeleteButton
-        action={removeIncome.bind(null, income.id)}
-        confirmMessage={`¿Eliminar el ingreso "${income.name}"?`}
-      />
+      {lockStructure ? (
+        <p className="text-sm text-muted-foreground">
+          No se puede eliminar: ya se usó en una quincena. Desactívalo si ya no aplica.
+        </p>
+      ) : (
+        <DeleteButton
+          action={removeIncome.bind(null, income.id)}
+          confirmMessage={`¿Eliminar el ingreso "${income.name}"?`}
+        />
+      )}
     </>
   );
 }

@@ -22,14 +22,14 @@ type FixedExpenseFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   expense?: FixedExpense;
   accountOptions: SelectOption[];
-  lockAccount?: boolean;
+  lockStructure?: boolean;
 };
 
 export function FixedExpenseForm({
   action,
   expense,
   accountOptions,
-  lockAccount = false,
+  lockStructure = false,
 }: FixedExpenseFormProps) {
   const [dueMode, setDueMode] = useState<DueMode>(expense?.dueDay ? "dueDate" : "onPayday");
 
@@ -46,19 +46,22 @@ export function FixedExpenseForm({
         maxLength={NAME_MAX_LENGTH}
         defaultValue={expense?.name}
       />
-      <AllocationFields defaultValue={expense} />
+      <AllocationFields defaultValue={expense} lockSplit={lockStructure} />
       <SelectField
         name="dueMode"
         label="¿Cuándo se paga?"
         hint={
-          dueMode === "onPayday"
-            ? "Sin día de vencimiento: se paga cuando recibes tu ingreso."
-            : "Tiene un día límite en el mes para liquidarlo."
+          lockStructure
+            ? "Ya se usó en una quincena; no se puede cambiar el vencimiento."
+            : dueMode === "onPayday"
+              ? "Sin día de vencimiento: se paga cuando recibes tu ingreso."
+              : "Tiene un día límite en el mes para liquidarlo."
         }
         required
         options={dueModeOptions}
         value={dueMode}
         onChange={(event) => setDueMode(event.target.value as DueMode)}
+        locked={lockStructure}
       />
       {dueMode === "dueDate" && (
         <IntegerField
@@ -68,6 +71,7 @@ export function FixedExpenseForm({
           max={DAY_OF_MONTH_MAX}
           placeholder={`1 a ${DAY_OF_MONTH_MAX}`}
           defaultValue={expense?.dueDay}
+          locked={lockStructure}
         />
       )}
       <SelectField
@@ -76,13 +80,13 @@ export function FixedExpenseForm({
         required
         placeholder="Selecciona una cuenta bancaria o efectivo"
         hint={
-          lockAccount
-            ? "Ya está apartado o pagado en una quincena; no se puede cambiar la cuenta."
+          lockStructure
+            ? "Ya se usó en una quincena; no se puede cambiar la cuenta."
             : "El dinero sale de esta cuenta. Al gastar podrás marcar si usaste una tarjeta ligada."
         }
         options={accountOptions}
         defaultValue={expense?.paymentAccountId ?? ""}
-        locked={lockAccount}
+        locked={lockStructure}
       />
       <CheckboxField name="isActive" label="Activo" defaultChecked={expense?.isActive ?? true} />
       <SubmitButton>Guardar</SubmitButton>

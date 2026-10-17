@@ -26,10 +26,11 @@ export default async function EditAccountPage({ params }: PageProps<"/cuentas/[i
   ]);
   if (!account) notFound();
 
-  const [hasLedger, hasCardActivity] = await Promise.all([
-    accountHasLedgerActivity(user.id, id),
-    account.type === "credit" ? cardHasStatementActivity(user.id, id) : Promise.resolve(false),
-  ]);
+  const hasCardActivity =
+    account.type === "credit" ? await cardHasStatementActivity(user.id, id) : false;
+  const canDelete =
+    !(await accountHasLedgerActivity(user.id, id)) &&
+    !(account.type === "credit" && hasCardActivity);
 
   const paymentAccounts = accounts.filter((other) => other.type !== "credit" && other.id !== id);
   const view = views.get(account.id);
@@ -98,14 +99,21 @@ export default async function EditAccountPage({ params }: PageProps<"/cuentas/[i
         paymentAccountOptions={toAccountOptions(paymentAccounts)}
         locks={{
           type: true,
-          openingBalance: hasLedger,
-          paymentAccount: hasCardActivity,
+          openingBalance: true,
+          paymentAccount: account.type === "credit",
+          statementSchedule: hasCardActivity,
         }}
       />
-      <DeleteButton
-        action={removeAccount.bind(null, account.id)}
-        confirmMessage={`¿Eliminar la cuenta "${account.name}"?`}
-      />
+      {canDelete ? (
+        <DeleteButton
+          action={removeAccount.bind(null, account.id)}
+          confirmMessage={`¿Eliminar la cuenta "${account.name}"?`}
+        />
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          No se puede eliminar: ya tiene movimientos, partidas o actividad de tarjeta.
+        </p>
+      )}
     </>
   );
 }

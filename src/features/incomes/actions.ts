@@ -28,20 +28,33 @@ export async function saveIncome(
     if (!current) return { error: "El ingreso ya no existe" };
 
     const locked = await sourceUsedInPeriod(user.id, id);
-    if (locked && input.depositAccountId !== current.depositAccountId) {
-      return {
-        fieldErrors: {
-          depositAccountId: [
-            "No se puede cambiar la cuenta: este ingreso ya se usó en una quincena",
-          ],
-        },
+    if (locked) {
+      if (input.depositAccountId !== current.depositAccountId) {
+        return {
+          fieldErrors: {
+            depositAccountId: [
+              "No se puede cambiar la cuenta: este ingreso ya se usó en una quincena",
+            ],
+          },
+        };
+      }
+      if (
+        input.split !== current.split ||
+        input.customFirstHalfCents !== current.customFirstHalfCents
+      ) {
+        return {
+          fieldErrors: {
+            split: ["No se puede cambiar el reparto: este ingreso ya se usó en una quincena"],
+          },
+        };
+      }
+      input = {
+        ...input,
+        depositAccountId: current.depositAccountId,
+        split: current.split,
+        customFirstHalfCents: current.customFirstHalfCents,
       };
     }
-
-    input = {
-      ...input,
-      depositAccountId: locked ? current.depositAccountId : input.depositAccountId,
-    };
 
     await updateIncome(user.id, id, input);
   } else {
@@ -52,6 +65,11 @@ export async function saveIncome(
 
 export async function removeIncome(id: string): Promise<FormState> {
   const user = await requireUser();
+  if (await sourceUsedInPeriod(user.id, id)) {
+    return {
+      error: "No se puede eliminar: ya se usó en una quincena. Desactívalo si ya no aplica.",
+    };
+  }
   await deleteIncome(user.id, id);
   redirect("/ingresos");
 }

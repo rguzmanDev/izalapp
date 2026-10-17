@@ -90,6 +90,7 @@ type IntegerFieldProps = Omit<FieldProps, "children"> & {
   max: number;
   defaultValue?: number | null;
   placeholder?: string;
+  locked?: boolean;
 };
 
 /** Whole number typed directly; non-digits and values above `max` are ignored as the user types. */
@@ -101,11 +102,13 @@ export function IntegerField({
   max,
   defaultValue,
   placeholder,
+  locked = false,
 }: IntegerFieldProps) {
   const error = useFieldError(name);
   const [value, setValue] = useState(defaultValue == null ? "" : String(defaultValue));
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    if (locked) return;
     const digits = event.target.value.replace(/\D/g, "").replace(/^0+/, "");
     if (Number(digits) <= max) setValue(digits);
   }
@@ -117,9 +120,10 @@ export function IntegerField({
         name={name}
         inputMode="numeric"
         autoComplete="off"
+        readOnly={locked}
         aria-invalid={Boolean(error)}
         aria-required={required}
-        className="h-10 tabular-nums"
+        className={cn("h-10 tabular-nums", locked && "bg-muted text-muted-foreground")}
         maxLength={String(max).length}
         placeholder={placeholder}
         value={value}

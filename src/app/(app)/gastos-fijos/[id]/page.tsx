@@ -6,7 +6,7 @@ import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeFixedExpense, saveFixedExpense } from "@/features/fixed-expenses/actions";
 import { FixedExpenseForm } from "@/features/fixed-expenses/components/fixed-expense-form";
 import { getFixedExpense } from "@/features/fixed-expenses/data";
-import { sourceAccountLocked } from "@/features/periods/locks";
+import { sourceUsedInPeriod } from "@/features/periods/locks";
 import { requireUser } from "@/lib/session";
 
 export default async function EditFixedExpensePage({ params }: PageProps<"/gastos-fijos/[id]">) {
@@ -18,7 +18,7 @@ export default async function EditFixedExpensePage({ params }: PageProps<"/gasto
   ]);
   if (!expense) notFound();
 
-  const lockAccount = await sourceAccountLocked(user.id, id);
+  const lockStructure = await sourceUsedInPeriod(user.id, id);
 
   return (
     <>
@@ -27,12 +27,18 @@ export default async function EditFixedExpensePage({ params }: PageProps<"/gasto
         action={saveFixedExpense.bind(null, expense.id)}
         expense={expense}
         accountOptions={toMoneyAccountOptions(accounts)}
-        lockAccount={lockAccount}
+        lockStructure={lockStructure}
       />
-      <DeleteButton
-        action={removeFixedExpense.bind(null, expense.id)}
-        confirmMessage={`¿Eliminar el gasto fijo "${expense.name}"?`}
-      />
+      {lockStructure ? (
+        <p className="text-sm text-muted-foreground">
+          No se puede eliminar: ya se usó en una quincena. Desactívalo si ya no aplica.
+        </p>
+      ) : (
+        <DeleteButton
+          action={removeFixedExpense.bind(null, expense.id)}
+          confirmMessage={`¿Eliminar el gasto fijo "${expense.name}"?`}
+        />
+      )}
     </>
   );
 }

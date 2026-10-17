@@ -38,41 +38,60 @@ export async function saveAccount(
       };
     }
 
-    const [hasLedger, hasCardActivity] = await Promise.all([
-      accountHasLedgerActivity(user.id, id),
-      current.type === "credit"
-        ? cardHasStatementActivity(user.id, id)
-        : Promise.resolve(false),
-    ]);
-
-    if (hasLedger && input.openingBalanceCents !== current.openingBalanceCents) {
+    // Restrictive: opening balance and card funding account only set at create time.
+    if (input.openingBalanceCents !== current.openingBalanceCents) {
       return {
         fieldErrors: {
           openingBalanceCents: [
-            "El saldo o deuda inicial no se puede cambiar cuando ya hay movimientos",
+            "El saldo o deuda inicial solo se define al crear la cuenta",
           ],
         },
       };
     }
 
     if (
-      hasCardActivity &&
+      current.type === "credit" &&
       (input.paymentAccountId ?? null) !== (current.paymentAccountId ?? null)
     ) {
       return {
         fieldErrors: {
           paymentAccountId: [
-            "No se puede cambiar «Se paga desde» cuando la tarjeta ya tiene compras o pagos",
+            "«Se paga desde» solo se define al crear la tarjeta",
           ],
         },
       };
     }
 
+    const hasCardActivity =
+      current.type === "credit" ? await cardHasStatementActivity(user.id, id) : false;
+
+    if (hasCardActivity) {
+      const scheduleChanged =
+        input.statementDay !== current.statementDay ||
+        input.paymentDueDay !== current.paymentDueDay ||
+        input.paymentDueDaysAfterCutoff !== current.paymentDueDaysAfterCutoff;
+      if (scheduleChanged) {
+        return {
+          fieldErrors: {
+            statementDay: [
+              "No se puede cambiar el corte o la fecha de pago: la tarjeta ya tiene compras o pagos",
+            ],
+          },
+        };
+      }
+    }
+
     input = {
       ...input,
       type: current.type,
-      openingBalanceCents: hasLedger ? current.openingBalanceCents : input.openingBalanceCents,
-      paymentAccountId: hasCardActivity ? current.paymentAccountId : input.paymentAccountId,
+      openingBalanceCents: current.openingBalanceCents,
+      paymentAccountId:
+        current.type === "credit" ? current.paymentAccountId : input.paymentAccountId,
+      statementDay: hasCardActivity ? current.statementDay : input.statementDay,
+      paymentDueDay: hasCardActivity ? current.paymentDueDay : input.paymentDueDay,
+      paymentDueDaysAfterCutoff: hasCardActivity
+        ? current.paymentDueDaysAfterCutoff
+        : input.paymentDueDaysAfterCutoff,
     };
 
     await updateAccount(user.id, id, input);
@@ -84,6 +103,16 @@ export async function saveAccount(
 
 export async function removeAccount(id: string): Promise<FormState> {
   const user = await requireUser();
+  if (await accountHasLedgerActivity(user.id, id)) {
+    return {
+      error: "No se puede eliminar: ya tiene movimientos o partidas.",
+    };
+  }
+  if (await cardHasStatementActivity(user.id, id)) {
+    return {
+      error: "No se puede eliminar: la tarjeta ya tiene compras o pagos.",
+    };
+  }
   try {
     await deleteAccount(user.id, id);
   } catch (error) {

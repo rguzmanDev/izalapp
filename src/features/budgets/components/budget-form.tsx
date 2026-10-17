@@ -10,16 +10,16 @@ type BudgetFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   budget?: Budget;
   accountOptions: SelectOption[];
-  lockAccount?: boolean;
-  lockFuelOff?: boolean;
+  lockStructure?: boolean;
+  lockFuel?: boolean;
 };
 
 export function BudgetForm({
   action,
   budget,
   accountOptions,
-  lockAccount = false,
-  lockFuelOff = false,
+  lockStructure = false,
+  lockFuel = false,
 }: BudgetFormProps) {
   return (
     <ActionForm
@@ -34,29 +34,29 @@ export function BudgetForm({
         maxLength={NAME_MAX_LENGTH}
         defaultValue={budget?.name}
       />
-      <AllocationFields defaultValue={budget} />
+      <AllocationFields defaultValue={budget} lockSplit={lockStructure} />
       <SelectField
         name="spendingAccountId"
         label="Se gasta desde"
         required
         placeholder="Selecciona una cuenta bancaria o efectivo"
         hint={
-          lockAccount
-            ? "Ya está apartado o tiene gastos en una quincena; no se puede cambiar la cuenta."
+          lockStructure
+            ? "Ya se usó en una quincena; no se puede cambiar la cuenta."
             : "El dinero sale de esta cuenta. Al gastar podrás marcar si usaste una tarjeta ligada."
         }
         options={accountOptions}
         defaultValue={budget?.spendingAccountId ?? ""}
-        locked={lockAccount}
+        locked={lockStructure}
       />
       <CheckboxField
         name="isFuel"
         label="Es de gasolina (registra odómetro y galones)"
         defaultChecked={budget?.isFuel ?? false}
-        locked={lockFuelOff && Boolean(budget?.isFuel)}
+        locked={lockFuel}
         hint={
-          lockFuelOff && budget?.isFuel
-            ? "Ya hay cargas de gasolina ligadas; no se puede quitar esta marca."
+          lockFuel
+            ? "Ya se usó en una quincena o tiene cargas; no se puede cambiar «es gasolina»."
             : undefined
         }
       />

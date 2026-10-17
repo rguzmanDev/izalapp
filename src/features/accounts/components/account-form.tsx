@@ -36,6 +36,7 @@ export type AccountFormLocks = {
   type?: boolean;
   openingBalance?: boolean;
   paymentAccount?: boolean;
+  statementSchedule?: boolean;
 };
 
 type AccountFormProps = {
@@ -59,6 +60,7 @@ export function AccountForm({
   const lockType = Boolean(account && locks.type);
   const lockOpening = Boolean(account && locks.openingBalance);
   const lockPaymentAccount = Boolean(account && locks.paymentAccount);
+  const lockSchedule = Boolean(account && locks.statementSchedule);
 
   return (
     <ActionForm
@@ -73,11 +75,7 @@ export function AccountForm({
         value={type}
         onChange={(event) => setType(event.target.value as AccountType)}
         locked={lockType}
-        hint={
-          lockType
-            ? "No se puede cambiar el tipo: ya hay movimientos o partidas en esta cuenta."
-            : undefined
-        }
+        hint={lockType ? "No se puede cambiar el tipo de una cuenta existente." : undefined}
       />
       <TextField
         name="name"
@@ -110,6 +108,12 @@ export function AccountForm({
             max={DAY_OF_MONTH_MAX}
             placeholder={`1 a ${DAY_OF_MONTH_MAX}`}
             defaultValue={account?.statementDay}
+            locked={lockSchedule}
+            hint={
+              lockSchedule
+                ? "Ya hay compras o pagos; no se puede cambiar el corte ni la fecha de pago."
+                : undefined
+            }
           />
           <div className="grid grid-cols-2 gap-4">
             <SelectField
@@ -119,6 +123,7 @@ export function AccountForm({
               options={paymentDueModeOptions}
               value={paymentDueMode}
               onChange={(event) => setPaymentDueMode(event.target.value as PaymentDueMode)}
+              locked={lockSchedule}
             />
             {paymentDueMode === "dayOfMonth" ? (
               <IntegerField
@@ -129,6 +134,7 @@ export function AccountForm({
                 max={DAY_OF_MONTH_MAX}
                 placeholder={`1 a ${DAY_OF_MONTH_MAX}`}
                 defaultValue={account?.paymentDueDay}
+                locked={lockSchedule}
               />
             ) : (
               <IntegerField
@@ -139,6 +145,7 @@ export function AccountForm({
                 max={MAX_DAYS_AFTER_CUTOFF}
                 placeholder={`1 a ${MAX_DAYS_AFTER_CUTOFF}`}
                 defaultValue={account?.paymentDueDaysAfterCutoff}
+                locked={lockSchedule}
               />
             )}
           </div>
@@ -151,7 +158,7 @@ export function AccountForm({
             locked={lockPaymentAccount}
             hint={
               lockPaymentAccount
-                ? "Ya hay compras o pagos en esta tarjeta; no se puede cambiar «Se paga desde»."
+                ? "«Se paga desde» solo se define al crear la tarjeta."
                 : undefined
             }
           />
@@ -160,7 +167,7 @@ export function AccountForm({
             label="Deuda inicial (informativa)"
             hint={
               lockOpening
-                ? "Ya hay actividad en esta tarjeta; la deuda inicial no se puede cambiar."
+                ? "La deuda inicial solo se define al crear la tarjeta."
                 : "Referencia de lo que ya debías al empezar. No mueve el saldo de la cuenta «Se paga desde»."
             }
             locked={lockOpening}
@@ -176,7 +183,7 @@ export function AccountForm({
           label="Saldo inicial"
           hint={
             lockOpening
-              ? "Ya hay movimientos o partidas; el saldo inicial no se puede cambiar. Usa un gasto o ingreso para ajustar."
+              ? "El saldo inicial solo se define al crear la cuenta. Usa un gasto o ingreso para ajustar."
               : "Dinero que ya tenía esta cuenta al empezar. Puedes usar una cuenta «Efectivo»."
           }
           locked={lockOpening}

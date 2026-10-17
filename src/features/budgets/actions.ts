@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getAccount, isOwnedAccount } from "@/features/accounts/data";
-import { sourceAccountLocked, sourceHasFuelLogs } from "@/features/periods/locks";
+import { sourceHasFuelLogs, sourceUsedInPeriod } from "@/features/periods/locks";
 import { parseFormData, type FormState } from "@/lib/form";
 import { requireUser } from "@/lib/session";
 import { createBudget, deleteBudget, getBudget, updateBudget } from "./data";
@@ -32,32 +32,49 @@ export async function saveBudget(
     const current = await getBudget(user.id, id);
     if (!current) return { error: "El presupuesto ya no existe" };
 
-    const [accountLocked, hasFuelLogs] = await Promise.all([
-      sourceAccountLocked(user.id, id),
+    const [used, hasFuelLogs] = await Promise.all([
+      sourceUsedInPeriod(user.id, id),
       sourceHasFuelLogs(user.id, id),
     ]);
+    const fuelLocked = used || hasFuelLogs;
 
-    if (accountLocked && input.spendingAccountId !== current.spendingAccountId) {
-      return {
-        fieldErrors: {
-          spendingAccountId: [
-            "No se puede cambiar la cuenta: ya está apartado o tiene gastos en una quincena",
-          ],
-        },
-      };
+    if (used) {
+      if (input.spendingAccountId !== current.spendingAccountId) {
+        return {
+          fieldErrors: {
+            spendingAccountId: [
+              "No se puede cambiar la cuenta: este presupuesto ya se usó en una quincena",
+            ],
+          },
+        };
+      }
+      if (
+        input.split !== current.split ||
+        input.customFirstHalfCents !== current.customFirstHalfCents
+      ) {
+        return {
+          fieldErrors: {
+            split: ["No se puede cambiar el reparto: este presupuesto ya se usó en una quincena"],
+          },
+        };
+      }
     }
-    if (hasFuelLogs && current.isFuel && !input.isFuel) {
+    if (fuelLocked && input.isFuel !== current.isFuel) {
       return {
         fieldErrors: {
-          isFuel: ["No se puede quitar «es gasolina»: ya hay cargas registradas"],
+          isFuel: [
+            "No se puede cambiar «es gasolina»: ya se usó en una quincena o tiene cargas",
+          ],
         },
       };
     }
 
     input = {
       ...input,
-      spendingAccountId: accountLocked ? current.spendingAccountId : input.spendingAccountId,
-      isFuel: hasFuelLogs && current.isFuel ? true : input.isFuel,
+      spendingAccountId: used ? current.spendingAccountId : input.spendingAccountId,
+      split: used ? current.split : input.split,
+      customFirstHalfCents: used ? current.customFirstHalfCents : input.customFirstHalfCents,
+      isFuel: fuelLocked ? current.isFuel : input.isFuel,
     };
 
     await updateBudget(user.id, id, input);
@@ -69,6 +86,11 @@ export async function saveBudget(
 
 export async function removeBudget(id: string): Promise<FormState> {
   const user = await requireUser();
+  if (await sourceUsedInPeriod(user.id, id)) {
+    return {
+      error: "No se puede eliminar: ya se usó en una quincena. Desactívalo si ya no aplica.",
+    };
+  }
   await deleteBudget(user.id, id);
   redirect("/presupuestos");
 }
