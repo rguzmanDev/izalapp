@@ -1,6 +1,17 @@
 import { formatMoney } from "@/lib/money";
 import type { FormState } from "@/lib/form";
 
+/**
+ * Planned balance already includes prior outflows. When editing one on the same
+ * account, add that amount back so the check is against the balance *before* it.
+ */
+export function availableBalanceCents(
+  plannedBalanceCents: number,
+  replacingOutflowCents = 0,
+): number {
+  return plannedBalanceCents + Math.max(0, replacingOutflowCents);
+}
+
 /** Soft-block when planned balance cannot cover the outflow, unless the user confirmed. */
 export function insufficientBalanceState(
   plannedBalanceCents: number,

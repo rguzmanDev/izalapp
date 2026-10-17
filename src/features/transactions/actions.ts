@@ -5,7 +5,11 @@ import { getPlannedBalance } from "@/features/accounts/balance";
 import { getAccount, isOwnedAccount } from "@/features/accounts/data";
 import { isPeriodOpen } from "@/features/periods/data";
 import { parseFormData, type FormState } from "@/lib/form";
-import { confirmInsufficient, insufficientBalanceState } from "@/lib/insufficient-balance";
+import {
+  availableBalanceCents,
+  confirmInsufficient,
+  insufficientBalanceState,
+} from "@/lib/insufficient-balance";
 import { requireUser } from "@/lib/session";
 import { createTransaction, deleteTransaction, getTransaction, updateTransaction } from "./data";
 import { CLOSED_EXPENSE_ERROR, fundingRequiredError, resolveExpensePeriod } from "./period";
@@ -51,10 +55,10 @@ export async function saveTransaction(
     creditCardId = null;
   }
 
-  if (id) {
-    const current = await getTransaction(user.id, id);
-    if (!current) return { error: "El movimiento ya no existe" };
-    if (!(await isPeriodOpen(user.id, current.periodId))) return { error: CLOSED_EXPENSE_ERROR };
+  const current = id ? await getTransaction(user.id, id) : null;
+  if (id && !current) return { error: "El movimiento ya no existe" };
+  if (current && !(await isPeriodOpen(user.id, current.periodId))) {
+    return { error: CLOSED_EXPENSE_ERROR };
   }
 
   if (!id && resolved.item) {
@@ -63,8 +67,10 @@ export async function saveTransaction(
   }
 
   const balance = await getPlannedBalance(user.id, accountId);
+  const replacing =
+    current && current.accountId === accountId ? current.amountCents : 0;
   const warning = insufficientBalanceState(
-    balance,
+    availableBalanceCents(balance, replacing),
     parsed.data.amountCents,
     confirmInsufficient(formData),
   );

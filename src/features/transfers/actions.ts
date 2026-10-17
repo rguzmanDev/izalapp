@@ -5,7 +5,11 @@ import { getPlannedBalance } from "@/features/accounts/balance";
 import { getAccount, isOwnedAccount } from "@/features/accounts/data";
 import { isPeriodOpen, resolveOpenPeriod } from "@/features/periods/data";
 import { parseFormData, type FormState } from "@/lib/form";
-import { confirmInsufficient, insufficientBalanceState } from "@/lib/insufficient-balance";
+import {
+  availableBalanceCents,
+  confirmInsufficient,
+  insufficientBalanceState,
+} from "@/lib/insufficient-balance";
 import { todayIsoDate } from "@/lib/period";
 import { requireUser } from "@/lib/session";
 import { requiredId } from "@/lib/validation";
@@ -65,19 +69,21 @@ export async function saveTransfer(
     };
   }
 
-  if (id) {
-    const current = await getTransfer(user.id, id);
-    if (!current) return { error: "La transferencia ya no existe" };
-    if (!(await isPeriodOpen(user.id, current.periodId))) return { error: CLOSED_PERIOD_ERROR };
-    if (isSetAsideTransferNote(current.note)) return { error: SET_ASIDE_EDIT_ERROR };
+  const current = id ? await getTransfer(user.id, id) : null;
+  if (id && !current) return { error: "La transferencia ya no existe" };
+  if (current && !(await isPeriodOpen(user.id, current.periodId))) {
+    return { error: CLOSED_PERIOD_ERROR };
   }
+  if (current && isSetAsideTransferNote(current.note)) return { error: SET_ASIDE_EDIT_ERROR };
 
   const resolved = await resolveOpenPeriod(user.id, occurredOn);
   if ("error" in resolved) return { fieldErrors: { occurredOn: [resolved.error] } };
 
   const balance = await getPlannedBalance(user.id, fromAccountId);
+  const replacing =
+    current && current.fromAccountId === fromAccountId ? current.amountCents : 0;
   const warning = insufficientBalanceState(
-    balance,
+    availableBalanceCents(balance, replacing),
     amountCents,
     confirmInsufficient(formData),
   );

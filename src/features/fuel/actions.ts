@@ -6,7 +6,11 @@ import { getAccount } from "@/features/accounts/data";
 import { getPeriodItem, isPeriodOpen } from "@/features/periods/data";
 import { CLOSED_EXPENSE_ERROR, resolveExpensePeriod } from "@/features/transactions/period";
 import { parseFormData, type FormState } from "@/lib/form";
-import { confirmInsufficient, insufficientBalanceState } from "@/lib/insufficient-balance";
+import {
+  availableBalanceCents,
+  confirmInsufficient,
+  insufficientBalanceState,
+} from "@/lib/insufficient-balance";
 import { requireUser } from "@/lib/session";
 import {
   createFuelLog,
@@ -66,15 +70,17 @@ export async function saveFuelLog(
   const resolved = await resolveExpensePeriod(user.id, input);
   if ("fieldErrors" in resolved) return { fieldErrors: resolved.fieldErrors };
 
-  if (!id) {
-    const balance = await getPlannedBalance(user.id, input.accountId);
-    const warning = insufficientBalanceState(
-      balance,
-      input.amountCents,
-      confirmInsufficient(formData),
-    );
-    if (warning) return warning;
-  }
+  const balance = await getPlannedBalance(user.id, input.accountId);
+  const replacing =
+    current && current.transaction.accountId === input.accountId
+      ? current.transaction.amountCents
+      : 0;
+  const warning = insufficientBalanceState(
+    availableBalanceCents(balance, replacing),
+    input.amountCents,
+    confirmInsufficient(formData),
+  );
+  if (warning) return warning;
 
   const { previous, next } = await findOdometerBounds(user.id, input.occurredOn, id);
   if (previous !== null && input.odometer <= previous) {
