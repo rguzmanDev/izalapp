@@ -145,7 +145,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
       >
         <div className="flex flex-col gap-3">
           <MovementFilter current={tipo} range={range} />
-          <MovementReportList entries={movementEntries} />
+          <MovementReportList entries={movementEntries} groupByPeriod linkable={false} />
         </div>
       </Section>
       <AccountReportSections {...accountReport} />

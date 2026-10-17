@@ -1,7 +1,7 @@
 import type { FinancialAccount, Period, PeriodItem, Transfer } from "@/db/schema";
 import { accountLabel } from "@/features/accounts/format";
 import { isExtraIncome } from "@/features/periods/constants";
-import { formatShortDate, periodBounds, shortPeriodLabel, toPeriodKey } from "@/lib/period";
+import { periodBounds, shortPeriodLabel, toPeriodKey } from "@/lib/period";
 
 export const MOVEMENT_FILTERS = ["todos", "ingresos", "gastos", "transferencias"] as const;
 export type MovementFilter = (typeof MOVEMENT_FILTERS)[number];
@@ -13,10 +13,13 @@ export type MovementReportEntry = {
   kind: MovementKind;
   href: string;
   title: string;
+  /** Account / route detail (no date or period — those are section headers). */
   subtitle: string;
   amountCents: number;
   occurredOn: string;
   createdAt: Date;
+  /** Short period label for grouping in multi-period reports. */
+  periodLabel: string;
 };
 
 export const MOVEMENT_KIND_LABELS: Record<MovementKind, string> = {
@@ -76,10 +79,11 @@ export function buildMovementReport(
         title: [itemName ?? "Sin presupuesto", transaction.note ?? station]
           .filter(Boolean)
           .join(" · "),
-        subtitle: `${shortPeriodLabel(toPeriodKey(period))} · ${formatShortDate(transaction.occurredOn)} · ${payWith}`,
+        subtitle: payWith,
         amountCents: transaction.amountCents,
         occurredOn: transaction.occurredOn,
         createdAt: transaction.createdAt,
+        periodLabel: shortPeriodLabel(toPeriodKey(period)),
       };
     },
   );
@@ -89,10 +93,11 @@ export function buildMovementReport(
     kind: "transfer",
     href: `/transferencias/${transfer.id}`,
     title: ["Transferencia", transfer.note].filter(Boolean).join(" · "),
-    subtitle: `${shortPeriodLabel(toPeriodKey(period))} · ${formatShortDate(transfer.occurredOn)} · ${accountLabel(from)} → ${accountLabel(to)}`,
+    subtitle: `${accountLabel(from)} → ${accountLabel(to)}`,
     amountCents: transfer.amountCents,
     occurredOn: transfer.occurredOn,
     createdAt: transfer.createdAt,
+    periodLabel: shortPeriodLabel(toPeriodKey(period)),
   }));
 
   const incomes: MovementReportEntry[] = incomeRows.map(({ item, account, period }) => {
@@ -103,10 +108,11 @@ export function buildMovementReport(
       kind: "income" as const,
       href: `/partidas/${item.id}`,
       title: isExtraIncome(item) ? `${item.name} · Extra` : item.name,
-      subtitle: `${shortPeriodLabel(key)} · ${formatShortDate(start)} · ${accountLabel(account)}`,
+      subtitle: accountLabel(account),
       amountCents: item.plannedCents,
       occurredOn: start,
       createdAt: item.createdAt,
+      periodLabel: shortPeriodLabel(key),
     };
   });
 

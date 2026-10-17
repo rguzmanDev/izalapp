@@ -99,8 +99,9 @@ export async function buildReportsCsv(userId: string, range: number): Promise<st
     },
     {
       title: "Movimientos",
-      headers: ["tipo", "titulo", "detalle", "monto", "fecha"],
+      headers: ["corte", "tipo", "titulo", "detalle", "monto", "fecha"],
       rows: movementEntries.map((entry) => [
+        entry.periodLabel,
         MOVEMENT_KIND_LABELS[entry.kind],
         entry.title,
         entry.subtitle,
