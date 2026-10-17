@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getPlannedBalance } from "@/features/accounts/balance";
 import { getAccount, isOwnedAccount } from "@/features/accounts/data";
+import { isPaidFixedExpenseNote } from "@/features/periods/constants";
 import { isPeriodOpen } from "@/features/periods/data";
 import { parseFormData, type FormState } from "@/lib/form";
 import {
@@ -12,6 +13,11 @@ import {
 } from "@/lib/insufficient-balance";
 import { requireUser } from "@/lib/session";
 import { createTransaction, deleteTransaction, getTransaction, updateTransaction } from "./data";
+import {
+  isManagedFixedPayment,
+  isPaidFixedExpenseItem,
+  MANAGED_PAYMENT_EDIT_ERROR,
+} from "./managed";
 import { CLOSED_EXPENSE_ERROR, fundingRequiredError, resolveExpensePeriod } from "./period";
 import { transactionSchema } from "./schema";
 
@@ -23,6 +29,10 @@ export async function saveTransaction(
   const user = await requireUser();
   const parsed = parseFormData(transactionSchema, formData);
   if (!parsed.success) return parsed.state;
+
+  if (isPaidFixedExpenseNote(parsed.data.note)) {
+    return { fieldErrors: { note: [MANAGED_PAYMENT_EDIT_ERROR] } };
+  }
 
   const resolved = await resolveExpensePeriod(user.id, parsed.data);
   if ("fieldErrors" in resolved) return { fieldErrors: resolved.fieldErrors };
@@ -60,10 +70,20 @@ export async function saveTransaction(
   if (current && !(await isPeriodOpen(user.id, current.periodId))) {
     return { error: CLOSED_EXPENSE_ERROR };
   }
+  if (current && (await isManagedFixedPayment(user.id, current))) {
+    return { error: MANAGED_PAYMENT_EDIT_ERROR };
+  }
 
   if (!id && resolved.item) {
     const fundingError = fundingRequiredError(resolved.item);
     if (fundingError) return { fieldErrors: fundingError };
+    if (isPaidFixedExpenseItem(resolved.item)) {
+      return {
+        fieldErrors: {
+          itemId: ["Este gasto fijo ya está pagado. Usa Deshacer en Inicio si necesitas corregirlo."],
+        },
+      };
+    }
   }
 
   const balance = await getPlannedBalance(user.id, accountId);
@@ -95,6 +115,9 @@ export async function removeTransaction(id: string): Promise<FormState> {
   const transaction = await getTransaction(user.id, id);
   if (transaction && !(await isPeriodOpen(user.id, transaction.periodId))) {
     return { error: CLOSED_EXPENSE_ERROR };
+  }
+  if (transaction && (await isManagedFixedPayment(user.id, transaction))) {
+    return { error: MANAGED_PAYMENT_EDIT_ERROR };
   }
   await deleteTransaction(user.id, id);
   redirect("/movimientos");

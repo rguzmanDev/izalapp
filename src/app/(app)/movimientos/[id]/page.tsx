@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { DeleteButton } from "@/components/form/delete-button";
 import { PageHeader } from "@/components/page-header";
@@ -9,6 +10,7 @@ import { removeTransaction, saveTransaction } from "@/features/transactions/acti
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import { getTransaction } from "@/features/transactions/data";
 import { toItemOptions } from "@/features/transactions/format";
+import { isManagedFixedPayment } from "@/features/transactions/managed";
 import { formatMoney } from "@/lib/money";
 import { requireUser } from "@/lib/session";
 
@@ -20,6 +22,34 @@ export default async function EditTransactionPage({ params }: PageProps<"/movimi
 
   const fuelLogId = await findFuelLogIdByTransaction(user.id, transaction.id);
   if (fuelLogId) redirect(`/gasolina/${fuelLogId}`);
+
+  const managedPayment = await isManagedFixedPayment(user.id, transaction);
+  if (managedPayment) {
+    return (
+      <>
+        <PageHeader
+          title={`Gasto de ${formatMoney(transaction.amountCents)}`}
+          backHref="/movimientos"
+        />
+        <div className="flex flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10">
+          <p>
+            Este gasto se creó con <span className="font-medium">Marcar pagado</span>
+            {transaction.note ? ` (${transaction.note})` : ""}. No se edita ni elimina aquí.
+          </p>
+          <p className="text-muted-foreground">
+            Para revertirlo usa <span className="font-medium text-foreground">Deshacer</span> en el
+            gasto fijo correspondiente en Inicio.
+          </p>
+          <Link
+            href="/"
+            className="text-sm font-medium text-foreground underline-offset-2 hover:underline"
+          >
+            Ir a Inicio
+          </Link>
+        </div>
+      </>
+    );
+  }
 
   const [rows, accounts] = await Promise.all([
     listPeriodItems(user.id, transaction.periodId),

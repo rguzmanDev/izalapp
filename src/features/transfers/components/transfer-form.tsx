@@ -17,8 +17,14 @@ type TransferFormProps = {
 };
 
 export function TransferForm({ action, defaults, accountOptions }: TransferFormProps) {
+  const isEdit = defaults.amountCents !== undefined;
   return (
-    <ActionForm action={action} confirmMessage="¿Registrar esta transferencia?">
+    <ActionForm
+      action={action}
+      confirmMessage={
+        isEdit ? "¿Guardar los cambios de esta transferencia?" : "¿Registrar esta transferencia?"
+      }
+    >
       <MoneyField
         name="amountCents"
         label="Monto"

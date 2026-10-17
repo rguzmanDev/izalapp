@@ -20,7 +20,7 @@ import {
   type PeriodKey,
 } from "@/lib/period";
 import { isUuid } from "@/lib/validation";
-import type { PaymentStatus } from "./constants";
+import { paidFixedExpenseNote, type PaymentStatus } from "./constants";
 import type { ExtraIncomeInput } from "./schema";
 
 export { setAsideTransferNote };
@@ -301,6 +301,7 @@ export async function changePaymentStatus(
         accountId: fresh.accountId,
         amountCents: fresh.plannedCents,
         occurredOn: paidOn,
+        note: paidFixedExpenseNote(fresh.name),
       });
     } else if (status !== "paid" && fresh.paymentStatus === "paid") {
       await tx.delete(transactions).where(eq(transactions.itemId, fresh.id));

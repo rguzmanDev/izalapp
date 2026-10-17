@@ -1,5 +1,6 @@
 import type { FinancialAccount, Period, PeriodItem, Transfer } from "@/db/schema";
 import { accountLabel } from "@/features/accounts/format";
+import { isExtraIncome } from "@/features/periods/constants";
 import { formatShortDate, periodBounds, shortPeriodLabel, toPeriodKey } from "@/lib/period";
 
 export const MOVEMENT_FILTERS = ["todos", "ingresos", "gastos", "transferencias"] as const;
@@ -101,7 +102,7 @@ export function buildMovementReport(
       id: item.id,
       kind: "income" as const,
       href: `/partidas/${item.id}`,
-      title: item.name,
+      title: isExtraIncome(item) ? `${item.name} · Extra` : item.name,
       subtitle: `${shortPeriodLabel(key)} · ${formatShortDate(start)} · ${accountLabel(account)}`,
       amountCents: item.plannedCents,
       occurredOn: start,

@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { LogOutIcon } from "lucide-react";
 import { DesktopNav, MobileNav } from "@/components/app-nav";
-import { Button } from "@/components/ui/button";
-import { signOut } from "@/features/auth/actions";
+import { SignOutButton } from "@/components/sign-out-button";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
@@ -13,12 +11,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
             IzalApp
           </Link>
           <DesktopNav />
-          <form action={signOut}>
-            <Button type="submit" variant="ghost" size="sm">
-              <LogOutIcon />
-              Salir
-            </Button>
-          </form>
+          <SignOutButton />
         </div>
       </header>
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 pt-6 pb-40 md:pb-28">

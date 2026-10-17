@@ -27,3 +27,12 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   set_aside: "Apartado",
   paid: "Pagado",
 };
+
+/** Note on the expense created by «Marcar pagado» (fixed expenses). */
+export function paidFixedExpenseNote(itemName: string) {
+  return `Pago fijo: ${itemName}`;
+}
+
+export function isPaidFixedExpenseNote(note: string | null | undefined) {
+  return Boolean(note?.startsWith("Pago fijo:"));
+}
