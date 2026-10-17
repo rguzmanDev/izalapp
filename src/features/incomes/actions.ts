@@ -2,9 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { getAccount } from "@/features/accounts/data";
+import { sourceUsedInPeriod } from "@/features/periods/locks";
 import { parseFormData, type FormState } from "@/lib/form";
 import { requireUser } from "@/lib/session";
-import { createIncome, deleteIncome, updateIncome } from "./data";
+import { createIncome, deleteIncome, getIncome, updateIncome } from "./data";
 import { incomeSchema } from "./schema";
 
 export async function saveIncome(
@@ -16,15 +17,35 @@ export async function saveIncome(
   const parsed = parseFormData(incomeSchema, formData);
   if (!parsed.success) return parsed.state;
 
-  const account = await getAccount(user.id, parsed.data.depositAccountId);
+  let input = parsed.data;
+  const account = await getAccount(user.id, input.depositAccountId);
   if (!account || account.type === "credit") {
     return { fieldErrors: { depositAccountId: ["Cuenta inválida"] } };
   }
 
   if (id) {
-    await updateIncome(user.id, id, parsed.data);
+    const current = await getIncome(user.id, id);
+    if (!current) return { error: "El ingreso ya no existe" };
+
+    const locked = await sourceUsedInPeriod(user.id, id);
+    if (locked && input.depositAccountId !== current.depositAccountId) {
+      return {
+        fieldErrors: {
+          depositAccountId: [
+            "No se puede cambiar la cuenta: este ingreso ya se usó en una quincena",
+          ],
+        },
+      };
+    }
+
+    input = {
+      ...input,
+      depositAccountId: locked ? current.depositAccountId : input.depositAccountId,
+    };
+
+    await updateIncome(user.id, id, input);
   } else {
-    await createIncome(user.id, parsed.data);
+    await createIncome(user.id, input);
   }
   redirect("/ingresos");
 }

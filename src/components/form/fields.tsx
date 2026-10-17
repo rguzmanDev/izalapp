@@ -137,6 +137,8 @@ type NumberFieldProps = Omit<FieldProps, "children"> & {
   defaultUnits?: number | null;
   /** Submits an empty value instead of zero, for fields where "empty" has a meaning. */
   optional?: boolean;
+  /** Shows the value but keeps it fixed (still submitted via the hidden input). */
+  locked?: boolean;
   onUnitsChange?: (units: number) => void;
   placeholder?: string;
   autoFocus?: boolean;
@@ -157,6 +159,7 @@ export function NumberField({
   prefix = "",
   defaultUnits,
   optional = false,
+  locked = false,
   onUnitsChange,
   placeholder,
   autoFocus,
@@ -175,6 +178,7 @@ export function NumberField({
   const format = (value: number) => prefix + formatter.format(value / scale);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    if (locked) return;
     const digits = event.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, maxDigits);
     const next = Number(digits || "0");
     setUnits(next);
@@ -182,6 +186,7 @@ export function NumberField({
   }
 
   function moveCaretToEnd(event: SyntheticEvent<HTMLInputElement>) {
+    if (locked) return;
     const input = event.currentTarget;
     requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
   }
@@ -194,13 +199,14 @@ export function NumberField({
         autoComplete="off"
         aria-invalid={Boolean(error)}
         aria-required={required}
-        className="h-10 tabular-nums"
+        readOnly={locked}
+        className={cn("h-10 tabular-nums", locked && "bg-muted text-muted-foreground")}
         placeholder={placeholder ?? format(0)}
         value={units === 0 ? "" : format(units)}
         onChange={handleChange}
         onFocus={moveCaretToEnd}
         onClick={moveCaretToEnd}
-        autoFocus={autoFocus}
+        autoFocus={autoFocus && !locked}
       />
       <input
         type="hidden"
@@ -245,45 +251,99 @@ export function SelectField({
   required,
   options,
   placeholder,
+  locked = false,
+  value,
+  defaultValue,
   ...selectProps
-}: SelectFieldProps) {
+}: SelectFieldProps & { locked?: boolean }) {
   const error = useFieldError(name);
+  const lockedValue = String(value ?? defaultValue ?? "");
 
   return (
     <Field name={name} label={label} hint={hint} required={required}>
-      <NativeSelect
-        id={name}
-        name={name}
-        aria-invalid={Boolean(error)}
-        aria-required={required}
-        className="w-full [&_select]:h-10"
-        {...selectProps}
-      >
-        {placeholder !== undefined && (
-          <NativeSelectOption value="">{placeholder}</NativeSelectOption>
-        )}
-        {options.map((option) => (
-          <NativeSelectOption key={option.value} value={option.value}>
-            {option.label}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
+      {locked ? (
+        <>
+          <input type="hidden" name={name} value={lockedValue} />
+          <NativeSelect
+            id={name}
+            aria-invalid={Boolean(error)}
+            aria-required={required}
+            disabled
+            className="w-full [&_select]:h-10"
+            value={lockedValue}
+          >
+            {placeholder !== undefined && lockedValue === "" && (
+              <NativeSelectOption value="">{placeholder}</NativeSelectOption>
+            )}
+            {options.map((option) => (
+              <NativeSelectOption key={option.value} value={option.value}>
+                {option.label}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </>
+      ) : (
+        <NativeSelect
+          id={name}
+          name={name}
+          aria-invalid={Boolean(error)}
+          aria-required={required}
+          className="w-full [&_select]:h-10"
+          value={value}
+          defaultValue={defaultValue}
+          {...selectProps}
+        >
+          {placeholder !== undefined && (
+            <NativeSelectOption value="">{placeholder}</NativeSelectOption>
+          )}
+          {options.map((option) => (
+            <NativeSelectOption key={option.value} value={option.value}>
+              {option.label}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      )}
     </Field>
   );
 }
 
-type CheckboxFieldProps = { name: string; label: string; defaultChecked?: boolean };
+type CheckboxFieldProps = {
+  name: string;
+  label: string;
+  defaultChecked?: boolean;
+  /** Keeps the value fixed but still submits it. */
+  locked?: boolean;
+  hint?: string;
+};
 
-export function CheckboxField({ name, label, defaultChecked }: CheckboxFieldProps) {
+export function CheckboxField({
+  name,
+  label,
+  defaultChecked,
+  locked = false,
+  hint,
+}: CheckboxFieldProps) {
+  const checked = Boolean(defaultChecked);
   return (
-    <label className="flex items-center gap-2 text-sm font-medium">
-      <input
-        type="checkbox"
-        name={name}
-        defaultChecked={defaultChecked}
-        className="size-4 accent-primary"
-      />
-      {label}
-    </label>
+    <div className="flex flex-col gap-1">
+      <label
+        className={cn(
+          "flex items-center gap-2 text-sm font-medium",
+          locked && "text-muted-foreground",
+        )}
+      >
+        {locked && checked ? <input type="hidden" name={name} value="on" /> : null}
+        <input
+          type="checkbox"
+          name={locked ? undefined : name}
+          defaultChecked={checked}
+          checked={locked ? checked : undefined}
+          disabled={locked}
+          className="size-4 accent-primary"
+        />
+        {label}
+      </label>
+      {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
+    </div>
   );
 }

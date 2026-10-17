@@ -10,9 +10,15 @@ type IncomeFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   income?: Income;
   accountOptions: SelectOption[];
+  lockAccount?: boolean;
 };
 
-export function IncomeForm({ action, income, accountOptions }: IncomeFormProps) {
+export function IncomeForm({
+  action,
+  income,
+  accountOptions,
+  lockAccount = false,
+}: IncomeFormProps) {
   return (
     <ActionForm
       action={action}
@@ -32,8 +38,14 @@ export function IncomeForm({ action, income, accountOptions }: IncomeFormProps) 
         label="Se deposita en"
         required
         placeholder="Selecciona una cuenta"
+        hint={
+          lockAccount
+            ? "Ya se usó en una quincena; no se puede cambiar la cuenta de depósito."
+            : undefined
+        }
         options={accountOptions}
         defaultValue={income?.depositAccountId ?? ""}
+        locked={lockAccount}
       />
       <CheckboxField name="isActive" label="Activo" defaultChecked={income?.isActive ?? true} />
       <SubmitButton>Guardar</SubmitButton>

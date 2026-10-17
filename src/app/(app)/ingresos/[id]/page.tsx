@@ -6,6 +6,7 @@ import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeIncome, saveIncome } from "@/features/incomes/actions";
 import { IncomeForm } from "@/features/incomes/components/income-form";
 import { getIncome } from "@/features/incomes/data";
+import { sourceUsedInPeriod } from "@/features/periods/locks";
 import { requireUser } from "@/lib/session";
 
 export default async function EditIncomePage({ params }: PageProps<"/ingresos/[id]">) {
@@ -14,6 +15,8 @@ export default async function EditIncomePage({ params }: PageProps<"/ingresos/[i
   const [income, accounts] = await Promise.all([getIncome(user.id, id), listAccounts(user.id)]);
   if (!income) notFound();
 
+  const lockAccount = await sourceUsedInPeriod(user.id, id);
+
   return (
     <>
       <PageHeader title={income.name} backHref="/ingresos" />
@@ -21,6 +24,7 @@ export default async function EditIncomePage({ params }: PageProps<"/ingresos/[i
         action={saveIncome.bind(null, income.id)}
         income={income}
         accountOptions={toMoneyAccountOptions(accounts)}
+        lockAccount={lockAccount}
       />
       <DeleteButton
         action={removeIncome.bind(null, income.id)}

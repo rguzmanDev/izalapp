@@ -20,7 +20,11 @@ import {
   setAsidePendingForAccount,
   updateTransfer,
 } from "./data";
+import { isSetAsideTransferNote } from "./plan";
 import { transferSchema } from "./schema";
+
+const SET_ASIDE_EDIT_ERROR =
+  "Las transferencias de apartado se gestionan con Apartar / Deshacer en Inicio, no desde aquí.";
 
 const completeStepSchema = z.object({ fromAccountId: requiredId });
 
@@ -35,7 +39,11 @@ export async function saveTransfer(
   const parsed = parseFormData(transferSchema, formData);
   if (!parsed.success) return parsed.state;
 
-  const { fromAccountId, toAccountId, occurredOn, amountCents } = parsed.data;
+  const { fromAccountId, toAccountId, occurredOn, amountCents, note } = parsed.data;
+  if (isSetAsideTransferNote(note)) {
+    return { fieldErrors: { note: [SET_ASIDE_EDIT_ERROR] } };
+  }
+
   const owned = await Promise.all([
     isOwnedAccount(user.id, fromAccountId),
     isOwnedAccount(user.id, toAccountId),
@@ -61,6 +69,7 @@ export async function saveTransfer(
     const current = await getTransfer(user.id, id);
     if (!current) return { error: "La transferencia ya no existe" };
     if (!(await isPeriodOpen(user.id, current.periodId))) return { error: CLOSED_PERIOD_ERROR };
+    if (isSetAsideTransferNote(current.note)) return { error: SET_ASIDE_EDIT_ERROR };
   }
 
   const resolved = await resolveOpenPeriod(user.id, occurredOn);
@@ -89,6 +98,9 @@ export async function removeTransfer(id: string): Promise<FormState> {
   const transfer = await getTransfer(user.id, id);
   if (transfer && !(await isPeriodOpen(user.id, transfer.periodId))) {
     return { error: CLOSED_PERIOD_ERROR };
+  }
+  if (transfer && isSetAsideTransferNote(transfer.note)) {
+    return { error: SET_ASIDE_EDIT_ERROR };
   }
   await deleteTransfer(user.id, id);
   redirect("/movimientos");

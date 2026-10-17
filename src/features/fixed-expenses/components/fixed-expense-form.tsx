@@ -22,9 +22,15 @@ type FixedExpenseFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   expense?: FixedExpense;
   accountOptions: SelectOption[];
+  lockAccount?: boolean;
 };
 
-export function FixedExpenseForm({ action, expense, accountOptions }: FixedExpenseFormProps) {
+export function FixedExpenseForm({
+  action,
+  expense,
+  accountOptions,
+  lockAccount = false,
+}: FixedExpenseFormProps) {
   const [dueMode, setDueMode] = useState<DueMode>(expense?.dueDay ? "dueDate" : "onPayday");
 
   return (
@@ -69,9 +75,14 @@ export function FixedExpenseForm({ action, expense, accountOptions }: FixedExpen
         label="Se paga con"
         required
         placeholder="Selecciona una cuenta bancaria o efectivo"
-        hint="El dinero sale de esta cuenta. Al gastar podrás marcar si usaste una tarjeta ligada."
+        hint={
+          lockAccount
+            ? "Ya está apartado o pagado en una quincena; no se puede cambiar la cuenta."
+            : "El dinero sale de esta cuenta. Al gastar podrás marcar si usaste una tarjeta ligada."
+        }
         options={accountOptions}
         defaultValue={expense?.paymentAccountId ?? ""}
+        locked={lockAccount}
       />
       <CheckboxField name="isActive" label="Activo" defaultChecked={expense?.isActive ?? true} />
       <SubmitButton>Guardar</SubmitButton>

@@ -6,6 +6,7 @@ import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeBudget, saveBudget } from "@/features/budgets/actions";
 import { BudgetForm } from "@/features/budgets/components/budget-form";
 import { getBudget } from "@/features/budgets/data";
+import { sourceAccountLocked, sourceHasFuelLogs } from "@/features/periods/locks";
 import { requireUser } from "@/lib/session";
 
 export default async function EditBudgetPage({ params }: PageProps<"/presupuestos/[id]">) {
@@ -14,6 +15,11 @@ export default async function EditBudgetPage({ params }: PageProps<"/presupuesto
   const [budget, accounts] = await Promise.all([getBudget(user.id, id), listAccounts(user.id)]);
   if (!budget) notFound();
 
+  const [lockAccount, lockFuelOff] = await Promise.all([
+    sourceAccountLocked(user.id, id),
+    sourceHasFuelLogs(user.id, id),
+  ]);
+
   return (
     <>
       <PageHeader title={budget.name} backHref="/presupuestos" />
@@ -21,6 +27,8 @@ export default async function EditBudgetPage({ params }: PageProps<"/presupuesto
         action={saveBudget.bind(null, budget.id)}
         budget={budget}
         accountOptions={toMoneyAccountOptions(accounts)}
+        lockAccount={lockAccount}
+        lockFuelOff={lockFuelOff}
       />
       <DeleteButton
         action={removeBudget.bind(null, budget.id)}

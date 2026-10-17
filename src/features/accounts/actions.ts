@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { isForeignKeyViolation } from "@/db/errors";
 import { parseFormData, type FormState } from "@/lib/form";
 import { requireUser } from "@/lib/session";
-import { createAccount, deleteAccount, isOwnedAccount, updateAccount } from "./data";
+import { createAccount, deleteAccount, getAccount, isOwnedAccount, updateAccount } from "./data";
+import { accountHasLedgerActivity, cardHasStatementActivity } from "./locks";
 import { accountSchema } from "./schema";
 
 export async function saveAccount(
@@ -16,7 +17,8 @@ export async function saveAccount(
   const parsed = parseFormData(accountSchema, formData);
   if (!parsed.success) return parsed.state;
 
-  const { paymentAccountId } = parsed.data;
+  let input = parsed.data;
+  const { paymentAccountId } = input;
   if (
     paymentAccountId &&
     (paymentAccountId === id || !(await isOwnedAccount(user.id, paymentAccountId)))
@@ -25,9 +27,57 @@ export async function saveAccount(
   }
 
   if (id) {
-    await updateAccount(user.id, id, parsed.data);
+    const current = await getAccount(user.id, id);
+    if (!current) return { error: "La cuenta ya no existe" };
+
+    if (input.type !== current.type) {
+      return {
+        fieldErrors: {
+          type: ["No se puede cambiar el tipo de una cuenta que ya existe"],
+        },
+      };
+    }
+
+    const [hasLedger, hasCardActivity] = await Promise.all([
+      accountHasLedgerActivity(user.id, id),
+      current.type === "credit"
+        ? cardHasStatementActivity(user.id, id)
+        : Promise.resolve(false),
+    ]);
+
+    if (hasLedger && input.openingBalanceCents !== current.openingBalanceCents) {
+      return {
+        fieldErrors: {
+          openingBalanceCents: [
+            "El saldo o deuda inicial no se puede cambiar cuando ya hay movimientos",
+          ],
+        },
+      };
+    }
+
+    if (
+      hasCardActivity &&
+      (input.paymentAccountId ?? null) !== (current.paymentAccountId ?? null)
+    ) {
+      return {
+        fieldErrors: {
+          paymentAccountId: [
+            "No se puede cambiar «Se paga desde» cuando la tarjeta ya tiene compras o pagos",
+          ],
+        },
+      };
+    }
+
+    input = {
+      ...input,
+      type: current.type,
+      openingBalanceCents: hasLedger ? current.openingBalanceCents : input.openingBalanceCents,
+      paymentAccountId: hasCardActivity ? current.paymentAccountId : input.paymentAccountId,
+    };
+
+    await updateAccount(user.id, id, input);
   } else {
-    await createAccount(user.id, parsed.data);
+    await createAccount(user.id, input);
   }
   redirect("/cuentas");
 }

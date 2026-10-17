@@ -48,6 +48,11 @@ export function setAsideTransferNote(itemName: string) {
   return `Apartado: ${itemName}`;
 }
 
+/** Manual create/edit must not invent or alter apartado transfers. */
+export function isSetAsideTransferNote(note: string | null | undefined) {
+  return Boolean(note?.startsWith("Apartado:"));
+}
+
 function coversForAccount(
   items: PeriodItem[],
   accountsById: Map<string, FinancialAccount>,

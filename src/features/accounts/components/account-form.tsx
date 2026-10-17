@@ -32,18 +32,33 @@ const paymentDueModeOptions = PAYMENT_DUE_MODES.map((mode) => ({
   label: PAYMENT_DUE_MODE_LABELS[mode],
 }));
 
+export type AccountFormLocks = {
+  type?: boolean;
+  openingBalance?: boolean;
+  paymentAccount?: boolean;
+};
+
 type AccountFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   account?: FinancialAccount;
   paymentAccountOptions: SelectOption[];
+  locks?: AccountFormLocks;
 };
 
-export function AccountForm({ action, account, paymentAccountOptions }: AccountFormProps) {
+export function AccountForm({
+  action,
+  account,
+  paymentAccountOptions,
+  locks = {},
+}: AccountFormProps) {
   const [type, setType] = useState<AccountType>(account?.type ?? "checking");
   const [lastFour, setLastFour] = useState(account?.lastFour ?? "");
   const [paymentDueMode, setPaymentDueMode] = useState<PaymentDueMode>(
     account?.paymentDueDaysAfterCutoff != null ? "daysAfterCutoff" : "dayOfMonth",
   );
+  const lockType = Boolean(account && locks.type);
+  const lockOpening = Boolean(account && locks.openingBalance);
+  const lockPaymentAccount = Boolean(account && locks.paymentAccount);
 
   return (
     <ActionForm
@@ -57,6 +72,12 @@ export function AccountForm({ action, account, paymentAccountOptions }: AccountF
         options={typeOptions}
         value={type}
         onChange={(event) => setType(event.target.value as AccountType)}
+        locked={lockType}
+        hint={
+          lockType
+            ? "No se puede cambiar el tipo: ya hay movimientos o partidas en esta cuenta."
+            : undefined
+        }
       />
       <TextField
         name="name"
@@ -127,11 +148,22 @@ export function AccountForm({ action, account, paymentAccountOptions }: AccountF
             placeholder="Sin definir"
             options={paymentAccountOptions}
             defaultValue={account?.paymentAccountId ?? ""}
+            locked={lockPaymentAccount}
+            hint={
+              lockPaymentAccount
+                ? "Ya hay compras o pagos en esta tarjeta; no se puede cambiar «Se paga desde»."
+                : undefined
+            }
           />
           <MoneyField
             name="openingBalanceCents"
             label="Deuda inicial (informativa)"
-            hint="Referencia de lo que ya debías al empezar. No mueve el saldo de la cuenta «Se paga desde»."
+            hint={
+              lockOpening
+                ? "Ya hay actividad en esta tarjeta; la deuda inicial no se puede cambiar."
+                : "Referencia de lo que ya debías al empezar. No mueve el saldo de la cuenta «Se paga desde»."
+            }
+            locked={lockOpening}
             defaultCents={
               account && account.openingBalanceCents < 0 ? -account.openingBalanceCents : 0
             }
@@ -142,7 +174,12 @@ export function AccountForm({ action, account, paymentAccountOptions }: AccountF
         <MoneyField
           name="openingBalanceCents"
           label="Saldo inicial"
-          hint="Dinero que ya tenía esta cuenta al empezar. Puedes usar una cuenta «Efectivo»."
+          hint={
+            lockOpening
+              ? "Ya hay movimientos o partidas; el saldo inicial no se puede cambiar. Usa un gasto o ingreso para ajustar."
+              : "Dinero que ya tenía esta cuenta al empezar. Puedes usar una cuenta «Efectivo»."
+          }
+          locked={lockOpening}
           defaultCents={account?.type !== "credit" ? (account?.openingBalanceCents ?? 0) : 0}
         />
       )}

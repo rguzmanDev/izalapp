@@ -6,6 +6,7 @@ import { removeAccount, saveAccount } from "@/features/accounts/actions";
 import { AccountForm } from "@/features/accounts/components/account-form";
 import { getAccount, listAccounts } from "@/features/accounts/data";
 import { accountLabel, toAccountOptions } from "@/features/accounts/format";
+import { accountHasLedgerActivity, cardHasStatementActivity } from "@/features/accounts/locks";
 import { listAccountMoneyViews } from "@/features/accounts/money-view";
 import { listCardStatements } from "@/features/cards/data";
 import { pendingCents } from "@/features/cards/payment";
@@ -24,6 +25,11 @@ export default async function EditAccountPage({ params }: PageProps<"/cuentas/[i
     listCardStatements(user.id, today),
   ]);
   if (!account) notFound();
+
+  const [hasLedger, hasCardActivity] = await Promise.all([
+    accountHasLedgerActivity(user.id, id),
+    account.type === "credit" ? cardHasStatementActivity(user.id, id) : Promise.resolve(false),
+  ]);
 
   const paymentAccounts = accounts.filter((other) => other.type !== "credit" && other.id !== id);
   const view = views.get(account.id);
@@ -90,6 +96,11 @@ export default async function EditAccountPage({ params }: PageProps<"/cuentas/[i
         action={saveAccount.bind(null, account.id)}
         account={account}
         paymentAccountOptions={toAccountOptions(paymentAccounts)}
+        locks={{
+          type: true,
+          openingBalance: hasLedger,
+          paymentAccount: hasCardActivity,
+        }}
       />
       <DeleteButton
         action={removeAccount.bind(null, account.id)}

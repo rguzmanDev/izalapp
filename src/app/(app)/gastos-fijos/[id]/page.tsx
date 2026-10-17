@@ -6,6 +6,7 @@ import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeFixedExpense, saveFixedExpense } from "@/features/fixed-expenses/actions";
 import { FixedExpenseForm } from "@/features/fixed-expenses/components/fixed-expense-form";
 import { getFixedExpense } from "@/features/fixed-expenses/data";
+import { sourceAccountLocked } from "@/features/periods/locks";
 import { requireUser } from "@/lib/session";
 
 export default async function EditFixedExpensePage({ params }: PageProps<"/gastos-fijos/[id]">) {
@@ -17,6 +18,8 @@ export default async function EditFixedExpensePage({ params }: PageProps<"/gasto
   ]);
   if (!expense) notFound();
 
+  const lockAccount = await sourceAccountLocked(user.id, id);
+
   return (
     <>
       <PageHeader title={expense.name} backHref="/gastos-fijos" />
@@ -24,6 +27,7 @@ export default async function EditFixedExpensePage({ params }: PageProps<"/gasto
         action={saveFixedExpense.bind(null, expense.id)}
         expense={expense}
         accountOptions={toMoneyAccountOptions(accounts)}
+        lockAccount={lockAccount}
       />
       <DeleteButton
         action={removeFixedExpense.bind(null, expense.id)}
