@@ -4,11 +4,7 @@ import { ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ItemList({ children }: { children: ReactNode }) {
-  return (
-    <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
-      {children}
-    </ul>
-  );
+  return <ul className="divide-y divide-border/70 border-y border-border/70">{children}</ul>;
 }
 
 type ItemLinkProps = {
@@ -27,7 +23,7 @@ export function ItemLink({ href, title, subtitle, trailing, muted, selectable = 
       <Link
         href={href}
         className={cn(
-          "flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50",
+          "flex items-center gap-3 py-3 transition-colors hover:bg-primary/[0.04]",
           muted && "opacity-60",
         )}
       >

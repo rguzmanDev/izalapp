@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DownloadIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -39,13 +40,11 @@ export function ExportCsvButton({ range }: { range: number }) {
         type="button"
         onClick={handleClick}
         disabled={pending}
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-10")}
+        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-9 gap-1.5")}
       >
-        {pending ? "Exportando…" : "Exportar CSV"}
+        <DownloadIcon className="size-3.5" />
+        {pending ? "Exportando…" : "CSV"}
       </button>
-      <span className="max-w-48 text-right text-[11px] text-muted-foreground">
-        Incluye todos los movimientos del rango
-      </span>
       {error && <span className="max-w-48 text-right text-[11px] text-destructive">{error}</span>}
     </div>
   );

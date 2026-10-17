@@ -22,9 +22,7 @@ export function PageHeader({ title, description, backHref, action }: PageHeaderP
             Volver
           </Link>
         )}
-        <h1 className="font-heading text-[1.65rem] leading-tight font-semibold tracking-[-0.02em] text-foreground">
-          {title}
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
         {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
       {action}

@@ -14,21 +14,21 @@ const KIND_STYLES: Record<
   { bar: string; badge: string; amount: string; sign: "+" | "−" | "" }
 > = {
   income: {
-    bar: "bg-emerald-500",
-    badge: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
-    amount: "text-emerald-700 dark:text-emerald-400",
+    bar: "bg-emerald-600",
+    badge: "bg-emerald-600/12 text-emerald-800 dark:text-emerald-400",
+    amount: "text-emerald-800 dark:text-emerald-400",
     sign: "+",
   },
   expense: {
-    bar: "bg-red-500",
-    badge: "bg-red-500/15 text-red-700 dark:text-red-400",
-    amount: "text-red-700 dark:text-red-400",
+    bar: "bg-red-600",
+    badge: "bg-red-600/12 text-red-800 dark:text-red-400",
+    amount: "text-red-800 dark:text-red-400",
     sign: "−",
   },
   transfer: {
-    bar: "bg-amber-500",
-    badge: "bg-amber-500/15 text-amber-800 dark:text-amber-400",
-    amount: "text-amber-800 dark:text-amber-400",
+    bar: "bg-primary",
+    badge: "bg-primary/12 text-primary",
+    amount: "text-foreground",
     sign: "",
   },
 };
@@ -73,11 +73,11 @@ function MovementRow({
   const body = (
     <>
       <span className={cn("w-1 self-stretch shrink-0 rounded-full", style.bar)} aria-hidden />
-      <div className="flex min-w-0 flex-1 flex-col gap-1 select-text">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5 select-text">
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "inline-flex shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",
+              "inline-flex shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase",
               style.badge,
             )}
           >
@@ -91,7 +91,7 @@ function MovementRow({
       </div>
       <span
         className={cn(
-          "shrink-0 text-right text-sm font-medium tabular-nums select-text",
+          "shrink-0 text-right font-mono text-sm font-semibold tabular-nums select-text",
           style.amount,
         )}
       >
@@ -107,12 +107,12 @@ function MovementRow({
       {linkable ? (
         <Link
           href={entry.href}
-          className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
+          className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50"
         >
           {body}
         </Link>
       ) : (
-        <div className="flex items-center gap-3 px-4 py-3">{body}</div>
+        <div className="flex items-center gap-3 px-4 py-2.5">{body}</div>
       )}
     </li>
   );
@@ -126,13 +126,13 @@ function DaySections({
   linkable: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {groupByDay(entries).map(({ date, entries: dayEntries }) => (
-        <section key={date} className="flex flex-col gap-2">
-          <h4 className="px-0.5 text-sm font-medium text-muted-foreground">
+        <section key={date} className="flex flex-col gap-1.5">
+          <h4 className="px-0.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
             {formatLongDate(date)}
           </h4>
-          <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
+          <ul className="divide-y divide-border/70 overflow-hidden rounded-xl border border-border/80 bg-card">
             {dayEntries.map((entry) => (
               <MovementRow
                 key={`${entry.kind}-${entry.id}`}
@@ -160,7 +160,7 @@ export function MovementReportList({
 }) {
   if (entries.length === 0) {
     return (
-      <p className="rounded-xl border border-border/80 bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+      <p className="rounded-xl border border-dashed border-border/80 bg-card/60 px-4 py-8 text-center text-sm text-muted-foreground">
         No hay movimientos en este rango.
       </p>
     );
@@ -171,10 +171,16 @@ export function MovementReportList({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {groupByPeriod(entries).map(({ periodLabel, entries: periodEntries }) => (
         <section key={periodLabel} className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-foreground">{periodLabel}</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-sm font-semibold text-foreground">{periodLabel}</h3>
+            <div className="h-px flex-1 bg-border/80" />
+            <span className="text-xs text-muted-foreground">
+              {periodEntries.length === 1 ? "1 mov." : `${periodEntries.length} mov.`}
+            </span>
+          </div>
           <DaySections entries={periodEntries} linkable={linkable} />
         </section>
       ))}

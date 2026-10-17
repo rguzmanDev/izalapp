@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowDownIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import { Section } from "@/components/section";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
@@ -10,10 +10,11 @@ import type {
   CardReportRow,
   TransferMapRow,
 } from "../account-report";
+import { ReportPanel } from "./report-panel";
 
 function ReportList({ children }: { children: ReactNode }) {
   return (
-    <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
+    <ul className="divide-y divide-border/70 overflow-hidden rounded-xl border border-border/80 bg-card">
       {children}
     </ul>
   );
@@ -21,9 +22,25 @@ function ReportList({ children }: { children: ReactNode }) {
 
 function EmptyNote({ children }: { children: ReactNode }) {
   return (
-    <p className="rounded-xl border border-border/80 bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+    <p className="rounded-xl border border-dashed border-border/80 bg-card/60 px-4 py-8 text-center text-sm text-muted-foreground">
       {children}
     </p>
+  );
+}
+
+function FlowBar({ inCents, outCents }: { inCents: number; outCents: number }) {
+  const total = inCents + outCents;
+  if (total <= 0) {
+    return <div className="h-1.5 rounded-full bg-muted" />;
+  }
+  const inPct = (inCents / total) * 100;
+  return (
+    <div
+      className="flex h-1.5 overflow-hidden rounded-full bg-red-500/25"
+      title={`Entró ${formatMoney(inCents)} · Salió ${formatMoney(outCents)}`}
+    >
+      <div className="h-full bg-emerald-600/80" style={{ width: `${inPct}%` }} />
+    </div>
   );
 }
 
@@ -49,10 +66,10 @@ export function AccountReportSections({
               <li
                 key={alert.id}
                 className={cn(
-                  "rounded-xl px-4 py-3 text-sm ring-1",
+                  "rounded-xl border px-4 py-3 text-sm",
                   alert.severity === "danger"
-                    ? "bg-red-500/10 text-red-800 ring-red-500/20 dark:text-red-300"
-                    : "bg-amber-500/10 text-amber-900 ring-amber-500/20 dark:text-amber-300",
+                    ? "border-red-500/25 bg-red-500/10 text-red-800 dark:text-red-300"
+                    : "border-amber-500/25 bg-amber-500/10 text-amber-900 dark:text-amber-300",
                 )}
               >
                 {alert.message}
@@ -62,115 +79,140 @@ export function AccountReportSections({
         </Section>
       )}
 
-      <Section
-        title="Saldo por cuenta"
-        description="En banco ≈ físico (aún no pagaste tarjetas). Tras pagar = lo que queda cuando liquides esas compras."
-      >
-        {balanceRows.length === 0 ? (
-          <EmptyNote>No hay cuentas.</EmptyNote>
-        ) : (
-          <ReportList>
-            {balanceRows.map((row) => (
-              <li key={row.accountId} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                <span className="min-w-0 truncate text-sm font-medium select-text">{row.label}</span>
-                <div className="shrink-0 text-right text-sm tabular-nums select-text">
-                  <div
-                    className={cn(
-                      "font-medium",
-                      row.bankEstimateCents < 0
-                        ? "text-red-700 dark:text-red-400"
-                        : "text-emerald-700 dark:text-emerald-400",
-                    )}
-                  >
-                    En banco {formatMoney(row.bankEstimateCents)}
-                  </div>
-                  {row.cardReservedCents > 0 ? (
-                    <div className="text-xs text-muted-foreground">
-                      tras pagar {formatMoney(row.plannedBalanceCents)}
-                      {" · "}
-                      reservado {formatMoney(row.cardReservedCents)}
-                    </div>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ReportList>
-        )}
-      </Section>
-
-      <Section
-        title="Flujo por cuenta"
-        description="Solo este rango: entradas (ingresos + transferencias in) vs salidas (gastos + transferencias out)"
-      >
-        {flowRows.length === 0 ? (
-          <EmptyNote>Sin flujo en este rango.</EmptyNote>
-        ) : (
-          <ReportList>
-            {flowRows.map((row) => (
-              <li key={row.accountId} className="flex flex-col gap-2 px-4 py-3">
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="min-w-0 truncate text-sm font-medium select-text">{row.label}</span>
-                  <span
-                    className={cn(
-                      "shrink-0 text-sm font-medium tabular-nums select-text",
-                      row.netCents > 0
-                        ? "text-emerald-700 dark:text-emerald-400"
-                        : row.netCents < 0
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <Section
+          title="Saldo por cuenta"
+          description="En banco ≈ físico. Tras pagar = cuando liquides las tarjetas."
+        >
+          {balanceRows.length === 0 ? (
+            <EmptyNote>No hay cuentas.</EmptyNote>
+          ) : (
+            <ReportList>
+              {balanceRows.map((row) => (
+                <li
+                  key={row.accountId}
+                  className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                >
+                  <span className="min-w-0 truncate text-sm font-medium select-text">
+                    {row.label}
+                  </span>
+                  <div className="shrink-0 text-right text-sm tabular-nums select-text">
+                    <div
+                      className={cn(
+                        "font-mono font-semibold",
+                        row.bankEstimateCents < 0
                           ? "text-red-700 dark:text-red-400"
-                          : "text-muted-foreground",
+                          : "text-primary",
+                      )}
+                    >
+                      {formatMoney(row.bankEstimateCents)}
+                    </div>
+                    {row.cardReservedCents > 0 ? (
+                      <div className="text-xs text-muted-foreground">
+                        tras pagar {formatMoney(row.plannedBalanceCents)}
+                        {" · "}
+                        reservado {formatMoney(row.cardReservedCents)}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-muted-foreground">En banco</div>
                     )}
-                  >
-                    {row.netCents > 0 ? "+" : row.netCents < 0 ? "−" : ""}
-                    {formatMoney(Math.abs(row.netCents))}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3 text-xs tabular-nums select-text">
-                  <span className="text-emerald-700 dark:text-emerald-400">
-                    Entró {formatMoney(row.inCents)}
-                  </span>
-                  <span className="text-red-700 dark:text-red-400">
-                    Salió {formatMoney(row.outCents)}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground select-text">
-                  <span>Ingresos {formatMoney(row.incomeCents)}</span>
-                  <span className="text-right">Gastos {formatMoney(row.expenseCents)}</span>
-                  <span>Transf. in {formatMoney(row.transferInCents)}</span>
-                  <span className="text-right">Transf. out {formatMoney(row.transferOutCents)}</span>
-                </div>
-              </li>
-            ))}
-          </ReportList>
-        )}
-      </Section>
+                  </div>
+                </li>
+              ))}
+            </ReportList>
+          )}
+        </Section>
+
+        <Section
+          title="Flujo por cuenta"
+          description="Entradas vs salidas en este rango (barra = proporción)"
+        >
+          {flowRows.length === 0 ? (
+            <EmptyNote>Sin flujo en este rango.</EmptyNote>
+          ) : (
+            <ReportList>
+              {flowRows.map((row) => (
+                <li key={row.accountId} className="flex flex-col gap-2 px-4 py-3">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="min-w-0 truncate text-sm font-medium select-text">
+                      {row.label}
+                    </span>
+                    <span
+                      className={cn(
+                        "shrink-0 font-mono text-sm font-semibold tabular-nums select-text",
+                        row.netCents > 0
+                          ? "text-emerald-700 dark:text-emerald-400"
+                          : row.netCents < 0
+                            ? "text-red-700 dark:text-red-400"
+                            : "text-muted-foreground",
+                      )}
+                    >
+                      {row.netCents > 0 ? "+" : row.netCents < 0 ? "−" : ""}
+                      {formatMoney(Math.abs(row.netCents))}
+                    </span>
+                  </div>
+                  <FlowBar inCents={row.inCents} outCents={row.outCents} />
+                  <div className="flex justify-between gap-3 text-xs tabular-nums select-text">
+                    <span className="text-emerald-700 dark:text-emerald-400">
+                      Entró {formatMoney(row.inCents)}
+                    </span>
+                    <span className="text-red-700 dark:text-red-400">
+                      Salió {formatMoney(row.outCents)}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ReportList>
+          )}
+        </Section>
+      </div>
 
       {cardRows.length > 0 && (
         <Section
           title="Tarjetas"
-          description="Seguimiento informativo: compras etiquetadas y pagos registrados; el dinero ya salió de la cuenta «Se paga desde»"
+          description="Seguimiento informativo: el dinero ya salió de la cuenta «Se paga desde»"
         >
-          <ReportList>
+          <div className="grid gap-3 sm:grid-cols-2">
             {cardRows.map((row) => (
-              <li key={row.accountId} className="flex flex-col gap-1.5 px-4 py-3 text-sm">
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="min-w-0 truncate font-medium select-text">{row.label}</span>
-                  <span className="shrink-0 tabular-nums text-red-700 dark:text-red-400 select-text">
-                    Por pagar {formatMoney(row.dueCents)}
+              <ReportPanel
+                key={row.accountId}
+                title={row.label}
+                bodyClassName="flex flex-col gap-2 py-3"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-xs text-muted-foreground">Por pagar</span>
+                  <span className="font-mono text-sm font-semibold tabular-nums text-red-700 dark:text-red-400 select-text">
+                    {formatMoney(row.dueCents)}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground select-text">
-                  <span>Compras {formatMoney(row.chargedCents)}</span>
-                  <span>Pagos {formatMoney(row.paidCents)}</span>
-                  <span>Ciclo actual {formatMoney(row.currentCents)}</span>
+                <div className="grid grid-cols-3 gap-2 border-t border-border/60 pt-2 text-center text-[11px] text-muted-foreground select-text">
+                  <div>
+                    <div className="font-mono text-xs text-foreground tabular-nums">
+                      {formatMoney(row.chargedCents)}
+                    </div>
+                    Compras
+                  </div>
+                  <div>
+                    <div className="font-mono text-xs text-foreground tabular-nums">
+                      {formatMoney(row.paidCents)}
+                    </div>
+                    Pagos
+                  </div>
+                  <div>
+                    <div className="font-mono text-xs text-foreground tabular-nums">
+                      {formatMoney(row.currentCents)}
+                    </div>
+                    Ciclo
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground select-text">
+                <p className="text-[11px] leading-relaxed text-muted-foreground select-text">
                   {row.hasPaymentAccount
                     ? `Se paga desde ${row.fundingLabel} · saldo ${formatMoney(row.fundingBalanceCents ?? 0)}`
                     : "Sin «Se paga desde»"}
-                </span>
-              </li>
+                </p>
+              </ReportPanel>
             ))}
-          </ReportList>
+          </div>
         </Section>
       )}
 
@@ -184,15 +226,15 @@ export function AccountReportSections({
                 key={row.key}
                 className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
               >
-                <div className="flex min-w-0 flex-col select-text">
-                  <span className="truncate">{row.fromLabel}</span>
-                  <ArrowDownIcon className="size-3.5 text-amber-600" />
-                  <span className="truncate">{row.toLabel}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {row.count === 1 ? "1 movimiento" : `${row.count} movimientos`}
+                <div className="flex min-w-0 flex-1 items-center gap-2 select-text">
+                  <span className="truncate font-medium">{row.fromLabel}</span>
+                  <ArrowRightIcon className="size-3.5 shrink-0 text-primary/70" />
+                  <span className="truncate font-medium">{row.toLabel}</span>
+                  <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
+                    · {row.count === 1 ? "1 mov." : `${row.count} mov.`}
                   </span>
                 </div>
-                <span className="shrink-0 font-medium tabular-nums text-amber-800 dark:text-amber-400 select-text">
+                <span className="shrink-0 font-mono font-semibold tabular-nums text-foreground select-text">
                   {formatMoney(row.amountCents)}
                 </span>
               </li>

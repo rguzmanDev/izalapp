@@ -17,13 +17,17 @@ export function MovementFilterBar({
   hrefFor: (filter: MovementFilter) => string;
 }) {
   return (
-    <div className="flex w-fit flex-wrap gap-1 rounded-lg bg-muted p-1 text-sm">
+    <div
+      className="flex w-full flex-wrap gap-0.5 rounded-lg border border-border/70 bg-muted/70 p-0.5 text-sm sm:w-fit"
+      role="group"
+      aria-label="Tipo de movimiento"
+    >
       {MOVEMENT_FILTERS.map((filter) => (
         <Link
           key={filter}
           href={hrefFor(filter)}
           className={cn(
-            "rounded-md px-3 py-1 text-muted-foreground",
+            "flex-1 rounded-md px-3 py-1.5 text-center text-muted-foreground transition-colors sm:flex-none",
             filter === current && "bg-card font-medium text-primary shadow-sm",
           )}
         >

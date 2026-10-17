@@ -53,29 +53,30 @@
     Izalco / Sonsonate: neblina sobre el volcán, verde de cafetal y bálsamo,
     basalto cálido. Evita el look “crema + serif + terracota” de plantilla.
   */
-  --background: oklch(0.965 0.012 140);
-  --foreground: oklch(0.26 0.03 55);
-  --card: oklch(0.985 0.006 130);
-  --card-foreground: oklch(0.26 0.03 55);
-  --popover: oklch(0.985 0.006 130);
-  --popover-foreground: oklch(0.26 0.03 55);
-  --primary: oklch(0.38 0.078 152);
-  --primary-foreground: oklch(0.97 0.012 140);
-  --secondary: oklch(0.93 0.02 135);
-  --secondary-foreground: oklch(0.32 0.05 150);
-  --muted: oklch(0.935 0.016 138);
-  --muted-foreground: oklch(0.48 0.03 80);
-  --accent: oklch(0.93 0.028 95);
-  --accent-foreground: oklch(0.32 0.05 55);
-  --destructive: oklch(0.52 0.17 28);
-  --border: oklch(0.87 0.02 135);
-  --input: oklch(0.87 0.02 135);
-  --ring: oklch(0.52 0.07 152);
-  --chart-1: oklch(0.45 0.09 152);
-  --chart-2: oklch(0.58 0.08 95);
-  --chart-3: oklch(0.5 0.06 200);
-  --chart-4: oklch(0.62 0.1 45);
-  --chart-5: oklch(0.4 0.04 55);
+  --background: oklch(0.97 0.01 142);
+  --foreground: oklch(0.24 0.028 50);
+  --card: oklch(0.99 0.004 135);
+  --card-foreground: oklch(0.24 0.028 50);
+  --popover: oklch(0.99 0.004 135);
+  --popover-foreground: oklch(0.24 0.028 50);
+  --primary: oklch(0.36 0.085 152);
+  --primary-foreground: oklch(0.98 0.01 140);
+  --secondary: oklch(0.935 0.018 138);
+  --secondary-foreground: oklch(0.3 0.05 150);
+  --muted: oklch(0.94 0.014 140);
+  --muted-foreground: oklch(0.46 0.028 75);
+  --accent: oklch(0.94 0.022 100);
+  --accent-foreground: oklch(0.3 0.045 55);
+  --destructive: oklch(0.5 0.18 27);
+  --border: oklch(0.88 0.018 138);
+  --input: oklch(0.88 0.018 138);
+  --ring: oklch(0.5 0.075 152);
+  /* Charts: cafetal → bálsamo → volcán → cereza café → basalto */
+  --chart-1: oklch(0.42 0.09 152);
+  --chart-2: oklch(0.55 0.09 95);
+  --chart-3: oklch(0.48 0.06 45);
+  --chart-4: oklch(0.58 0.12 35);
+  --chart-5: oklch(0.38 0.03 55);
   --radius: 0.5rem;
   --sidebar: oklch(0.955 0.014 140);
   --sidebar-foreground: oklch(0.26 0.03 55);
@@ -128,17 +129,19 @@
   /* App text can't be selected; elements showing the user's data opt back in with `select-text`. */
   body {
     @apply bg-background text-foreground select-none;
-    /* Neblina matinal sobre ladera + resplandor cálido tipo bálsamo (muy suave) */
-    background-image:
-      radial-gradient(ellipse 90% 55% at 50% -25%, oklch(0.72 0.06 145 / 0.22), transparent 55%),
-      radial-gradient(ellipse 50% 40% at 100% 0%, oklch(0.78 0.06 85 / 0.1), transparent 50%),
-      linear-gradient(180deg, oklch(0.98 0.01 135 / 0.5), transparent 32%);
+    background-image: radial-gradient(
+      ellipse 85% 45% at 50% -18%,
+      oklch(0.7 0.05 150 / 0.14),
+      transparent 60%
+    );
     background-attachment: fixed;
   }
   .dark body {
-    background-image:
-      radial-gradient(ellipse 70% 45% at 50% -20%, oklch(0.4 0.06 150 / 0.25), transparent),
-      none;
+    background-image: radial-gradient(
+      ellipse 70% 40% at 50% -15%,
+      oklch(0.4 0.05 150 / 0.2),
+      transparent
+    );
   }
   input,
   textarea {

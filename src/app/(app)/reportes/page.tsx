@@ -11,6 +11,7 @@ import { MovementFilter } from "@/features/reports/components/movement-filter";
 import { MovementReportList } from "@/features/reports/components/movement-report-list";
 import { PeriodChart } from "@/features/reports/components/period-chart";
 import { RangeSelector, REPORT_RANGES } from "@/features/reports/components/range-selector";
+import { ReportPanel } from "@/features/reports/components/report-panel";
 import {
   getAccountReports,
   getPeriodReports,
@@ -21,6 +22,7 @@ import { spentCentsOf } from "@/features/periods/summary";
 import { formatMoney } from "@/lib/money";
 import { formatShortDate, shortPeriodLabel, toPeriodKey } from "@/lib/period";
 import { requireUser } from "@/lib/session";
+import { cn } from "@/lib/utils";
 
 const toDollars = (cents: number) => Math.round(cents) / 100;
 const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
@@ -51,14 +53,6 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
     );
   }
 
-  const header = (
-    <PageHeader
-      title="Reportes"
-      description="Cómo se usó tu dinero en las últimas quincenas"
-      action={<ExportCsvButton range={range} />}
-    />
-  );
-
   const periodIds = reports.map((report) => report.period.id);
   const [movements, accountReport] = await Promise.all([
     listMovementsForPeriods(user.id, periodIds),
@@ -79,6 +73,16 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
   const transferTotal = totalOf("transfer");
 
   const summaries = reports.map((report) => report.summary);
+  const incomeSum = sum(summaries.map((summary) => summary.incomeCents));
+  const spentSum = sum(summaries.map(spentCentsOf));
+  const surplusSum = sum(summaries.map((summary) => summary.actualSurplusCents));
+  const overspentSum = sum(summaries.map((summary) => summary.overspentCents));
+  const rangeDetail =
+    reports.length === range
+      ? reports.length === 1
+        ? "1 quincena"
+        : `${reports.length} quincenas`
+      : `${reports.length} de ${range} solicitadas`;
 
   const periodData = reports.map(({ period, summary }) => ({
     label: shortPeriodLabel(toPeriodKey(period)),
@@ -98,68 +102,94 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
       : [{ label: formatShortDate(transaction.occurredOn), mpg: Math.round(mpg * 10) / 10 }];
   });
 
+  const movementSummary =
+    tipo === "ingresos"
+      ? `${movementEntries.length} ingresos · ${formatMoney(incomeTotal)}`
+      : tipo === "gastos"
+        ? `${movementEntries.length} gastos · ${formatMoney(expenseTotal)}`
+        : tipo === "transferencias"
+          ? `${movementEntries.length} transferencias · ${formatMoney(transferTotal)}`
+          : `${movementEntries.length} · ingresos ${formatMoney(incomeTotal)} · gastos ${formatMoney(expenseTotal)} · transferencias ${formatMoney(transferTotal)}`;
+
   return (
     <>
-      {header}
-      <RangeSelector current={range} tipo={tipo} />
-      <div className="grid grid-cols-2 gap-3">
-        <StatCard
-          label="Ingreso"
-          value={formatMoney(sum(summaries.map((summary) => summary.incomeCents)))}
-          detail={
-            reports.length === range
-              ? reports.length === 1
-                ? "1 quincena"
-                : `${reports.length} quincenas`
-              : `${reports.length} de ${range} solicitadas`
-          }
-        />
+      <PageHeader
+        title="Reportes"
+        description="Cómo se usó tu dinero en las últimas quincenas"
+        action={<ExportCsvButton range={range} />}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <RangeSelector current={range} tipo={tipo} />
+        <p className="text-xs text-muted-foreground">{rangeDetail}</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard label="Ingreso" value={formatMoney(incomeSum)} detail={rangeDetail} />
         <StatCard
           label="Gastado"
-          value={formatMoney(sum(summaries.map(spentCentsOf)))}
+          value={formatMoney(spentSum)}
           detail="Solo gastos registrados"
         />
-        <StatCard
-          label="Sobrante"
-          value={formatMoney(sum(summaries.map((summary) => summary.actualSurplusCents)))}
-        />
+        <div
+          className={cn(
+            "rounded-xl border border-primary/20 bg-primary/5 p-3 shadow-[0_1px_2px_oklch(0.3_0.03_80/0.04)]",
+            "col-span-2 sm:col-span-1",
+          )}
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[0.7rem] font-medium tracking-wide text-primary/80 uppercase">
+              Sobrante
+            </span>
+            <span
+              className={cn(
+                "font-mono text-lg font-semibold tracking-tight tabular-nums select-text",
+                surplusSum < 0 && "text-destructive",
+              )}
+            >
+              {formatMoney(surplusSum)}
+            </span>
+          </div>
+        </div>
         <StatCard
           label="Excesos"
-          value={formatMoney(sum(summaries.map((summary) => summary.overspentCents)))}
-          detail="Gastado por encima de lo planeado"
-          negative={summaries.some((summary) => summary.overspentCents > 0)}
+          value={formatMoney(overspentSum)}
+          detail="Por encima de lo planeado"
+          negative={overspentSum > 0}
         />
       </div>
+
       <Section
-        title="Movimientos"
-        description={
-          tipo === "ingresos"
-            ? `${movementEntries.length} ingresos · ${formatMoney(incomeTotal)}`
-            : tipo === "gastos"
-              ? `${movementEntries.length} gastos · ${formatMoney(expenseTotal)}`
-              : tipo === "transferencias"
-                ? `${movementEntries.length} transferencias · ${formatMoney(transferTotal)}`
-                : `${movementEntries.length} · ingresos ${formatMoney(incomeTotal)} · gastos ${formatMoney(expenseTotal)} · transferencias ${formatMoney(transferTotal)}`
-        }
+        title="Uso por quincena"
+        description="Fijos, presupuestos, otros y lo que sobró — el gráfico es el resumen del rango"
       >
+        <ReportPanel
+          title="Composición del gasto"
+          description="Barras apiladas por quincena (montos en dólares)"
+          bodyClassName="pt-2 pb-3"
+        >
+          <PeriodChart data={periodData} />
+        </ReportPanel>
+      </Section>
+
+      {fuelData.length > 0 && (
+        <ReportPanel
+          title="Rendimiento de gasolina"
+          description="Millas por galón en cada carga con odómetro"
+          bodyClassName="pt-2 pb-3"
+        >
+          <FuelChart data={fuelData} />
+        </ReportPanel>
+      )}
+
+      <AccountReportSections {...accountReport} />
+
+      <Section title="Movimientos" description={movementSummary}>
         <div className="flex flex-col gap-3">
           <MovementFilter current={tipo} range={range} />
           <MovementReportList entries={movementEntries} groupByPeriod linkable={false} />
         </div>
       </Section>
-      <AccountReportSections {...accountReport} />
-      <Section title="Por quincena">
-        <div className="rounded-xl border border-border/80 bg-card p-4">
-          <PeriodChart data={periodData} />
-        </div>
-      </Section>
-      {fuelData.length > 0 && (
-        <Section title="Rendimiento de gasolina">
-          <div className="rounded-xl border border-border/80 bg-card p-4">
-            <FuelChart data={fuelData} />
-          </div>
-        </Section>
-      )}
     </>
   );
 }

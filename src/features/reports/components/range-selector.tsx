@@ -12,17 +12,21 @@ export function RangeSelector({
   tipo?: MovementFilter;
 }) {
   return (
-    <div className="flex w-fit gap-1 rounded-lg bg-muted p-1 text-sm">
+    <div
+      className="inline-flex gap-0.5 rounded-lg border border-border/70 bg-muted/70 p-0.5 text-sm"
+      role="group"
+      aria-label="Rango de quincenas"
+    >
       {REPORT_RANGES.map((range) => (
         <Link
           key={range}
           href={`/reportes?quincenas=${range}&tipo=${tipo}`}
           className={cn(
-            "rounded-md px-3 py-1 text-muted-foreground",
+            "rounded-md px-3 py-1.5 text-muted-foreground transition-colors",
             range === current && "bg-card font-medium text-primary shadow-sm",
           )}
         >
-          {range} quincenas
+          {range}q
         </Link>
       ))}
     </div>
