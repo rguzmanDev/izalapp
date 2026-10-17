@@ -24,7 +24,7 @@ export function MovementFilterBar({
           href={hrefFor(filter)}
           className={cn(
             "rounded-md px-3 py-1 text-muted-foreground",
-            filter === current && "bg-background text-foreground shadow-sm",
+            filter === current && "bg-card font-medium text-primary shadow-sm",
           )}
         >
           {LABELS[filter]}

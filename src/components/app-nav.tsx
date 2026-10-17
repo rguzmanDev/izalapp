@@ -39,14 +39,14 @@ export function DesktopNav() {
   const isActive = useIsActive();
 
   return (
-    <nav className="hidden items-center gap-1 md:flex">
+    <nav className="hidden items-center gap-0.5 md:flex">
       {NAV_ITEMS.map((item) => (
         <Link
           key={item.href}
           href={item.href}
           className={cn(
             "rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground",
-            isActive(item) && "bg-muted text-foreground",
+            isActive(item) && "bg-primary/10 font-medium text-primary",
           )}
         >
           {item.label}
@@ -60,18 +60,18 @@ export function MobileNav() {
   const isActive = useIsActive();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-10 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border/80 bg-background/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:hidden">
       <ul className="grid grid-cols-5">
         {NAV_ITEMS.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 py-2 text-[11px] text-muted-foreground",
-                isActive(item) && "text-foreground",
+                "flex flex-col items-center gap-1 py-2 text-[11px] text-muted-foreground transition-colors",
+                isActive(item) && "font-medium text-primary",
               )}
             >
-              <item.icon className="size-5" />
+              <item.icon className={cn("size-5", isActive(item) && "stroke-[2.25]")} />
               {item.label}
             </Link>
           </li>

@@ -34,7 +34,7 @@ export default function LoginPage() {
         </ActionForm>
         <p className="text-center text-sm text-muted-foreground">
           ¿No tienes cuenta?{" "}
-          <Link href="/registro" className="text-foreground underline underline-offset-4">
+          <Link href="/registro" className="font-medium text-primary underline underline-offset-4">
             Regístrate
           </Link>
         </p>

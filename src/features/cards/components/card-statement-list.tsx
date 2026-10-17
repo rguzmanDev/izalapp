@@ -70,7 +70,7 @@ export function CardStatementList({
   today: string;
 }) {
   return (
-    <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+    <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
       {statements.map((statement) => (
         <CardStatementRow key={statement.card.id} statement={statement} today={today} />
       ))}

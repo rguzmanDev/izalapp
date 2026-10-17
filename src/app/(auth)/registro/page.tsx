@@ -47,7 +47,7 @@ export default function SignUpPage() {
         </ActionForm>
         <p className="text-center text-sm text-muted-foreground">
           ¿Ya tienes cuenta?{" "}
-          <Link href="/login" className="text-foreground underline underline-offset-4">
+          <Link href="/login" className="font-medium text-primary underline underline-offset-4">
             Inicia sesión
           </Link>
         </p>

@@ -132,7 +132,7 @@ function DaySections({
           <h4 className="px-0.5 text-sm font-medium text-muted-foreground">
             {formatLongDate(date)}
           </h4>
-          <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+          <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
             {dayEntries.map((entry) => (
               <MovementRow
                 key={`${entry.kind}-${entry.id}`}
@@ -160,7 +160,7 @@ export function MovementReportList({
 }) {
   if (entries.length === 0) {
     return (
-      <p className="rounded-xl bg-card px-4 py-6 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">
+      <p className="rounded-xl border border-border/80 bg-card px-4 py-6 text-center text-sm text-muted-foreground">
         No hay movimientos en este rango.
       </p>
     );

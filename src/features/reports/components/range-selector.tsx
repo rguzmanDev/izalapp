@@ -19,7 +19,7 @@ export function RangeSelector({
           href={`/reportes?quincenas=${range}&tipo=${tipo}`}
           className={cn(
             "rounded-md px-3 py-1 text-muted-foreground",
-            range === current && "bg-background text-foreground shadow-sm",
+            range === current && "bg-card font-medium text-primary shadow-sm",
           )}
         >
           {range} quincenas

@@ -44,7 +44,7 @@ export function QuickAddButton({ href = "/movimientos/nuevo", fuelHref }: QuickA
       className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex flex-col items-end gap-2 md:bottom-8"
     >
       {open && (
-        <div className="flex flex-col gap-2 rounded-xl bg-card p-2 shadow-lg ring-1 ring-foreground/10">
+        <div className="flex flex-col gap-2 rounded-xl border border-border/80 bg-card p-2 shadow-lg">
           <Link
             href={href}
             onClick={() => setOpen(false)}

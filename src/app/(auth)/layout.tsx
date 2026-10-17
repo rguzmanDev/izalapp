@@ -7,7 +7,12 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <p className="text-center text-xl font-semibold tracking-tight">IzalApp</p>
+        <div className="flex flex-col items-center gap-1.5 text-center">
+          <p className="font-heading text-2xl font-semibold tracking-[-0.03em] text-primary">
+            IzalApp
+          </p>
+          <p className="text-sm text-muted-foreground">Tu planeación quincenal</p>
+        </div>
         {children}
       </div>
     </main>

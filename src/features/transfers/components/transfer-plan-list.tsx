@@ -25,7 +25,7 @@ export function TransferPlanList({ periodId, steps, accounts, readOnly }: Transf
   };
 
   return (
-    <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+    <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
       {steps.map((step) => {
         const pendingCents = step.amountCents - step.doneCents;
         const covers = coversLabel(step.covers);

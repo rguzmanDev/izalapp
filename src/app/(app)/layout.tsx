@@ -5,9 +5,12 @@ import { SignOutButton } from "@/components/sign-out-button";
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <>
-      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-border/80 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-4 px-4">
-          <Link href="/" className="font-semibold tracking-tight">
+          <Link
+            href="/"
+            className="font-heading text-[1.05rem] font-semibold tracking-[-0.03em] text-primary"
+          >
             IzalApp
           </Link>
           <DesktopNav />

@@ -41,7 +41,7 @@ export default async function EditAccountPage({ params }: PageProps<"/cuentas/[i
       <PageHeader title={accountLabel(account)} backHref="/cuentas" />
       {account.type !== "credit" && view && (
         <Section title="Saldo">
-          <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+          <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
             <li className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
               <span className="text-muted-foreground">En banco</span>
               <span className="font-medium tabular-nums select-text">
@@ -73,7 +73,7 @@ export default async function EditAccountPage({ params }: PageProps<"/cuentas/[i
       )}
       {account.type === "credit" && statement && (
         <Section title="Estado">
-          <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+          <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
             <li className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
               <span className="text-muted-foreground">Por pagar (corte)</span>
               <span className="font-medium tabular-nums select-text">

@@ -10,10 +10,11 @@ export function renderAppIcon(size: number) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#171717",
-          color: "#ffffff",
-          fontSize: size * 0.6,
+          background: "#1a5a66",
+          color: "#f4fafb",
+          fontSize: size * 0.58,
           fontWeight: 700,
+          letterSpacing: "-0.04em",
         }}
       >
         I

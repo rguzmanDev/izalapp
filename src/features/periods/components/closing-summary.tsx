@@ -13,7 +13,7 @@ function Line({ label, cents, strong }: { label: string; cents: number; strong?:
 
 export function ClosingSummary({ summary }: { summary: PeriodSummary }) {
   return (
-    <dl className="divide-y overflow-hidden rounded-xl bg-card text-sm ring-1 ring-foreground/10">
+    <dl className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card text-sm">
       <Line label="Ingreso" cents={summary.incomeCents} />
       <Line label="Gastos fijos" cents={-summary.fixedCommittedCents} />
       <Line label="Gastado en presupuestos" cents={-summary.budgetSpentCents} />

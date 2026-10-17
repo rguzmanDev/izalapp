@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export function ItemList({ children }: { children: ReactNode }) {
   return (
-    <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+    <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
       {children}
     </ul>
   );

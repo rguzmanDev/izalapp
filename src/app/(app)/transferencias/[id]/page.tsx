@@ -27,7 +27,7 @@ export default async function EditTransferPage({ params }: PageProps<"/transfere
         backHref="/movimientos"
       />
       {isApartado ? (
-        <div className="flex flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10">
+        <div className="flex flex-col gap-3 rounded-xl border border-border/80 bg-card p-4 text-sm">
           <p>
             Esta es una transferencia de <span className="font-medium">apartado</span>
             {transfer.note ? ` (${transfer.note})` : ""}. No se edita ni elimina aquí.

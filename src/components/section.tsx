@@ -12,10 +12,12 @@ export function Section({ title, description, action, children }: SectionProps) 
     <section className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between gap-3">
         <div className="min-w-0 flex flex-col gap-0.5">
-          <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>
+          <h2 className="text-[0.7rem] font-semibold tracking-[0.08em] text-primary/80 uppercase">
+            {title}
+          </h2>
           {description &&
             (typeof description === "string" ? (
-              <p className="text-xs text-muted-foreground/80">{description}</p>
+              <p className="text-xs text-muted-foreground">{description}</p>
             ) : (
               description
             ))}

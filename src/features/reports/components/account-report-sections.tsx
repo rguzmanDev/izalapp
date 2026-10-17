@@ -13,7 +13,7 @@ import type {
 
 function ReportList({ children }: { children: ReactNode }) {
   return (
-    <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+    <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
       {children}
     </ul>
   );
@@ -21,7 +21,7 @@ function ReportList({ children }: { children: ReactNode }) {
 
 function EmptyNote({ children }: { children: ReactNode }) {
   return (
-    <p className="rounded-xl bg-card px-4 py-6 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">
+    <p className="rounded-xl border border-border/80 bg-card px-4 py-6 text-center text-sm text-muted-foreground">
       {children}
     </p>
   );

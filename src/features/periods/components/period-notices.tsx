@@ -10,7 +10,7 @@ type NoticeProps = { title: string; description: string; action: ReactNode };
 
 function Notice({ title, description, action }: NoticeProps) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl bg-card px-4 py-3 ring-1 ring-foreground/10">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-card px-4 py-3">
       <div className="flex min-w-0 flex-col">
         <span className="font-medium">{title}</span>
         <span className="text-sm text-muted-foreground">{description}</span>

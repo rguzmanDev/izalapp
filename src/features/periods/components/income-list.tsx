@@ -6,7 +6,7 @@ import type { PeriodItemRow } from "../data";
 
 export function IncomeList({ rows, readOnly }: { rows: PeriodItemRow[]; readOnly?: boolean }) {
   return (
-    <ul className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+    <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border/80 bg-card">
       {rows.map(({ item, account }) => (
         <li key={item.id} className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 flex-col select-text">

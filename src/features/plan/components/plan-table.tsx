@@ -46,7 +46,7 @@ function SectionRows({ title, section }: { title: string; section: PlanSection }
 
 export function PlanTable({ plan }: { plan: MonthlyPlan }) {
   return (
-    <div className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+    <div className="overflow-hidden rounded-xl bg-card border border-border/80">
       <Table>
         <TableHeader>
           <TableRow>

@@ -31,7 +31,7 @@ export default async function EditTransactionPage({ params }: PageProps<"/movimi
           title={`Gasto de ${formatMoney(transaction.amountCents)}`}
           backHref="/movimientos"
         />
-        <div className="flex flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10">
+        <div className="flex flex-col gap-3 rounded-xl border border-border/80 bg-card p-4 text-sm">
           <p>
             Este gasto se creó con <span className="font-medium">Marcar pagado</span>
             {transaction.note ? ` (${transaction.note})` : ""}. No se edita ni elimina aquí.

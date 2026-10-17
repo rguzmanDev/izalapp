@@ -149,13 +149,13 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
       </Section>
       <AccountReportSections {...accountReport} />
       <Section title="Por quincena">
-        <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+        <div className="rounded-xl border border-border/80 bg-card p-4">
           <PeriodChart data={periodData} />
         </div>
       </Section>
       {fuelData.length > 0 && (
         <Section title="Rendimiento de gasolina">
-          <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+          <div className="rounded-xl border border-border/80 bg-card p-4">
             <FuelChart data={fuelData} />
           </div>
         </Section>
