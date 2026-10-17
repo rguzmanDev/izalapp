@@ -12,7 +12,7 @@ export function Section({ title, description, action, children }: SectionProps) 
     <section className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between gap-3">
         <div className="min-w-0 flex flex-col gap-0.5">
-          <h2 className="text-[0.7rem] font-semibold tracking-[0.08em] text-primary/80 uppercase">
+          <h2 className="font-heading text-base font-semibold tracking-[-0.01em] text-foreground">
             {title}
           </h2>
           {description &&

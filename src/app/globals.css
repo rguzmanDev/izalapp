@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-ibm-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,73 +49,76 @@
 }
 
 :root {
-  /* Cool paper + petrol teal — trustworthy without looking like default shadcn zinc */
-  --background: oklch(0.975 0.006 220);
-  --foreground: oklch(0.24 0.028 230);
-  --card: oklch(0.995 0.003 220);
-  --card-foreground: oklch(0.24 0.028 230);
-  --popover: oklch(0.995 0.003 220);
-  --popover-foreground: oklch(0.24 0.028 230);
-  --primary: oklch(0.42 0.07 215);
-  --primary-foreground: oklch(0.98 0.01 210);
-  --secondary: oklch(0.94 0.012 215);
-  --secondary-foreground: oklch(0.3 0.04 220);
-  --muted: oklch(0.945 0.01 220);
-  --muted-foreground: oklch(0.48 0.03 230);
-  --accent: oklch(0.93 0.02 200);
-  --accent-foreground: oklch(0.3 0.05 215);
-  --destructive: oklch(0.55 0.2 25);
-  --border: oklch(0.88 0.015 220);
-  --input: oklch(0.88 0.015 220);
-  --ring: oklch(0.55 0.06 215);
-  --chart-1: oklch(0.48 0.08 215);
-  --chart-2: oklch(0.62 0.07 185);
-  --chart-3: oklch(0.55 0.06 250);
-  --chart-4: oklch(0.7 0.05 160);
-  --chart-5: oklch(0.4 0.04 230);
-  --radius: 0.45rem;
-  --sidebar: oklch(0.97 0.008 220);
-  --sidebar-foreground: oklch(0.24 0.028 230);
-  --sidebar-primary: oklch(0.42 0.07 215);
-  --sidebar-primary-foreground: oklch(0.98 0.01 210);
-  --sidebar-accent: oklch(0.93 0.02 200);
-  --sidebar-accent-foreground: oklch(0.3 0.05 215);
-  --sidebar-border: oklch(0.88 0.015 220);
-  --sidebar-ring: oklch(0.55 0.06 215);
+  /*
+    Izalco / Sonsonate: neblina sobre el volcán, verde de cafetal y bálsamo,
+    basalto cálido. Evita el look “crema + serif + terracota” de plantilla.
+  */
+  --background: oklch(0.965 0.012 140);
+  --foreground: oklch(0.26 0.03 55);
+  --card: oklch(0.985 0.006 130);
+  --card-foreground: oklch(0.26 0.03 55);
+  --popover: oklch(0.985 0.006 130);
+  --popover-foreground: oklch(0.26 0.03 55);
+  --primary: oklch(0.38 0.078 152);
+  --primary-foreground: oklch(0.97 0.012 140);
+  --secondary: oklch(0.93 0.02 135);
+  --secondary-foreground: oklch(0.32 0.05 150);
+  --muted: oklch(0.935 0.016 138);
+  --muted-foreground: oklch(0.48 0.03 80);
+  --accent: oklch(0.93 0.028 95);
+  --accent-foreground: oklch(0.32 0.05 55);
+  --destructive: oklch(0.52 0.17 28);
+  --border: oklch(0.87 0.02 135);
+  --input: oklch(0.87 0.02 135);
+  --ring: oklch(0.52 0.07 152);
+  --chart-1: oklch(0.45 0.09 152);
+  --chart-2: oklch(0.58 0.08 95);
+  --chart-3: oklch(0.5 0.06 200);
+  --chart-4: oklch(0.62 0.1 45);
+  --chart-5: oklch(0.4 0.04 55);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.955 0.014 140);
+  --sidebar-foreground: oklch(0.26 0.03 55);
+  --sidebar-primary: oklch(0.38 0.078 152);
+  --sidebar-primary-foreground: oklch(0.97 0.012 140);
+  --sidebar-accent: oklch(0.93 0.028 95);
+  --sidebar-accent-foreground: oklch(0.32 0.05 55);
+  --sidebar-border: oklch(0.87 0.02 135);
+  --sidebar-ring: oklch(0.52 0.07 152);
 }
 
 .dark {
-  --background: oklch(0.18 0.02 230);
-  --foreground: oklch(0.95 0.01 220);
-  --card: oklch(0.23 0.022 230);
-  --card-foreground: oklch(0.95 0.01 220);
-  --popover: oklch(0.23 0.022 230);
-  --popover-foreground: oklch(0.95 0.01 220);
-  --primary: oklch(0.78 0.06 200);
-  --primary-foreground: oklch(0.22 0.04 220);
-  --secondary: oklch(0.28 0.025 230);
-  --secondary-foreground: oklch(0.95 0.01 220);
-  --muted: oklch(0.28 0.025 230);
-  --muted-foreground: oklch(0.72 0.02 220);
-  --accent: oklch(0.3 0.035 210);
-  --accent-foreground: oklch(0.95 0.01 220);
-  --destructive: oklch(0.68 0.18 22);
+  --background: oklch(0.19 0.02 145);
+  --foreground: oklch(0.94 0.015 130);
+  --card: oklch(0.24 0.022 145);
+  --card-foreground: oklch(0.94 0.015 130);
+  --popover: oklch(0.24 0.022 145);
+  --popover-foreground: oklch(0.94 0.015 130);
+  --primary: oklch(0.78 0.08 150);
+  --primary-foreground: oklch(0.22 0.04 152);
+  --secondary: oklch(0.29 0.025 145);
+  --secondary-foreground: oklch(0.94 0.015 130);
+  --muted: oklch(0.29 0.025 145);
+  --muted-foreground: oklch(0.72 0.025 130);
+  --accent: oklch(0.32 0.035 95);
+  --accent-foreground: oklch(0.94 0.015 130);
+  --destructive: oklch(0.68 0.16 28);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.65 0.05 200);
-  --chart-1: oklch(0.72 0.08 200);
-  --chart-2: oklch(0.65 0.07 175);
-  --chart-3: oklch(0.7 0.06 250);
-  --chart-4: oklch(0.75 0.05 155);
-  --chart-5: oklch(0.55 0.04 230);
-  --sidebar: oklch(0.21 0.022 230);
-  --sidebar-foreground: oklch(0.95 0.01 220);
-  --sidebar-primary: oklch(0.78 0.06 200);
-  --sidebar-primary-foreground: oklch(0.22 0.04 220);
-  --sidebar-accent: oklch(0.3 0.035 210);
-  --sidebar-accent-foreground: oklch(0.95 0.01 220);
+  --ring: oklch(0.65 0.07 150);
+  --chart-1: oklch(0.72 0.09 150);
+  --chart-2: oklch(0.7 0.08 95);
+  --chart-3: oklch(0.68 0.06 200);
+  --chart-4: oklch(0.72 0.1 45);
+  --chart-5: oklch(0.55 0.04 55);
+  --sidebar: oklch(0.22 0.022 145);
+  --sidebar-foreground: oklch(0.94 0.015 130);
+  --sidebar-primary: oklch(0.78 0.08 150);
+  --sidebar-primary-foreground: oklch(0.22 0.04 152);
+  --sidebar-accent: oklch(0.32 0.035 95);
+  --sidebar-accent-foreground: oklch(0.94 0.015 130);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.65 0.05 200);
+  --sidebar-ring: oklch(0.65 0.07 150);
 }
 
 @layer base {
@@ -125,14 +128,16 @@
   /* App text can't be selected; elements showing the user's data opt back in with `select-text`. */
   body {
     @apply bg-background text-foreground select-none;
+    /* Neblina matinal sobre ladera + resplandor cálido tipo bálsamo (muy suave) */
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, oklch(0.7 0.04 200 / 0.12), transparent),
-      linear-gradient(180deg, oklch(0.99 0.008 215 / 0.6), transparent 28%);
+      radial-gradient(ellipse 90% 55% at 50% -25%, oklch(0.72 0.06 145 / 0.22), transparent 55%),
+      radial-gradient(ellipse 50% 40% at 100% 0%, oklch(0.78 0.06 85 / 0.1), transparent 50%),
+      linear-gradient(180deg, oklch(0.98 0.01 135 / 0.5), transparent 32%);
     background-attachment: fixed;
   }
   .dark body {
     background-image:
-      radial-gradient(ellipse 70% 40% at 50% -15%, oklch(0.45 0.06 200 / 0.18), transparent),
+      radial-gradient(ellipse 70% 45% at 50% -20%, oklch(0.4 0.06 150 / 0.25), transparent),
       none;
   }
   input,

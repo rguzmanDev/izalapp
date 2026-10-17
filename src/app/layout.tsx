@@ -1,11 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Fraunces, IBM_Plex_Mono, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 
-const plexSans = IBM_Plex_Sans({
+const sourceSans = Source_Sans_3({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  axes: ["SOFT", "WONK"],
 });
 
 const plexMono = IBM_Plex_Mono({
@@ -21,13 +26,16 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f4f7f8",
+  themeColor: "#f2f5f0",
   viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${plexSans.variable} ${plexMono.variable} h-full antialiased`}>
+    <html
+      lang="es"
+      className={`${sourceSans.variable} ${fraunces.variable} ${plexMono.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
