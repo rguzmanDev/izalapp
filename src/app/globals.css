@@ -151,3 +151,16 @@
     @apply font-sans;
   }
 }
+
+@keyframes faro-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.15);
+  }
+}
+

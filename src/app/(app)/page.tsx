@@ -9,6 +9,7 @@ import { BudgetList } from "@/features/periods/components/budget-list";
 import { FixedExpenseList } from "@/features/periods/components/fixed-expense-list";
 import { IncomeList } from "@/features/periods/components/income-list";
 import { OpenPeriodPrompt } from "@/features/periods/components/open-period-prompt";
+import { PeriodHero } from "@/features/periods/components/period-hero";
 import { ClosedPeriodNotice, StalePeriodNotice } from "@/features/periods/components/period-notices";
 import { PeriodSummary } from "@/features/periods/components/period-summary";
 import {
@@ -29,18 +30,12 @@ export default async function HomePage() {
   const user = await requireUser();
   const today = todayIsoDate();
   const { period, key, isStale } = await getWorkingPeriod(user.id, today);
-  const header = (
-    <>
-      <PageHeader title={periodLabel(key)} description={periodRangeLabel(key)} />
-      {isStale && period && <StalePeriodNotice period={period} />}
-    </>
-  );
 
   if (!period) {
     const templates = await getActiveTemplates(user.id);
     return (
       <>
-        {header}
+        <PageHeader title={periodLabel(key)} description={periodRangeLabel(key)} />
         <OpenPeriodPrompt hasIncome={templates.incomes.length > 0} />
       </>
     );
@@ -57,13 +52,22 @@ export default async function HomePage() {
   const fixedExpenses = rows.filter((row) => row.item.kind === "fixed_expense");
   const isClosed = period.status === "closed";
   const hasFuelBudget = budgets.some((row) => row.item.isFuel);
+  const summary = summarizePeriod(rows, unbudgetedCents);
+
+  const notice = isStale ? (
+    <StalePeriodNotice period={period} embedded />
+  ) : isClosed ? (
+    <ClosedPeriodNotice periodId={period.id} embedded />
+  ) : null;
 
   return (
     <>
-      {header}
-      {isClosed && <ClosedPeriodNotice periodId={period.id} />}
-      <PeriodSummary summary={summarizePeriod(rows, unbudgetedCents)} closed={isClosed} />
+      <PeriodHero periodKey={key} today={today} closed={isClosed} notice={notice}>
+        <PeriodSummary summary={summary} closed={isClosed} />
+      </PeriodHero>
+
       <UpcomingPayments fixedExpenses={isClosed ? [] : fixedExpenses} today={today} />
+
       {transferPlan.steps.length > 0 && (
         <Section title="Fondear cuentas" description={<FundingHelp />}>
           <TransferPlanList
@@ -74,6 +78,7 @@ export default async function HomePage() {
           />
         </Section>
       )}
+
       {cardStatements.length > 0 && (
         <Section
           title="Tarjetas"
@@ -82,16 +87,28 @@ export default async function HomePage() {
           <CardStatementList statements={cardStatements} today={today} />
         </Section>
       )}
-      {budgets.length > 0 && (
-        <Section title="Presupuestos">
-          <BudgetList rows={budgets} readOnly={isClosed} />
-        </Section>
+
+      {(budgets.length > 0 || fixedExpenses.length > 0) && (
+        <div
+          className={
+            budgets.length > 0 && fixedExpenses.length > 0
+              ? "grid gap-6 lg:grid-cols-2 lg:items-start"
+              : "flex flex-col gap-6"
+          }
+        >
+          {budgets.length > 0 && (
+            <Section title="Presupuestos">
+              <BudgetList rows={budgets} readOnly={isClosed} />
+            </Section>
+          )}
+          {fixedExpenses.length > 0 && (
+            <Section title="Gastos fijos">
+              <FixedExpenseList rows={fixedExpenses} today={today} readOnly={isClosed} />
+            </Section>
+          )}
+        </div>
       )}
-      {fixedExpenses.length > 0 && (
-        <Section title="Gastos fijos">
-          <FixedExpenseList rows={fixedExpenses} today={today} readOnly={isClosed} />
-        </Section>
-      )}
+
       {(incomes.length > 0 || !isClosed) && (
         <Section
           title="Ingresos"
@@ -113,6 +130,7 @@ export default async function HomePage() {
           )}
         </Section>
       )}
+
       {!isClosed && (
         <>
           <LinkButton href={`/quincenas/${period.id}/cerrar`} variant="outline">

@@ -12,6 +12,7 @@ import { MovementReportList } from "@/features/reports/components/movement-repor
 import { PeriodChart } from "@/features/reports/components/period-chart";
 import { RangeSelector, REPORT_RANGES } from "@/features/reports/components/range-selector";
 import { ReportPanel } from "@/features/reports/components/report-panel";
+import { ReportStory } from "@/features/reports/components/report-story";
 import {
   getAccountReports,
   getPeriodReports,
@@ -22,7 +23,6 @@ import { spentCentsOf } from "@/features/periods/summary";
 import { formatMoney } from "@/lib/money";
 import { formatShortDate, shortPeriodLabel, toPeriodKey } from "@/lib/period";
 import { requireUser } from "@/lib/session";
-import { cn } from "@/lib/utils";
 
 const toDollars = (cents: number) => Math.round(cents) / 100;
 const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
@@ -113,74 +113,54 @@ export default async function ReportsPage({ searchParams }: PageProps<"/reportes
 
   return (
     <>
-      <PageHeader
-        title="Reportes"
-        description="Cómo se usó tu dinero en las últimas quincenas"
-        action={<ExportCsvButton range={range} />}
-      />
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <RangeSelector current={range} tipo={tipo} />
-        <p className="text-xs text-muted-foreground">{rangeDetail}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <PageHeader
+          title="Reportes"
+          description="Cómo se usó tu dinero en las últimas quincenas"
+        />
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <RangeSelector current={range} tipo={tipo} />
+          <ExportCsvButton range={range} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Ingreso" value={formatMoney(incomeSum)} detail={rangeDetail} />
+      <ReportStory summaries={summaries} rangeLabel={rangeDetail} />
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Ingreso" value={formatMoney(incomeSum)} />
+        <StatCard label="Gastado" value={formatMoney(spentSum)} />
         <StatCard
-          label="Gastado"
-          value={formatMoney(spentSum)}
-          detail="Solo gastos registrados"
+          label="Sobrante"
+          value={formatMoney(surplusSum)}
+          negative={surplusSum < 0}
         />
-        <div
-          className={cn(
-            "rounded-xl border border-primary/20 bg-primary/5 p-3 shadow-[0_1px_2px_oklch(0.3_0.03_80/0.04)]",
-            "col-span-2 sm:col-span-1",
-          )}
-        >
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[0.7rem] font-medium tracking-wide text-primary/80 uppercase">
-              Sobrante
-            </span>
-            <span
-              className={cn(
-                "font-mono text-lg font-semibold tracking-tight tabular-nums select-text",
-                surplusSum < 0 && "text-destructive",
-              )}
-            >
-              {formatMoney(surplusSum)}
-            </span>
-          </div>
-        </div>
         <StatCard
           label="Excesos"
           value={formatMoney(overspentSum)}
-          detail="Por encima de lo planeado"
           negative={overspentSum > 0}
         />
       </div>
 
-      <Section
-        title="Uso por quincena"
-        description="Fijos, presupuestos, otros y lo que sobró — el gráfico es el resumen del rango"
-      >
+      <div className={fuelData.length > 0 ? "grid gap-4 lg:grid-cols-5" : undefined}>
         <ReportPanel
-          title="Composición del gasto"
-          description="Barras apiladas por quincena (montos en dólares)"
+          title="Uso por quincena"
+          description="Fijos, presupuestos, otros y sobrante"
+          className={fuelData.length > 0 ? "lg:col-span-3" : undefined}
           bodyClassName="pt-2 pb-3"
         >
           <PeriodChart data={periodData} />
         </ReportPanel>
-      </Section>
-
-      {fuelData.length > 0 && (
-        <ReportPanel
-          title="Rendimiento de gasolina"
-          description="Millas por galón en cada carga con odómetro"
-          bodyClassName="pt-2 pb-3"
-        >
-          <FuelChart data={fuelData} />
-        </ReportPanel>
-      )}
+        {fuelData.length > 0 && (
+          <ReportPanel
+            title="Gasolina"
+            description="mi/gal por carga"
+            className="lg:col-span-2"
+            bodyClassName="pt-2 pb-3"
+          >
+            <FuelChart data={fuelData} />
+          </ReportPanel>
+        )}
+      </div>
 
       <AccountReportSections {...accountReport} />
 

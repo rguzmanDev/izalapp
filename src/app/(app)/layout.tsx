@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DesktopNav, MobileNav } from "@/components/app-nav";
+import { FaroMark } from "@/components/faro-mark";
 import { SignOutButton } from "@/components/sign-out-button";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
@@ -9,9 +10,12 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-4 px-4">
           <Link
             href="/"
-            className="font-heading text-[1.2rem] font-semibold tracking-[-0.02em] text-primary"
+            className="flex items-center gap-2 text-primary transition-opacity hover:opacity-90"
           >
-            IzalApp
+            <FaroMark glow className="size-6" />
+            <span className="font-heading text-[1.2rem] font-semibold tracking-[-0.02em]">
+              IzalApp
+            </span>
           </Link>
           <DesktopNav />
           <SignOutButton />

@@ -6,15 +6,15 @@
 <title>Manual de IzalApp</title>
 <style>
   :root {
-    --bg: #fafafa;
-    --card: #ffffff;
-    --text: #171717;
-    --muted: #6b6b6b;
-    --border: #e5e5e5;
-    --primary: #171717;
-    --green: #2f9e57;
-    --red: #d93636;
-    --soft: #f2f2f2;
+    --bg: #f2f5f0;
+    --card: #fbfcf9;
+    --text: #2a2418;
+    --muted: #6b6458;
+    --border: #d5ddd2;
+    --primary: #2f5c3a;
+    --green: #2f5c3a;
+    --red: #b53a2e;
+    --soft: #e8eee6;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -40,8 +40,9 @@
   header.cover .logo {
     display: inline-flex; align-items: center; justify-content: center;
     width: 56px; height: 56px; border-radius: 14px;
-    background: var(--primary); color: #fff; font-size: 32px; font-weight: 700;
+    background: var(--primary); color: #f2f6ef;
   }
+  header.cover .logo svg { width: 34px; height: 34px; }
   h1 { font-size: 32px; margin: 16px 0 4px; }
   h2 { font-size: 24px; margin: 56px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); }
   h3 { font-size: 18px; margin: 28px 0 8px; }
@@ -147,9 +148,15 @@
 <main>
 
 <header class="cover">
-  <span class="logo">I</span>
+  <span class="logo" aria-hidden="true">
+    <svg viewBox="0 0 32 32" fill="none">
+      <path d="M16 4.5 L26.5 26.5 H5.5 Z" fill="rgba(242,246,239,0.2)" stroke="#f2f6ef" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M16 4.5 L20.5 15 H11.5 Z" fill="rgba(242,246,239,0.45)"/>
+      <circle cx="16" cy="7" r="1.8" fill="#f2f6ef"/>
+    </svg>
+  </span>
   <h1>Manual de IzalApp</h1>
-  <p class="lead">Planea tu dinero por quincena: ingresos, gastos fijos, presupuestos, cuentas, tarjetas y gasolina.</p>
+  <p class="lead">Planeación quincenal desde Izalco: ingresos, gastos fijos, presupuestos, cuentas, tarjetas y gasolina.</p>
 </header>
 
 <!-- 1 -->
@@ -200,10 +207,10 @@
 <p>En el celular verás una barra abajo con cinco secciones; en computadora aparece arriba.</p>
 <table>
   <tr><th>Sección</th><th>Para qué sirve</th></tr>
-  <tr><td><b>Inicio</b></td><td>Resumen de la quincena actual, próximos pagos, fondeo de cuentas, tarjetas, presupuestos, gastos fijos e ingresos.</td></tr>
+  <tr><td><b>Inicio</b></td><td>Hero de la quincena (progreso del corte + sobrante), próximos pagos, fondeo, tarjetas, presupuestos, gastos fijos e ingresos.</td></tr>
   <tr><td><b>Movimientos</b></td><td>Lista de gastos y transferencias de la quincena.</td></tr>
   <tr><td><b>Gasolina</b></td><td>Cargas de combustible, rendimiento y costo por milla.</td></tr>
-  <tr><td><b>Reportes</b></td><td>Gráficas e historial de varias quincenas.</td></tr>
+  <tr><td><b>Reportes</b></td><td>Lectura del rango, totales, gráficas, cuentas y detalle de movimientos.</td></tr>
   <tr><td><b>Ajustes</b></td><td>Tu plan: cuentas, ingresos, gastos fijos, presupuestos y el plan mensual.</td></tr>
 </table>
 
@@ -267,26 +274,26 @@
 <h3>4.1 Abrir la quincena</h3>
 <p>Al empezar cada quincena, Inicio te muestra <b>“Quincena sin abrir”</b>. Toca <span class="btn">Abrir quincena</span> y la app copia tus ingresos, gastos fijos y presupuestos activos con el monto que les toca en esa quincena.</p>
 
-<h3>4.2 El resumen</h3>
-<p>En Inicio el <b>resumen</b> va primero. <b>Próximos pagos</b> lista gastos fijos con fecha que vencen en 7 días. Las <b>tarjetas</b> tienen su propia sección (corte, «por pagar», registrar pago informativo).</p>
+<h3>4.2 El resumen (hero de la quincena)</h3>
+<p>En Inicio lo primero es un <b>bloque único</b> con el nombre del corte, el rango de fechas y un <b>riel de días</b> (“Día 7 de 15”, “Quedan 8 días”) que marca en qué punto vas de la quincena.</p>
+<p>Debajo, el número grande es el <b>Sobrante</b> (o <b>Sobrante real</b> si ya cerraste). Una barra muestra cuánto del ingreso ya está comprometido. En la misma tarjeta aparecen tres cifras:</p>
+<div class="example">
+  <div class="stat"><small>Ingreso</small><b>$1,200.00</b></div>
+  <div class="stat"><small>Gastos fijos</small><b>$450.00</b><em>1 de 3 pagados</em></div>
+  <div class="stat"><small>Presupuesto</small><b>$120.00</b><em>de $300.00</em></div>
+</div>
+<ul>
+  <li><b>Sobrante</b>: ingreso − fijos del plan − lo ya gastado de presupuestos − otros gastos. Es el mismo número que en Reportes.</li>
+  <li><b>Gastos fijos</b>: total planeado y cuántos ya marcaste como pagados.</li>
+  <li><b>Presupuesto</b>: lo que llevas gastado contra el total de topes.</li>
+</ul>
+<p>Si el corte está atrasado o cerrado, el aviso (cerrar / reabrir) aparece dentro de ese mismo bloque. Luego vienen <b>Próximos pagos</b> (gastos fijos que vencen en 7 días), fondeo, tarjetas, y en pantallas anchas <b>Presupuestos</b> y <b>Gastos fijos</b> lado a lado.</p>
 <div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <div>Tarjeta de crédito NICO ••1234 · BAC<br><span class="muted" style="font-size:14px">18 de octubre</span></div>
     <div style="text-align:right"><b>$150.00</b><br><span class="badge">vence en 4 días</span></div>
   </div>
 </div>
-<p>Debajo verás cuatro tarjetas:</p>
-<div class="example">
-  <div class="stat"><small>Ingreso</small><b>$1,200.00</b></div>
-  <div class="stat"><small>Gastos fijos</small><b>$450.00</b><em>1 de 3 pagados</em></div>
-  <div class="stat"><small>Presupuesto consumido</small><b>$120.00</b><em>de $300.00</em></div>
-  <div class="stat"><small>Sobrante</small><b>$450.00</b></div>
-</div>
-<ul>
-  <li><b>Gastos fijos</b>: total planeado y cuántos ya marcaste como pagados.</li>
-  <li><b>Presupuesto consumido</b>: lo que llevas gastado contra el total de topes.</li>
-  <li><b>Sobrante</b>: ingreso − fijos del plan − lo ya gastado de presupuestos − otros gastos. Es el mismo número que en Reportes. Al cerrar la quincena pasa a llamarse <b>Sobrante real</b>.</li>
-</ul>
 
 <h3>4.3 Cambiar un monto solo en esta quincena</h3>
 <p>Toca el nombre de cualquier presupuesto, gasto fijo o ingreso en Inicio (los ingresos están al final de la página). Puedes cambiar el <b>Monto en esta quincena</b> sin tocar tu plan mensual; útil, por ejemplo, si una quincena cobras horas extra.</p>
@@ -431,18 +438,18 @@
 
 <!-- 10 -->
 <h2 id="reportes">10. Reportes</h2>
-<p>Elige ver las últimas <b>6</b>, <b>12</b> o <b>24</b> quincenas. Con <b>Exportar CSV</b> descargas un archivo con todas las secciones del reporte (totales, movimientos, cuentas, tarjetas, transferencias, gasolina, etc.) del rango elegido.</p>
+<p>Arriba eliges el rango (<b>6q</b>, <b>12q</b> o <b>24q</b>) y, si quieres, descargas un <b>CSV</b> con todas las secciones del reporte del rango.</p>
+<p>La página está pensada de arriba hacia abajo: primero la lectura, luego las gráficas, después las cuentas y al final el detalle de movimientos.</p>
 <ul>
-  <li><b>Totales</b>: Ingreso, Gastado (solo registrados), Sobrante (misma fórmula que en Inicio) y Excesos. Si pediste 6 quincenas y solo tienes 1, verás «1 de 6».</li>
-  <li><b>Movimientos</b>: lista de ingresos (verde), gastos (rojo) y transferencias (amarillo) del rango. Filtra por tipo. Cada fila indica la quincena (el corte) y la fecha real del movimiento. El corte lo defines tú al cerrar/abrir; la fecha no cambia de periodo sola.</li>
-  <li><b>Saldo por cuenta</b>: <b>en banco</b>, <b>tras pagar tarjetas</b> y <b>reservado</b> (compras de tarjeta aún no liquidadas).</li>
+  <li><b>Lectura del rango</b>: un resumen en lenguaje claro (por ejemplo si la mayoría de quincenas sobró o si el rango cerró en rojo), con una barra de gastado vs ingreso.</li>
+  <li><b>Totales</b>: Ingreso, Gastado (solo registrados), Sobrante (misma fórmula que en Inicio) y Excesos. El rango aparece como «6 quincenas» o «1 de 6» si aún no tienes todas.</li>
+  <li><b>Uso por quincena</b>: gráfica de barras apiladas (gastos fijos, presupuestos, otros y sobrante). Si hay datos de gasolina, el rendimiento (mi/gal) aparece al lado en pantallas anchas.</li>
   <li><b>Alertas</b>: saldo negativo, cuentas sin movimiento en el rango, tarjetas sin «Se paga desde» o sin cobertura para lo por pagar.</li>
-  <li><b>Saldo por cuenta</b>: saldo planificado acumulado (opening + todas las quincenas), no solo el rango.</li>
-  <li><b>Flujo por cuenta</b>: qué entró y qué salió <b>en este rango</b> (ingresos, gastos y transferencias).</li>
-  <li><b>Tarjetas</b>: seguimiento informativo (compras etiquetadas, pagos registrados, por pagar); el saldo real está en la cuenta «Se paga desde».</li>
+  <li><b>Saldo por cuenta</b>: <b>en banco</b>, y si aplica <b>tras pagar</b> / <b>reservado</b> (compras de tarjeta aún no liquidadas).</li>
+  <li><b>Flujo por cuenta</b>: qué entró y qué salió <b>en este rango</b>, con una barra que muestra la proporción entradas vs salidas.</li>
+  <li><b>Tarjetas</b>: paneles con por pagar, compras, pagos y ciclo; el saldo real está en la cuenta «Se paga desde».</li>
   <li><b>Mapa de transferencias</b>: totales origen → destino en el rango.</li>
-  <li><b>Por quincena</b>: una gráfica de barras con gastos fijos registrados, presupuestos, otros gastos y sobrante de cada quincena.</li>
-  <li><b>Rendimiento de gasolina</b>: cómo ha cambiado tu rendimiento por tanque lleno (aparece cuando hay al menos dos cargas).</li>
+  <li><b>Movimientos</b>: lista agrupada por quincena y día. Filtra por tipo (todos / ingresos / gastos / transferencias). Cada fila muestra el corte y la fecha real; el corte lo defines tú al cerrar/abrir.</li>
 </ul>
 
 <!-- 11 -->

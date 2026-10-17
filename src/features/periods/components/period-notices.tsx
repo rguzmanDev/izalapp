@@ -4,13 +4,27 @@ import { PendingButton } from "@/components/form/pending-button";
 import { LinkButton } from "@/components/link-button";
 import type { Period } from "@/db/schema";
 import { periodLabel, toPeriodKey } from "@/lib/period";
+import { cn } from "@/lib/utils";
 import { reopenPeriodAction } from "../actions";
 
-type NoticeProps = { title: string; description: string; action: ReactNode };
+type NoticeProps = {
+  title: string;
+  description: string;
+  action: ReactNode;
+  /** Flat look when nested inside PeriodHero. */
+  embedded?: boolean;
+};
 
-function Notice({ title, description, action }: NoticeProps) {
+function Notice({ title, description, action, embedded }: NoticeProps) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-card px-4 py-3">
+    <div
+      className={cn(
+        "flex items-center justify-between gap-3",
+        embedded
+          ? "py-0"
+          : "rounded-xl border border-border/80 bg-card px-4 py-3",
+      )}
+    >
       <div className="flex min-w-0 flex-col">
         <span className="font-medium">{title}</span>
         <span className="text-sm text-muted-foreground">{description}</span>
@@ -20,9 +34,16 @@ function Notice({ title, description, action }: NoticeProps) {
   );
 }
 
-export function StalePeriodNotice({ period }: { period: Period }) {
+export function StalePeriodNotice({
+  period,
+  embedded,
+}: {
+  period: Period;
+  embedded?: boolean;
+}) {
   return (
     <Notice
+      embedded={embedded}
       title={`Sigue el corte de la ${periodLabel(toPeriodKey(period))}`}
       description="Hasta que la cierres, todos los movimientos van aquí. Luego abres la siguiente."
       action={
@@ -34,9 +55,16 @@ export function StalePeriodNotice({ period }: { period: Period }) {
   );
 }
 
-export function ClosedPeriodNotice({ periodId }: { periodId: string }) {
+export function ClosedPeriodNotice({
+  periodId,
+  embedded,
+}: {
+  periodId: string;
+  embedded?: boolean;
+}) {
   return (
     <Notice
+      embedded={embedded}
       title="Quincena cerrada"
       description="Al reabrirla se quita el traspaso del sobrante."
       action={
