@@ -6,7 +6,7 @@ import { toMoneyAccountOptions } from "@/features/accounts/format";
 import { removeBudget, saveBudget } from "@/features/budgets/actions";
 import { BudgetForm } from "@/features/budgets/components/budget-form";
 import { getBudget } from "@/features/budgets/data";
-import { sourceHasFuelLogs, sourceUsedInPeriod } from "@/features/periods/locks";
+import { sourceUsedInPeriod } from "@/features/periods/locks";
 import { requireUser } from "@/lib/session";
 
 export default async function EditBudgetPage({ params }: PageProps<"/presupuestos/[id]">) {
@@ -15,10 +15,7 @@ export default async function EditBudgetPage({ params }: PageProps<"/presupuesto
   const [budget, accounts] = await Promise.all([getBudget(user.id, id), listAccounts(user.id)]);
   if (!budget) notFound();
 
-  const [lockStructure, hasFuelLogs] = await Promise.all([
-    sourceUsedInPeriod(user.id, id),
-    sourceHasFuelLogs(user.id, id),
-  ]);
+  const used = await sourceUsedInPeriod(user.id, id);
 
   return (
     <>
@@ -27,10 +24,8 @@ export default async function EditBudgetPage({ params }: PageProps<"/presupuesto
         action={saveBudget.bind(null, budget.id)}
         budget={budget}
         accountOptions={toMoneyAccountOptions(accounts)}
-        lockStructure={lockStructure}
-        lockFuel={lockStructure || hasFuelLogs}
       />
-      {lockStructure ? (
+      {used ? (
         <p className="text-sm text-muted-foreground">
           No se puede eliminar: ya se usó en una quincena. Desactívalo si ya no aplica.
         </p>

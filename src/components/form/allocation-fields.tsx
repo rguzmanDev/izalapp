@@ -6,14 +6,7 @@ import { MoneyField, SelectField } from "./fields";
 
 const splitOptions = SPLITS.map((split) => ({ value: split, label: SPLIT_LABELS[split] }));
 
-export function AllocationFields({
-  defaultValue,
-  lockSplit = false,
-}: {
-  defaultValue?: Allocation;
-  /** When true, only the monthly amount stays editable. */
-  lockSplit?: boolean;
-}) {
+export function AllocationFields({ defaultValue }: { defaultValue?: Allocation }) {
   const [split, setSplit] = useState<Split>(defaultValue?.split ?? "even");
 
   return (
@@ -31,24 +24,13 @@ export function AllocationFields({
         options={splitOptions}
         value={split}
         onChange={(event) => setSplit(event.target.value as Split)}
-        locked={lockSplit}
-        hint={
-          lockSplit
-            ? "Ya se usó en una quincena; no se puede cambiar el reparto."
-            : undefined
-        }
       />
       {split === "custom" && (
         <MoneyField
           name="customFirstHalfCents"
           label="Monto en el pago del 15"
-          hint={
-            lockSplit
-              ? "Ya se usó en una quincena; no se puede cambiar el reparto."
-              : "El resto se asigna al pago del 30"
-          }
+          hint="El resto se asigna al pago del 30"
           required
-          locked={lockSplit}
           defaultCents={defaultValue?.customFirstHalfCents}
         />
       )}

@@ -17,7 +17,7 @@ export async function saveIncome(
   const parsed = parseFormData(incomeSchema, formData);
   if (!parsed.success) return parsed.state;
 
-  let input = parsed.data;
+  const input = parsed.data;
   const account = await getAccount(user.id, input.depositAccountId);
   if (!account || account.type === "credit") {
     return { fieldErrors: { depositAccountId: ["Cuenta inválida"] } };
@@ -26,36 +26,6 @@ export async function saveIncome(
   if (id) {
     const current = await getIncome(user.id, id);
     if (!current) return { error: "El ingreso ya no existe" };
-
-    const locked = await sourceUsedInPeriod(user.id, id);
-    if (locked) {
-      if (input.depositAccountId !== current.depositAccountId) {
-        return {
-          fieldErrors: {
-            depositAccountId: [
-              "No se puede cambiar la cuenta: este ingreso ya se usó en una quincena",
-            ],
-          },
-        };
-      }
-      if (
-        input.split !== current.split ||
-        input.customFirstHalfCents !== current.customFirstHalfCents
-      ) {
-        return {
-          fieldErrors: {
-            split: ["No se puede cambiar el reparto: este ingreso ya se usó en una quincena"],
-          },
-        };
-      }
-      input = {
-        ...input,
-        depositAccountId: current.depositAccountId,
-        split: current.split,
-        customFirstHalfCents: current.customFirstHalfCents,
-      };
-    }
-
     await updateIncome(user.id, id, input);
   } else {
     await createIncome(user.id, input);

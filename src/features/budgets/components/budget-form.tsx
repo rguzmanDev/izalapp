@@ -10,17 +10,9 @@ type BudgetFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   budget?: Budget;
   accountOptions: SelectOption[];
-  lockStructure?: boolean;
-  lockFuel?: boolean;
 };
 
-export function BudgetForm({
-  action,
-  budget,
-  accountOptions,
-  lockStructure = false,
-  lockFuel = false,
-}: BudgetFormProps) {
+export function BudgetForm({ action, budget, accountOptions }: BudgetFormProps) {
   return (
     <ActionForm
       action={action}
@@ -34,31 +26,21 @@ export function BudgetForm({
         maxLength={NAME_MAX_LENGTH}
         defaultValue={budget?.name}
       />
-      <AllocationFields defaultValue={budget} lockSplit={lockStructure} />
+      <AllocationFields defaultValue={budget} />
       <SelectField
         name="spendingAccountId"
         label="Se gasta desde"
         required
         placeholder="Selecciona una cuenta bancaria o efectivo"
-        hint={
-          lockStructure
-            ? "Ya se usó en una quincena; no se puede cambiar la cuenta."
-            : "El dinero sale de esta cuenta. Al gastar podrás marcar si usaste una tarjeta ligada."
-        }
+        hint="El dinero sale de esta cuenta. Los cambios aplican en la próxima quincena que abras."
         options={accountOptions}
         defaultValue={budget?.spendingAccountId ?? ""}
-        locked={lockStructure}
       />
       <CheckboxField
         name="isFuel"
         label="Es de gasolina (registra odómetro y galones)"
         defaultChecked={budget?.isFuel ?? false}
-        locked={lockFuel}
-        hint={
-          lockFuel
-            ? "Ya se usó en una quincena o tiene cargas; no se puede cambiar «es gasolina»."
-            : undefined
-        }
+        hint="Los cambios aplican en la próxima quincena que abras."
       />
       <CheckboxField name="isActive" label="Activo" defaultChecked={budget?.isActive ?? true} />
       <SubmitButton>Guardar</SubmitButton>

@@ -18,7 +18,7 @@ export default async function EditFixedExpensePage({ params }: PageProps<"/gasto
   ]);
   if (!expense) notFound();
 
-  const lockStructure = await sourceUsedInPeriod(user.id, id);
+  const used = await sourceUsedInPeriod(user.id, id);
 
   return (
     <>
@@ -27,9 +27,8 @@ export default async function EditFixedExpensePage({ params }: PageProps<"/gasto
         action={saveFixedExpense.bind(null, expense.id)}
         expense={expense}
         accountOptions={toMoneyAccountOptions(accounts)}
-        lockStructure={lockStructure}
       />
-      {lockStructure ? (
+      {used ? (
         <p className="text-sm text-muted-foreground">
           No se puede eliminar: ya se usó en una quincena. Desactívalo si ya no aplica.
         </p>

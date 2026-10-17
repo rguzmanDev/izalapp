@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getAccount, isOwnedAccount } from "@/features/accounts/data";
-import { sourceHasFuelLogs, sourceUsedInPeriod } from "@/features/periods/locks";
+import { sourceUsedInPeriod } from "@/features/periods/locks";
 import { parseFormData, type FormState } from "@/lib/form";
 import { requireUser } from "@/lib/session";
 import { createBudget, deleteBudget, getBudget, updateBudget } from "./data";
@@ -17,7 +17,7 @@ export async function saveBudget(
   const parsed = parseFormData(budgetSchema, formData);
   if (!parsed.success) return parsed.state;
 
-  let input = parsed.data;
+  const input = parsed.data;
   if (!(await isOwnedAccount(user.id, input.spendingAccountId))) {
     return { fieldErrors: { spendingAccountId: ["Cuenta inválida"] } };
   }
@@ -31,52 +31,6 @@ export async function saveBudget(
   if (id) {
     const current = await getBudget(user.id, id);
     if (!current) return { error: "El presupuesto ya no existe" };
-
-    const [used, hasFuelLogs] = await Promise.all([
-      sourceUsedInPeriod(user.id, id),
-      sourceHasFuelLogs(user.id, id),
-    ]);
-    const fuelLocked = used || hasFuelLogs;
-
-    if (used) {
-      if (input.spendingAccountId !== current.spendingAccountId) {
-        return {
-          fieldErrors: {
-            spendingAccountId: [
-              "No se puede cambiar la cuenta: este presupuesto ya se usó en una quincena",
-            ],
-          },
-        };
-      }
-      if (
-        input.split !== current.split ||
-        input.customFirstHalfCents !== current.customFirstHalfCents
-      ) {
-        return {
-          fieldErrors: {
-            split: ["No se puede cambiar el reparto: este presupuesto ya se usó en una quincena"],
-          },
-        };
-      }
-    }
-    if (fuelLocked && input.isFuel !== current.isFuel) {
-      return {
-        fieldErrors: {
-          isFuel: [
-            "No se puede cambiar «es gasolina»: ya se usó en una quincena o tiene cargas",
-          ],
-        },
-      };
-    }
-
-    input = {
-      ...input,
-      spendingAccountId: used ? current.spendingAccountId : input.spendingAccountId,
-      split: used ? current.split : input.split,
-      customFirstHalfCents: used ? current.customFirstHalfCents : input.customFirstHalfCents,
-      isFuel: fuelLocked ? current.isFuel : input.isFuel,
-    };
-
     await updateBudget(user.id, id, input);
   } else {
     await createBudget(user.id, input);
